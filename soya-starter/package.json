@@ -15,9 +15,9 @@
     "file-loader": "^0.8.4",
     "react": "^0.13.3",
     "source-map-support": "^0.3.2",
-    "soya": "0.0.5",
     "style-loader": "^0.12.4",
-    "webpack": "^1.12.2"
+    "webpack": "^1.12.2",
+    "soya": "^0.0.9"
   },
   "devDependencies": {
     "nodemon": "^1.7.0"

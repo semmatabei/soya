@@ -1,6 +1,6 @@
 {
   "name": "soya",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Hopefully hassle-free web front-end framework",
   "keywords": [
     "webpack",
