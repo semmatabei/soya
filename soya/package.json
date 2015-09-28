@@ -13,7 +13,7 @@
   "license": "MIT",
   "scripts": {
     "watch": "./node_modules/.bin/babel src/ --out-dir lib --source-maps --watch",
-    "watch-boilerplate": "./node_modules/.bin/babel src/ --out-dir \"../soya-boilerplate/node_modules/soya/lib\" --source-maps --watch"
+    "watch-starter": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter/node_modules/soya/lib\" --source-maps --watch"
   },
   "peerDependencies": {
     "babel": "^5.8.23",
