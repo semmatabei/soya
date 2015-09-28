@@ -1,4 +1,3 @@
-import Config from '../Config.js';
 import RenderResult from './RenderResult.js';
 import ServerHttpRequest from '../http/ServerHttpRequest.js';
 import ClientHttpRequest from '../http/ClientHttpRequest.js';

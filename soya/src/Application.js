@@ -1,6 +1,5 @@
 import CompileResult from './compiler/CompileResult';
 import Compiler from './compiler/Compiler';
-import Config from './Config';
 import Router from './router/Router';
 import EntryPoint from './EntryPoint';
 import ServerHttpRequest from './http/ServerHttpRequest';
