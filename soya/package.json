@@ -1,0 +1,44 @@
+{
+  "name": "soya",
+  "version": "0.0.8",
+  "description": "Hopefully hassle-free web front-end framework",
+  "keywords": [
+    "webpack",
+    "isomorphic",
+    "front-end",
+    "framework",
+    "soya"
+  ],
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "watch": "./node_modules/.bin/babel src/ --out-dir lib --source-maps --watch",
+    "watch-boilerplate": "./node_modules/.bin/babel src/ --out-dir \"../soya-boilerplate/node_modules/soya/lib\" --source-maps --watch"
+  },
+  "peerDependencies": {
+    "babel": "^5.8.23",
+    "babel-core": "^5.8.24",
+    "babel-eslint": "^4.1.2",
+    "babel-loader": "^5.3.2",
+    "babel-plugin-flow-comments": "^1.0.9",
+    "babel-plugin-remove-nonjs": "^0.0.2",
+    "babel-runtime": "^5.8.20",
+    "css-loader": "^0.18.0",
+    "file-loader": "^0.8.4",
+    "react": "^0.13.0",
+    "source-map-support": "^0.3.2",
+    "style-loader": "^0.12.3",
+    "webpack": "^1.12.1"
+  },
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "babel-core": "^5.8.24",
+    "babel-eslint": "^4.1.1",
+    "babel-plugin-flow-comments": "^1.0.9",
+    "babel-runtime": "^5.8.20",
+    "express": "^4.13.3"
+  },
+  "dependencies": {
+    "rimraf": "^2.4.3"
+  }
+}

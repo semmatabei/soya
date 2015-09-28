@@ -1,0 +1,7 @@
+node_modules/
+.idea/
+lib/
+build/
+carrot/
+docs/
+npm-debug.log
