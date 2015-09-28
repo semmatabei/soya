@@ -1,19 +1,11 @@
-/* @flow */
+import RenderResult from 'soya/lib/page/RenderResult';
+import Page from 'soya/lib/page/Page';
+import React from 'react';
 
 import AboutPageReactComponent from './AboutPageReactComponent';
-import RenderResult from 'soya/lib/page/RenderResult';
+import style from '../../../shared/sitewide.css';
 
-var React = require('react');
-
-export default class AboutPage {
-  config;
-  router;
-
-  constructor(config, router) {
-    this.config = config;
-    this.router = router;
-  }
-
+export default class AboutPage extends Page {
   render(httpRequest, routeArgs, callback) {
     var renderResult = new RenderResult();
     renderResult.head = '<meta name="description" content="blah" /><title>About Page</title>';

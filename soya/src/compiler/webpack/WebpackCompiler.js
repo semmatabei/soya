@@ -105,7 +105,7 @@ export default class WebpackCompiler extends Compiler {
       output: {
         path: absBuildTargetDir,
         publicPath: frameworkConfig.assetProtocol + '://' + frameworkConfig.assetHostPath,
-        filename: 'server.js'
+        filename: 'index.js'
       },
       node: {
         __dirname: true,

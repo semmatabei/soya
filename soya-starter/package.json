@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "nodemon": "./node_modules/.bin/nodemon ./build/server/server.js"
+    "nodemon": "./node_modules/.bin/nodemon ./build/server"
   },
   "dependencies": {
     "babel": "^5.8.23",
@@ -17,7 +17,7 @@
     "source-map-support": "^0.3.2",
     "style-loader": "^0.12.4",
     "webpack": "^1.12.2",
-    "soya": "^0.0.11"
+    "soya": "^0.0.12"
   },
   "devDependencies": {
     "nodemon": "^1.7.0"

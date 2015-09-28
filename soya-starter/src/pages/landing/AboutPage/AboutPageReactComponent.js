@@ -14,10 +14,9 @@ export default React.createClass({
   },
   render: function() {
     return <div>
-      <h1 className={style.AboutPage}>Hello World!</h1>
+      <h1 className={style.AboutPage}>Send Suggestions</h1>
       <p>Sample text <a onClick={this.handleClick}>Try and click me!</a></p>
       <div className={style.AboutPageDiv}></div>
-      <img src={scramblerLink}/>
     </div>;
   },
   handleClick: function() {

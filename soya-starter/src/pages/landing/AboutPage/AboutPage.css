@@ -1,0 +1,10 @@
+:local(.AboutPageDiv) {
+  background: url('scrambler.jpg');
+  width: 246px;
+  height: 205px;
+  display: block;
+  margin: 30px 0;
+}
+
+:local(.AboutPage) {
+}

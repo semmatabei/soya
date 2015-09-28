@@ -20,6 +20,5 @@ module.exports = function(config) {
   router.set404NotFoundPage('NotFound');
   router.reg('HOME_PAGE', 'HomePage', [n.GET()], '/', []);
   router.reg('ABOUT_PAGE', 'AboutPage', [n.GET()], '/info/about', []);
-  router.reg('FAQ_PAGE', 'FaqPage', [n.GET()], '/info/faq/:foo', []);
   return router;
 };

@@ -2,6 +2,7 @@ import RenderResult from 'soya/lib/page/RenderResult';
 import React from 'react';
 
 import NotFoundReactComponent from './NotFoundReactComponent.js';
+import style from '../../../shared/sitewide.css';
 
 export default class NotFound {
   _config;
