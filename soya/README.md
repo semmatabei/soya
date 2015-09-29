@@ -2,4 +2,4 @@
 
 ## Hopefully hassle-free web front-end framework
 
-TODO: Write README.
+More information in GitHub: https://github.com/traveloka/soya.

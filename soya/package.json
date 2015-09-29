@@ -1,7 +1,11 @@
 {
   "name": "soya",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Hopefully hassle-free web front-end framework",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/traveloka/soya.git"
+  },
   "keywords": [
     "webpack",
     "isomorphic",
