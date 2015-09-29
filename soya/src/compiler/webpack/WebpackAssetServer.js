@@ -61,8 +61,7 @@ export default class WebpackAssetServer extends AssetServer {
    */
   handle(httpRequest, response) {
     if (httpRequest.startsWith(this._assetHostPath)) {
-      // TODO: Handle percent encoding in path.
-      var fullRequestPath = path.join(httpRequest.getHost(), httpRequest.getPath());
+      var fullRequestPath = path.join(httpRequest.getHost(), decodeURI(httpRequest.getPath()));
       var realPath = fullRequestPath.substr(this._assetHostPath.length);
       var content = this.get(realPath);
       if (content == null) {
