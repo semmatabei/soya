@@ -1,7 +1,6 @@
 :local(.image) {
   float: left;
   padding: 15px;
-  width: 220px;
   border: 1px solid #ccc;
   background-color: #f4f4f4;
 }
@@ -12,6 +11,10 @@
   padding: 10px;
   margin-bottom: 10px;
   background-color: #fff;
+}
+
+:local(.container) {
+  overflow: auto;
 }
 
 :local(.imageCaption) {

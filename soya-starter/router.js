@@ -19,6 +19,6 @@ module.exports = function(config) {
   var router = new Router();
   router.set404NotFoundPage('NotFound');
   router.reg('HOME_PAGE', 'HomePage', [n.GET()], '/', []);
-  router.reg('ABOUT_PAGE', 'AboutPage', [n.GET()], '/info/about', []);
+  router.reg('ANOTHER_PAGE', 'AnotherPage', [n.GET()], '/another-page', []);
   return router;
 };
