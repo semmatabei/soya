@@ -115,7 +115,7 @@ export default class WebpackCompiler extends Compiler {
       module: {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
-          WebpackCompiler.getFileLoaderConfig(),
+          WebpackCompiler.getFileLoaderConfig(frameworkConfig),
           { test: /\.css$/, loader: "css-loader" }
         ]
       },
@@ -143,8 +143,17 @@ export default class WebpackCompiler extends Compiler {
     };
   };
 
-  static getFileLoaderConfig() {
-    return { test: /(\.jpg|\.png|\.jpeg|\.gif|\.ico)$/, loader: "file-loader?name=[path][name]-[hash].[ext]" };
+  static getFileLoaderConfig(config) {
+    var test;
+    if (config.staticAssetRegex) {
+      test = config.staticAssetRegex;
+    } else {
+      test = /(\.jpg|\.png|\.jpeg|\.gif|\.ico|\.svg|\.eot|\.woff|\.woff2|\.ttf)$/;
+    }
+    return {
+      test: test,
+      loader: "file-loader?name=[path][name]-[hash].[ext]"
+    };
   }
 
   /**
@@ -172,7 +181,7 @@ export default class WebpackCompiler extends Compiler {
       module: {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
-          WebpackCompiler.getFileLoaderConfig(),
+          WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
           { test: /\.css$/, loader: "style-loader?returnComplete=true!css-loader" }
         ]
       },
@@ -299,7 +308,7 @@ export default class WebpackCompiler extends Compiler {
     result += '</div>';
 
     for (i = 0; i < pageDependencies.jsDependencies.length; i++) {
-      url = isSecure ? 'https://' : 'http://';
+      url = this._frameworkConfig.assetProtocol + "://";
       url += pageDependencies.jsDependencies[i];
       result += '<script type="text/javascript" src="' + url + '"></script>';
     }
