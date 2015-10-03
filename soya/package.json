@@ -44,6 +44,7 @@
     "express": "^4.13.3"
   },
   "dependencies": {
+    "memory-fs": "^0.2.0",
     "rimraf": "^2.4.3"
   }
 }

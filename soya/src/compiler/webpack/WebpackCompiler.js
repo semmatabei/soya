@@ -122,7 +122,8 @@ export default class WebpackCompiler extends Compiler {
       plugins: [
         definePlugin,
         new webpack.BannerPlugin('require("source-map-support").install();',
-          { raw: true, entryOnly: false })
+          { raw: true, entryOnly: false }),
+        new webpack.NoErrorsPlugin()
       ],
       externals: nodeModules
     };
@@ -201,7 +202,9 @@ export default class WebpackCompiler extends Compiler {
       resolve: {
         alias: {}
       },
-      plugins: []
+      plugins: [
+        new this._webpack.NoErrorsPlugin()
+      ]
     };
 
     for (i in this._clientReplace) {
