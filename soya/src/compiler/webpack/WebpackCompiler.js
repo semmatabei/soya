@@ -123,6 +123,7 @@ export default class WebpackCompiler extends Compiler {
         definePlugin,
         new webpack.BannerPlugin('require("source-map-support").install();',
           { raw: true, entryOnly: false }),
+        new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.NoErrorsPlugin()
       ],
       externals: nodeModules
@@ -203,12 +204,21 @@ export default class WebpackCompiler extends Compiler {
         alias: {}
       },
       plugins: [
-        new this._webpack.NoErrorsPlugin()
+        new this._webpack.optimize.OccurenceOrderPlugin()
       ]
     };
 
     for (i in this._clientReplace) {
       configuration.resolve.alias[i] = this._clientReplace[i];
+    }
+
+    configuration.plugins.push(new this._webpack.NoErrorsPlugin());
+    configuration.plugins.push(new this._webpack.optimize.CommonsChunkPlugin(
+      COMMONS_ENTRY_NAME, 'common-[hash].js', entryPointList
+    ));
+
+    if (this._frameworkConfig.minifyJs) {
+      configuration.plugins.push(new this._webpack.optimize.UglifyJsPlugin({}));
     }
 
     var clientRuntime, entryPointFileName, pageToRequire;
@@ -220,14 +230,6 @@ export default class WebpackCompiler extends Compiler {
       fs.writeFileSync(entryPointFileName, clientRuntime);
       configuration.entry[entryPoint.name] = entryPointFileName;
       entryPointList.push(entryPoint.name);
-    }
-
-    configuration.plugins.push(new this._webpack.optimize.CommonsChunkPlugin(
-      COMMONS_ENTRY_NAME, 'common-[hash].js', entryPointList
-    ));
-
-    if (this._frameworkConfig.minifyJs) {
-      configuration.plugins.push(new this._webpack.optimize.UglifyJsPlugin({}));
     }
 
     var compiler = this._webpack(configuration);
