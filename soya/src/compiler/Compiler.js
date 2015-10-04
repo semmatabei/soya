@@ -6,6 +6,8 @@ import CompileResult from './CompileResult';
 import AssetServer from './AssetServer';
 
 /**
+ * Interface for compiler. Of course we only use webpack, but who knows.
+ *
  * @SERVER
  */
 export default class Compiler {
