@@ -31,5 +31,5 @@ module.exports = function(config, webpack, React, logger, register, router, erro
     logger, register, router, errorHandler, compiler, frameworkConfig,
     serverConfig, clientConfig
   );
-  application.run();
+  application.start();
 };

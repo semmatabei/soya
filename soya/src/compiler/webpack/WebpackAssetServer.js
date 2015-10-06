@@ -1,4 +1,5 @@
 import AssetServer from '../AssetServer';
+import ServerHttpRequest from '../../http/ServerHttpRequest.js';
 
 var fs = require('fs');
 var path = require('path');
@@ -55,11 +56,12 @@ export default class WebpackAssetServer extends AssetServer {
   }
 
   /**
-   * @param {ServerHttpRequest} httpRequest
-   * @param {any} response
+   * @param {http.incomingMessage} request
+   * @param {httpServerResponse} response
    * @returns {boolean}
    */
-  handle(httpRequest, response) {
+  handle(request, response) {
+    var httpRequest = new ServerHttpRequest(request);
     if (httpRequest.startsWith(this._assetHostPath)) {
       var fullRequestPath = path.join(httpRequest.getHost(), decodeURI(httpRequest.getPath()));
       var realPath = fullRequestPath.substr(this._assetHostPath.length);

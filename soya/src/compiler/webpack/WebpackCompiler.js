@@ -282,6 +282,18 @@ export default class WebpackCompiler extends Compiler {
       // No-op. We'll use the above 'done' and 'failed' hook to notify
       // application for successes and failures.
     });
+
+    var middlewares = [];
+
+    // Middleware for regular webpack asset server.
+    middlewares.push((request, response, next) => {
+      var handledByAssetServer = this._assetServer.handle(request, response);
+      if (!handledByAssetServer) {
+        next();
+      }
+    });
+
+    return middlewares;
   }
 
   /**
@@ -327,13 +339,6 @@ export default class WebpackCompiler extends Compiler {
     result += '</body>';
     result += '</html>';
     return result;
-  }
-
-  /**
-   * @returns {AssetServer}
-   */
-  getAssetServer() {
-    return this._assetServer;
   }
 
   _cleanTempDir() {

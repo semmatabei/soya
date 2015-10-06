@@ -40,13 +40,4 @@ export default class Compiler {
   assembleHtml(componentName, pageDependencies, renderResult, isSecure) {
     return '';
   }
-
-  /**
-   * Used by Application to handle asset requests.
-   *
-   * @return {AssetServer}
-   */
-  getAssetServer() {
-    return new AssetServer();
-  }
 }
