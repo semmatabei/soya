@@ -12,13 +12,19 @@ import AssetServer from './AssetServer';
  */
 export default class Compiler {
   /**
-   * Run compilation. Calls the given callback with CompileResult.
+   * Run compilation. Calls the given callback with CompileResult. Returns
+   * a list of middlewares that will be run by Application before executing
+   * soya's own middleware.
+   *
+   * NOTE: In case of hot reloading, updateCompileResultCallback may be called
+   * multiple times to update compiler
    *
    * @param {Array<EntryPoint>} entryPoints
-   * @param {Function} compileCallback
+   * @param {Function} updateCompileResultCallback
+   * @return {Array<Function>}
    */
-  run(entryPoints, compileCallback) {
-    compileCallback(new CompileResult());
+  run(entryPoints, updateCompileResultCallback) {
+    updateCompileResultCallback(new CompileResult());
   }
 
   /**

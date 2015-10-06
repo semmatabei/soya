@@ -169,9 +169,10 @@ export default class WebpackCompiler extends Compiler {
    *    TODO: Allow user setting of loaders.
    *
    * @param {Array<EntryPoint>} entryPoints
-   * @param {Function} compileCallback
+   * @param {Function} updateCompileResultCallback
+   * @return {Array<Function>}
    */
-  run(entryPoints, compileCallback) {
+  run(entryPoints, updateCompileResultCallback) {
     var i, j, entryPoint, entryPointList = [];
     var configuration = {
       entry: {},
@@ -234,13 +235,8 @@ export default class WebpackCompiler extends Compiler {
 
     var compiler = this._webpack(configuration);
     var self = this;
-    compiler.run(function(err, stats) {
-      if (stats.compilation.errors.length > 0) {
-        // Error occured. Print error messages.
-        self._printErrorMessages(stats);
-        return;
-      }
 
+    compiler.plugin('done', (stats) => {
       var i, chunkMap = {};
       for (i = 0; i < stats.compilation.chunks.length; i++) {
         chunkMap[stats.compilation.chunks[i].name] = stats.compilation.chunks[i];
@@ -274,7 +270,17 @@ export default class WebpackCompiler extends Compiler {
         compileResult.pages[entryPointName] = pageDep;
       }
 
-      compileCallback(compileResult);
+      updateCompileResultCallback(compileResult);
+    });
+
+    compiler.plugin('failed', (err) => {
+      // Error ocurred. Print error messages.
+      this._printErrorMessages(err);
+    });
+
+    compiler.run(function() {
+      // No-op. We'll use the above 'done' and 'failed' hook to notify
+      // application for successes and failures.
     });
   }
 

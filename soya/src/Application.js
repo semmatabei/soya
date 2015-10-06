@@ -100,6 +100,16 @@ export default class Application {
   _logger;
 
   /**
+   * The idea is to have middleware system that is compatible with express
+   * middlewares. Since express middlewares are just functions accepting req,
+   * res, and next - it should not be hard to make it compatible.
+   * Kudos to the express team to make such an awesome framework btw.
+   *
+   * @type {Array<Function>}
+   */
+  _middlewares;
+
+  /**
    * @param {Logger} logger
    * @param {ComponentRegister} componentRegister
    * @param {Router} router
@@ -152,6 +162,8 @@ export default class Application {
 
       this._pages[pageCmpt.name] = page;
     }
+
+    this._middlewares = [];
   }
 
   /**
@@ -167,10 +179,10 @@ export default class Application {
    * the HTML page.
    */
   compile() {
-    this._compileResult = this._compiler.run(this._entryPoints, function(compileResult) {
+    this._compiler.run(this._entryPoints, (compileResult) => {
       this._compileResult = compileResult;
       this.createServer();
-    }.bind(this));
+    });
   }
 
   createServer() {
