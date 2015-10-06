@@ -4,6 +4,7 @@ import {prop} from 'soya/lib/helper';
 import {Provider} from 'react-redux';
 import Page from 'soya/lib/page/Page';
 import RenderResult from 'soya/lib/page/RenderResult';
+import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 import App from './App.js';
 import todos from '../../../store/todos.js';
@@ -16,6 +17,9 @@ class Component extends React.Component {
       <Provider store={this.props.store}>
         {() => <App />}
       </Provider>
+      <DebugPanel top right bottom>
+        <DevTools store={this.props.store} monitor={LogMonitor} />
+      </DebugPanel>
     </div>
   }
 }
