@@ -58,22 +58,42 @@ export default class WebpackCompiler extends Compiler {
   _logger;
 
   /**
+   * @type {?Function}
+   */
+  _webpackDevMiddleware;
+
+  /**
+   * @type {?Function}
+   */
+  _webpackHotMiddleware;
+
+  /**
    * @param {Logger} logger
    * @param {Object} frameworkConfig
    * @param {any} webpack
    * @param {any} react
+   * @param {Function} webpackDevMiddleware
+   * @param {Function} webpackHotMiddleware
    */
-  constructor(logger, frameworkConfig, webpack, react) {
+  constructor(logger, frameworkConfig, webpack, react,
+              webpackDevMiddleware, webpackHotMiddleware) {
     super();
     this._logger = logger;
     this._react = react;
     this._webpack = webpack;
+    this._webpackDevMiddleware = webpackDevMiddleware;
+    this._webpackHotMiddleware = webpackHotMiddleware;
     this._frameworkConfig = frameworkConfig;
     this._clientReplace = frameworkConfig.clientReplace;
     this._clientResolve = frameworkConfig.clientResolve;
     this._absoluteClientBuildDir = frameworkConfig.absoluteClientBuildDir;
     this._assetHostPath = frameworkConfig.assetHostPath;
     this._assetServer = new WebpackAssetServer(this._assetHostPath, this._absoluteClientBuildDir, logger);
+
+    if (this._frameworkConfig.hotReload && (!webpackDevMiddleware || !webpackHotMiddleware)) {
+      throw new Error('Hot reload flag is true, yet webpack dev/hot middleware is not passed to WebpackCompiler.');
+    }
+
     this._cleanTempDir();
   }
 
@@ -114,7 +134,7 @@ export default class WebpackCompiler extends Compiler {
       devtool: 'sourcemap',
       module: {
         loaders: [
-          WebpackCompiler.getBabelLoaderConfig(),
+          WebpackCompiler.getBabelLoaderConfig(frameworkConfig, []),
           WebpackCompiler.getFileLoaderConfig(frameworkConfig),
           { test: /\.css$/, loader: "css-loader" }
         ]
@@ -130,19 +150,43 @@ export default class WebpackCompiler extends Compiler {
     };
   }
 
-  static getBabelLoaderConfig() {
-    return {
+  /**
+   * @param {Object} frameworkConfig
+   * @param {Array<Object>} extraPlugins
+   * @return {Object}
+   */
+  static getBabelLoaderConfig(frameworkConfig, extraPlugins) {
+    extraPlugins = Array.isArray(extraPlugins) ? extraPlugins : [];
+    var result = {
       test: /\.jsx?$/,
       exclude: /(node_modules|bower_components)/,
       loader: 'babel',
       query: {
         optional: ['runtime'],
-        plugins: ["flow-comments"],
+        plugins: [
+          "flow-comments"
+        ],
+        extra: {},
         blacklist: ["flow"],
         retainLines: true,
         comments: false
       }
     };
+
+    result.query.plugins = result.query.plugins.concat(extraPlugins);
+
+    if (frameworkConfig.hotReload) {
+      result.query.plugins.push('react-transform');
+      result.query.extra['react-transform'] = {
+        transforms: [{
+          'transform':  'react-transform-hmr',
+          'imports': ['react'],
+          'locals':  ['module']
+        }]
+      };
+    }
+
+    return result;
   };
 
   static getFileLoaderConfig(config) {
@@ -183,11 +227,18 @@ export default class WebpackCompiler extends Compiler {
       },
       module: {
         loaders: [
-          WebpackCompiler.getBabelLoaderConfig(),
+          WebpackCompiler.getBabelLoaderConfig(this._frameworkConfig, []),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
           { test: /\.css$/, loader: "style-loader?returnComplete=true!css-loader" }
         ]
       },
+
+      // Right now we don't need these, since we're compiling via webpack.
+      // But we still need to figure out how to send transformer with state
+      // to babel-loader. Maybe use "extra" like react-transform? We need
+      // to send functions, so that could also not work, worst case scenario
+      // is to rely on regex strings instead.
+      // TODO: Fix client resolve feature, make it work.
       babel: {
         plugins: [
           "flow-comments",
@@ -197,20 +248,18 @@ export default class WebpackCompiler extends Compiler {
           }
         ]
       },
-      soya: {
-        assetHostPath: this._assetHostPath,
-        assetServer: this._assetServer
-      },
-      resolve: {
-        alias: {}
-      },
-      plugins: [
-        new this._webpack.optimize.OccurenceOrderPlugin()
-      ]
+
+      resolve: { alias: {} },
+      plugins: [ new this._webpack.optimize.OccurenceOrderPlugin() ]
     };
 
     for (i in this._clientReplace) {
+      if (!this._clientReplace.hasOwnProperty(i)) continue;
       configuration.resolve.alias[i] = this._clientReplace[i];
+    }
+
+    if (this._frameworkConfig.hotReload) {
+      configuration.plugins.push(new this._webpack.HotModuleReplacementPlugin());
     }
 
     configuration.plugins.push(new this._webpack.NoErrorsPlugin());
@@ -237,6 +286,12 @@ export default class WebpackCompiler extends Compiler {
     var self = this;
 
     compiler.plugin('done', (stats) => {
+      if (stats.compilation.errors.length > 0) {
+        // Error occured. Print error messages.
+        this._printErrorMessages(stats);
+        return;
+      }
+
       var i, chunkMap = {};
       for (i = 0; i < stats.compilation.chunks.length; i++) {
         chunkMap[stats.compilation.chunks[i].name] = stats.compilation.chunks[i];
@@ -278,20 +333,33 @@ export default class WebpackCompiler extends Compiler {
       this._printErrorMessages(err);
     });
 
-    compiler.run(function() {
-      // No-op. We'll use the above 'done' and 'failed' hook to notify
-      // application for successes and failures.
-    });
-
     var middlewares = [];
 
-    // Middleware for regular webpack asset server.
-    middlewares.push((request, response, next) => {
-      var handledByAssetServer = this._assetServer.handle(request, response);
-      if (!handledByAssetServer) {
-        next();
-      }
-    });
+    if (this._frameworkConfig.hotReload) {
+      // Let webpack-dev-middleware handles watching, storing output and serving
+      // asset requests. Meanwhile, webpack hot middleware should be accepting
+      // connection from the client.
+      middlewares.push(this._webpackDevMiddleware(compiler, {
+        noInfo: true,
+        publicPath: configuration.output.publicPath
+      }));
+      middlewares.push(this._webpackHotMiddleware(compiler));
+    } else {
+      // Middleware for regular webpack asset server.
+      middlewares.push((request, response, next) => {
+        var handledByAssetServer = this._assetServer.handle(request, response);
+        if (!handledByAssetServer) {
+          next();
+        }
+      });
+
+      // We only need to run if we are not hot reloading, since
+      // webpack-dev-middleware already runs watch() for us.
+      compiler.run(function() {
+        // No-op. We'll use the above 'done' and 'failed' hook to notify
+        // application for successes and failures.
+      });
+    }
 
     return middlewares;
   }
@@ -373,7 +441,11 @@ export default class WebpackCompiler extends Compiler {
     var pagePath = pageToRequire.replace(/'/g, '\\\'');
     var routerPath = path.join(this._frameworkConfig.absoluteProjectDir, 'router.js');
     routerPath = routerPath.replace(/'/g, '\\\'');
-    return 'var Page = require(\'' + pagePath + '\');' +
+    var result = '';
+    if (this._frameworkConfig.hotReload) {
+      result += 'window.HotReload = require(\'webpack-hot-middleware/client\');';
+    }
+    result += 'var Page = require(\'' + pagePath + '\');' +
       'var React = require("react");' +
       'var ClientHttpRequest = require("soya/lib/http/ClientHttpRequest");' +
       'window.router = require(\'' + routerPath + '\')(window.config);' +
@@ -382,6 +454,7 @@ export default class WebpackCompiler extends Compiler {
         'window.renderResult = renderResult;' +
         'React.render(renderResult.body, document.getElementById("__body"));' +
       '});';
+    return result;
   }
 
   _createPlugin() {
@@ -391,7 +464,7 @@ export default class WebpackCompiler extends Compiler {
         visitor: {
           CallExpression(node, parent) {
             if (t.isIdentifier(node.callee, { name: "require" })) {
-              debugger;
+              console.log('HAHAHAHAHAHAHAHAHAHAAAAAAAAAAAAAAAAAAAA');
               var requireValue = node.arguments[0].value;
               if (self._clientResolve) {
                 var i, resolved;

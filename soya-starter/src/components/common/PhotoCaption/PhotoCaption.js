@@ -3,7 +3,7 @@ import {prop} from 'soya/lib/helper';
 
 // We can use webpack's localized CSS to ensure there is no naming clash
 // between our components.
-var style = prop(require('./PhotoCaption.css'));
+var style = prop(require('./PhotoCaption.css'), 'locals');
 
 export default class PhotoCaption extends React.Component {
   render() {

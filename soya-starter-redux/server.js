@@ -17,4 +17,8 @@ var register = require('./register')(config, logger);
 var errorHandler = require('./error')(config, logger);
 var router = require('./router')(config.serverConfig);
 
-createServer(config, webpack, React, logger, register, router, errorHandler);
+// TODO: Figure out how to handle dev and prod server.js - prod version should not load webpack dev/hot middleware.
+var webpackDevMiddleware = require('webpack-dev-middleware');
+var webpackHotMiddleware = require('webpack-hot-middleware');
+
+createServer(config, webpack, React, logger, register, router, errorHandler, webpackDevMiddleware, webpackHotMiddleware);

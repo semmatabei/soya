@@ -33,14 +33,13 @@ var frameworkConfig = {
     path.join(dirname, 'src/pages/info'),
     path.join(dirname, 'src/pages/landing')
   ],
+  hotReload: true,
   absoluteComponentDirMap: {
     'tvlk': path.join(dirname, 'src/components/tvlk'),
     'common-biz': path.join(dirname, 'src/components/common-biz')
   },
   clientResolve: [],
-  clientReplace: {
-    'react': path.join(dirname, 'src/shared/react-0.13.3.min.js')
-  },
+  clientReplace: {},
   minifyJs: false
 };
 

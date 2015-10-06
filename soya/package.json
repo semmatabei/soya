@@ -18,6 +18,7 @@
   "scripts": {
     "watch": "./node_modules/.bin/babel src/ --out-dir lib --source-maps --watch",
     "watch-starter": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter/node_modules/soya/lib\" --source-maps --watch",
+    "watch-starter-redux": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter-redux/node_modules/soya/lib\" --source-maps --watch",
     "watch-tap": "./node_modules/.bin/babel src/ --out-dir \"../../tap/node_modules/soya/lib\" --source-maps --watch"
   },
   "peerDependencies": {
@@ -45,6 +46,7 @@
   },
   "dependencies": {
     "memory-fs": "^0.2.0",
+    "mustache": "^2.1.3",
     "rimraf": "^2.4.3"
   }
 }

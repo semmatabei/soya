@@ -41,7 +41,7 @@ class TodoItem extends Component {
                  checked={todo.completed}
                  onChange={() => completeTodo(todo.id)} />
           <label onDoubleClick={this.handleDoubleClick.bind(this)}>
-            {"Haha " + todo.text}
+            {"[P0] " + todo.text}
           </label>
           <button className="destroy"
                   onClick={() => deleteTodo(todo.id)} />

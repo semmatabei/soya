@@ -11,10 +11,13 @@ var Router = require('../../router/Router');
  * @param {ComponentRegister} register
  * @param {Router} router
  * @param {ErrorHandler} errorHandler
+ * @param {Function} webpackDevMiddleware
+ * @param {Function} webpackHotMiddleware
  *
  * @SERVER
  */
-module.exports = function(config, webpack, React, logger, register, router, errorHandler) {
+module.exports = function(config, webpack, React, logger, register, router,
+                          errorHandler, webpackDevMiddleware, webpackHotMiddleware) {
   var frameworkConfig = config.frameworkConfig;
   var serverConfig = config.serverConfig;
   var clientConfig = config.clientConfig;
@@ -26,7 +29,10 @@ module.exports = function(config, webpack, React, logger, register, router, erro
     throw new Error('Given router is not an instance of Router: ' + router);
   }
 
-  var compiler = new WebpackCompiler(logger, frameworkConfig, webpack, React);
+  var compiler = new WebpackCompiler(
+    logger, frameworkConfig, webpack, React,
+    webpackDevMiddleware, webpackHotMiddleware);
+
   var application = new Application(
     logger, register, router, errorHandler, compiler, frameworkConfig,
     serverConfig, clientConfig

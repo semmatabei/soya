@@ -190,16 +190,17 @@ export default class Application {
       return;
     }
 
+    // No need to listen twice.
+    this._serverCreated = true;
+
     // TODO: Config can set timeout for http requests.
     http.createServer((request, response) => {
       var d = domain.create().on('error', (error) => {
         this.handleError(error, request, response);
       });
       d.run(() => {
-        debugger;
         var index = 0;
         var runMiddleware = () => {
-          debugger;
           var middleware = this._middlewares[index++];
           if (!middleware) return;
           middleware(request, response, runMiddleware);
