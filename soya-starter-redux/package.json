@@ -17,7 +17,7 @@
     "source-map-support": "^0.3.2",
     "style-loader": "^0.12.4",
     "webpack": "^1.12.2",
-    "soya": "^0.0.14",
+    "soya": "^0.0.15",
     "react-redux": "^2.1.2",
     "redux": "^3.0.0",
     "classnames": "^2.1.2"
