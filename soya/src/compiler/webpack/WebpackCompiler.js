@@ -134,7 +134,7 @@ export default class WebpackCompiler extends Compiler {
       devtool: 'sourcemap',
       module: {
         loaders: [
-          WebpackCompiler.getBabelLoaderConfig(frameworkConfig, []),
+          WebpackCompiler.getBabelLoaderConfig(frameworkConfig, [], false),
           WebpackCompiler.getFileLoaderConfig(frameworkConfig),
           { test: /\.css$/, loader: "css-loader" }
         ]
@@ -153,9 +153,10 @@ export default class WebpackCompiler extends Compiler {
   /**
    * @param {Object} frameworkConfig
    * @param {Array<Object>} extraPlugins
+   * @param {boolean} withHotReload
    * @return {Object}
    */
-  static getBabelLoaderConfig(frameworkConfig, extraPlugins) {
+  static getBabelLoaderConfig(frameworkConfig, extraPlugins, withHotReload) {
     extraPlugins = Array.isArray(extraPlugins) ? extraPlugins : [];
     var result = {
       test: /\.jsx?$/,
@@ -175,7 +176,7 @@ export default class WebpackCompiler extends Compiler {
 
     result.query.plugins = result.query.plugins.concat(extraPlugins);
 
-    if (frameworkConfig.hotReload) {
+    if (frameworkConfig.hotReload && withHotReload) {
       result.query.plugins.push('react-transform');
       result.query.extra['react-transform'] = {
         transforms: [{
@@ -227,7 +228,7 @@ export default class WebpackCompiler extends Compiler {
       },
       module: {
         loaders: [
-          WebpackCompiler.getBabelLoaderConfig(this._frameworkConfig, []),
+          WebpackCompiler.getBabelLoaderConfig(this._frameworkConfig, [], true),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
           { test: /\.css$/, loader: "style-loader?returnComplete=true!css-loader" }
         ]
