@@ -185,11 +185,17 @@ export default class WebpackCompiler extends Compiler {
     if (frameworkConfig.hotReload && withHotReload) {
       result.query.plugins.push('react-transform');
       result.query.extra['react-transform'] = {
-        transforms: [{
-          'transform':  'react-transform-hmr',
-          'imports': ['react'],
-          'locals':  ['module']
-        }]
+        transforms: [
+          {
+            'transform': 'react-transform-hmr',
+            'imports': ['react'],
+            'locals':  ['module']
+          },
+          {
+            'transform': 'react-transform-catch-errors',
+            'imports': ['react', 'redbox-react']
+          }
+        ]
       };
     }
 
