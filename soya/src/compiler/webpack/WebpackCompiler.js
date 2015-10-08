@@ -68,6 +68,11 @@ export default class WebpackCompiler extends Compiler {
   _webpackHotMiddleware;
 
   /**
+   * @type {boolean}
+   */
+  _firstCompileDone;
+
+  /**
    * @param {Logger} logger
    * @param {Object} frameworkConfig
    * @param {any} webpack
@@ -89,6 +94,7 @@ export default class WebpackCompiler extends Compiler {
     this._absoluteClientBuildDir = frameworkConfig.absoluteClientBuildDir;
     this._assetHostPath = frameworkConfig.assetHostPath;
     this._assetServer = new WebpackAssetServer(this._assetHostPath, this._absoluteClientBuildDir, logger);
+    this._firstCompileDone = false;
 
     if (this._frameworkConfig.hotReload && (!webpackDevMiddleware || !webpackHotMiddleware)) {
       throw new Error('Hot reload flag is true, yet webpack dev/hot middleware is not passed to WebpackCompiler.');
@@ -303,7 +309,14 @@ export default class WebpackCompiler extends Compiler {
       for (i = 0; i < entryPointList.length; i++) {
         entryPointName = entryPointList[i];
         if (!chunkMap.hasOwnProperty(entryPointName)) {
-          throw new Error('Unable to determine dependency, entry point ' + entryPointName + ' does not have webpack chunk!');
+          var error = new Error('Unable to determine dependency, entry point ' + entryPointName + ' does not have webpack chunk!');
+          if (this._firstCompileDone) {
+            // If this is a webpack hot reload compilation, don't throw the
+            // error, just log to the user.
+            this._logger.error('Hot reload ->', error);
+            return;
+          }
+          throw error;
         }
         entryPointChunk = chunkMap[entryPointName];
 
@@ -325,6 +338,10 @@ export default class WebpackCompiler extends Compiler {
 
         compileResult.pages[entryPointName] = pageDep;
       }
+
+      // Sets the flag, we have completed the very first compilation. Next
+      // compilation error should not trigger errors.
+      this._firstCompileDone = true;
 
       updateCompileResultCallback(compileResult);
     });
@@ -426,6 +443,11 @@ export default class WebpackCompiler extends Compiler {
    * @param {any} stats
    */
   _printErrorMessages(stats) {
+    if (this._firstCompileDone) {
+      // Second compilation is only done when we are using hot reload.
+      // We should not stop the server if an exception happens.
+      return;
+    }
     var error = new Error('Webpack compilation error!');
     this._logger.error('Webpack compilation error -> ', error, [stats.compilation.errors]);
     throw error;
