@@ -23,8 +23,8 @@
     "classnames": "^2.1.2"
   },
   "devDependencies": {
-    "babel-plugin-react-transform": "^1.1.1",
     "nodemon": "^1.7.0",
+    "babel-plugin-react-transform": "^1.1.1",
     "react-transform-catch-errors": "^1.0.0",
     "react-transform-hmr": "^1.0.1",
     "redbox-react": "^1.1.1",

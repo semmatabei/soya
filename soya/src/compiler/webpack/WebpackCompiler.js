@@ -481,7 +481,7 @@ export default class WebpackCompiler extends Compiler {
       'window.page = new Page(window.config, window.router);' +
       'page.render(new ClientHttpRequest(), window.routeArgs, function(renderResult) {' +
         'window.renderResult = renderResult;' +
-        'React.render(renderResult.body, document.getElementById("__body"));' +
+        'window.reactElement = React.render(renderResult.body, document.getElementById("__body"));' +
       '});';
     return result;
   }
