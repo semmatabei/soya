@@ -29,15 +29,7 @@ var frameworkConfig = {
   absoluteSrcDir: path.join(dirname, 'src'),
   absoluteServerBuildDir: path.join(dirname, 'build/server'),
   absoluteClientBuildDir: path.join(dirname, 'build/client'),
-  absolutePageDirs: [
-    path.join(dirname, 'src/pages/info'),
-    path.join(dirname, 'src/pages/landing')
-  ],
   hotReload: true,
-  absoluteComponentDirMap: {
-    'tvlk': path.join(dirname, 'src/components/tvlk'),
-    'common-biz': path.join(dirname, 'src/components/common-biz')
-  },
   clientResolve: [],
   clientReplace: {},
   minifyJs: false

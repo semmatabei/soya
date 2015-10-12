@@ -493,7 +493,6 @@ export default class WebpackCompiler extends Compiler {
         visitor: {
           CallExpression(node, parent) {
             if (t.isIdentifier(node.callee, { name: "require" })) {
-              console.log('HAHAHAHAHAHAHAHAHAHAAAAAAAAAAAAAAAAAAAA');
               var requireValue = node.arguments[0].value;
               if (self._clientResolve) {
                 var i, resolved;
