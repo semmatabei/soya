@@ -15,7 +15,7 @@ class Component extends React.Component {
   render() {
     return <div className="todoapp">
       <Provider store={this.props.store}>
-        {() => <App />}
+        <App />
       </Provider>
       <DebugPanel top right bottom>
         <DevTools store={this.props.store} monitor={LogMonitor} />
@@ -29,6 +29,7 @@ export default class HomePage extends Page {
     var store = todos();
     var renderResult = new RenderResult();
     renderResult.head = '<title>Hello World!</title>';
+    renderResult.component = Component;
     renderResult.body = React.createElement(Component, {router: this.router, store: store});
     callback(renderResult);
   }

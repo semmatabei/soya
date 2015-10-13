@@ -5,5 +5,5 @@ lib/
 build/
 carrot/
 docs/
-redux/
+/redux/
 npm-debug.log
