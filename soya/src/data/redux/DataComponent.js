@@ -1,6 +1,5 @@
 import React from 'react';
 
-import Container from './Container.js';
 import uuid from './uuid.js';
 
 /**
@@ -9,23 +8,27 @@ import uuid from './uuid.js';
  * @CLIENT_SERVER
  */
 export default class ContextualComponent extends React.Component {
-  static get propTypes() {
-    return {
-      container: React.PropTypes.instanceOf(Container)
-    };
-  }
-
   constructor(props, context) {
     super(props, context);
   }
 
+  componentWillReceiveProps() {
+
+  }
+
   componentWillMount() {
+    var b = function(arg) {
+      console.log('HAHAHA');
+      console.log(arg);
+      console.log();
+    };
+    b(this);
     this.__soyaUuid = uuid.v4();
     this.registerStores();
   }
 
   componentWillUnmount() {
-    this.container.unsubscribeAll();
+
   }
 
   registerStores() {

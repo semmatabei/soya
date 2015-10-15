@@ -3,15 +3,16 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Header from './Header';
 import MainSection from './MainSection';
-import ContextualComponent from 'soya/lib/redux/ContextualComponent';
+import DataComponent from 'soya/lib/data/redux/DataComponent';
 import * as TodoActions from '../../../actions/todos';
 
-class App extends ContextualComponent {
+class App extends DataComponent {
   registerStores() {
     console.log('App bwahahahaha');
   }
 
   render() {
+    console.log('render!');
     const { todos, dispatch } = this.props;
     const actions = bindActionCreators(TodoActions, dispatch);
 

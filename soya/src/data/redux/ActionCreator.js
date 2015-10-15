@@ -1,4 +1,7 @@
 /**
+ * This is the interface that defines interaction between ActionCreator and
+ * user Component code.
+ *
  * Action creator interface, to be used by implementations of Container.
  *
  * @CLIENT_SERVER
@@ -19,9 +22,10 @@ export default class ActionCreator {
    *
    * @param {any} query
    * @param {?Object} options
+   * @param {boolean} forceLoad
    * @return {Object | Function}
    */
-  createLoadAction(query, options) {
+  createLoadAction(query, options, forceLoad) {
 
   }
 }
