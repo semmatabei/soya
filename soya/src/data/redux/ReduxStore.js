@@ -400,6 +400,7 @@ export default class ReduxStore extends Store {
    * @return {StoreReference}
    */
   register(segment, query, options, callback, component, hydrationOption) {
+    // TODO: Handle Segment dependencies!
     // Determine subscriber ID.
     var subscriberId = component[SUBSCRIBER_ID];
     if (!subscriberId) {

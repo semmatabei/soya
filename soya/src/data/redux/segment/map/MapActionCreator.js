@@ -30,8 +30,14 @@ export default class MapActionCreator extends ActionCreator {
     this._actionType = ActionNameUtil.generate(segmentName, 'LOAD');
   }
 
+  /**
+   * @param {any} query
+   * @param {Object} options
+   * @param {?boolean} forceLoad
+   */
   createLoadAction(query, options, forceLoad) {
-
+    forceLoad = forceLoad == null ? false : forceLoad;
+    var queryId = this._generateQueryId()
   }
 
   /**
@@ -46,7 +52,17 @@ export default class MapActionCreator extends ActionCreator {
 
   }
 
-  _registerQuery() {
+  /**
+   * Generates a unique string representing the given query. Same query must
+   * generate identical strings. Query ID is used by ReduxStore and Segment
+   * to recognize identical queries.
+   *
+   * ABSTRACT: To be overridden by child implementations.
+   *
+   * @param {any} query
+   * @return {string}
+   */
+  _generateQueryId(query) {
 
   }
 

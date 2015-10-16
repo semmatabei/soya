@@ -1,6 +1,5 @@
 import Segment from '../../Segment.js';
 import QueryOptionUtil from '../QueryOptionUtil.js';
-import ActionNameUtil from '../ActionNameUtil.js';
 
 /**
  * Promise implementation, in local variable so that our code can be natural.
@@ -45,27 +44,6 @@ export default class MapSegment extends Segment {
   }
 
   /**
-   * Generates a unique string representing the given query. Same query must
-   * generate identical strings. Query ID is used by ReduxStore and Segment
-   * to recognize identical queries.
-   *
-   * ABSTRACT: To be overridden by child implementations.
-   *
-   * @param {any} query
-   * @return {string}
-   */
-  _generateQueryId(query) {
-
-  }
-
-  /**
-   * @return {MapActionCreator}
-   */
-  _getActionCreator() {
-    return this._actionCreator;
-  }
-
-  /**
    * Child classes may want override merging behavior.
    *
    * @param {Object} optionA
@@ -92,7 +70,7 @@ export default class MapSegment extends Segment {
    */
   _registerQuery(query, options) {
     options = QueryOptionUtil.initOptions(options);
-    var queryId = this._generateQueryId(query);
+    var queryId = this._actionCreator._generateQueryId(query);
     if (this._queries.hasOwnProperty(queryId)) {
       this._queries[queryId].options = this._mergeOptions(
         options, this._queries[queryId].options)
@@ -109,12 +87,49 @@ export default class MapSegment extends Segment {
    * @return {Object | Function}
    */
   _createHydrateAction(queryId) {
-    var actionCreator = this._getActionCreator();
-    return actionCreator.createLoadAction(
+    return this._actionCreator.createLoadAction(
       this._queries[queryId].query,
       this._queries[queryId].options,
       true
     );
+  }
+
+  /**
+   * @return {MapActionCreator}
+   */
+  _getActionCreator() {
+    return this._actionCreator;
+  }
+
+  /**
+   * @param {Object} state
+   * @param {string} queryId
+   */
+  _getPieceObject(state, queryId) {
+    return state[queryId];
+  }
+
+  /**
+   * @param {any} segmentStateA
+   * @param {any} segmentStateB
+   * @return {boolean}
+   */
+  _isStateEqual(segmentStateA, segmentStateB) {
+    // We're not using immutable because we store simple maps.
+    return segmentStateA === segmentStateB;
+  }
+
+  /**
+   * @param prevSegmentState
+   * @param segmentState
+   * @param queryId
+   * @return {?{data: ?any; errors: ?any}}
+   */
+  _comparePiece(prevSegmentState, segmentState, queryId) {
+    if (this._isStateEqual(prevSegmentState, segmentState)) {
+      return null;
+    }
+    return this._getPieceObject(segmentState, queryId);
   }
 
   /**
@@ -123,22 +138,20 @@ export default class MapSegment extends Segment {
   _getReducer() {
     var loadActionType = this._actionCreator._getActionType();
     return function(state, action) {
-      var data, queryId;
-      if (!state) return {};
+      var queryId, newState = {};
+      if (!state) return newState;
       switch(action.type) {
         case loadActionType:
-          data = action.payload;
-          for () {
-
+          for (queryId in state) {
+            if (!state.hasOwnProperty(queryId)) continue;
+            newState[queryId] = state[queryId];
           }
+          newState[action.queryId] = action.payload;
+          return newState;
           break;
         default:
           return state;
       }
     };
-  }
-
-  _getPieceObject(state, queryId) {
-
   }
 }
