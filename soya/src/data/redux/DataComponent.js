@@ -35,4 +35,3 @@ export default class ContextualComponent extends React.Component {
 
   }
 }
-

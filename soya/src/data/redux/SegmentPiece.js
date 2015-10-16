@@ -11,8 +11,13 @@ export default class SegmentPiece {
   data;
 
   /**
-   * Array of errors. Will
+   * Array of errors. Will be null if there are no errors.
    * @type {void | any}
    */
   errors;
+
+  /**
+   * @type {boolean}
+   */
+  isHydrated;
 }

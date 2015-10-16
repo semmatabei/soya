@@ -26,6 +26,6 @@ export default class ActionCreator {
    * @return {Object | Function}
    */
   createLoadAction(query, options, forceLoad) {
-
+    throw new Error('Method not implemented!');
   }
 }

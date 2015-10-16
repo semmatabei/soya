@@ -1,3 +1,3 @@
-export const BLOCKING = 'BLOCKING';
-export const NON_BLOCKING = 'ASYNC';
-export const NOOP = 'NOOP';
+export const BLOCKING = 3;
+export const NON_BLOCKING = 2;
+export const NOOP = 1;
