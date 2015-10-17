@@ -410,9 +410,9 @@ export default class WebpackCompiler extends Compiler {
     result += 'var routeArgs = ' + JSON.stringify(routeArgs) + ';';
     result += '</script>';
 
-    var i, url, dep;
+    var i, url;
     for (i = 0; i < pageDependencies.cssDependencies.length; i++) {
-      url = isSecure ? 'https://' : 'http://';
+      url = this._frameworkConfig.assetProtocol + "://";
       url += pageDependencies.cssDependencies[i];
       result += '<link rel="stylesheet" type="text/css" src="' + url + '">';
     }
@@ -462,6 +462,7 @@ export default class WebpackCompiler extends Compiler {
   /**
    * TODO: Page caching for history API!
    * TODO: Send http request headers, request method, etc - if a config knob is turned on!
+   * TODO: This shouldn't be in WebpackCompiler, client runtime strictly belongs to Application and should not know that we are using Webpack!
    *
    * @param {string} pageToRequire
    * @returns {string}
