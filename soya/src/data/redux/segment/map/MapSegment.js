@@ -26,17 +26,19 @@ export default class MapSegment extends Segment {
    */
   _actionCreator;
 
+  /**
+   *
+   */
   constructor() {
+    super();
     this._queries = {};
-    this._actionCreator = this._createActionCreator();
   }
 
   /**
-   * Creates MapActionCreator implementation.
+   * Creates MapActionCreator implementation. Will only be called once.
    *
    * ABSTRACT: To be overridden by child implementation.
    *
-   * @param {Function} PromiseImpl
    * @return {MapActionCreator}
    */
   _createActionCreator() {
@@ -58,6 +60,12 @@ export default class MapSegment extends Segment {
    */
   _activate(PromiseImpl) {
     Promise = PromiseImpl;
+    if (!this._actionCreator) {
+      this._actionCreator = this._createActionCreator();
+    }
+    if (!(this._actionCreator instanceof MapActionCreator)) {
+      throw new Error('MapSegment must be used in tandem with MapActionCreator.');
+    }
     this._actionCreator._setPromise(PromiseImpl);
   }
 

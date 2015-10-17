@@ -13,9 +13,9 @@ export default class Store {
    * given callback when all blocking render is complete.
    *
    * @param {RenderType} renderType
-   * @param {Function} callback
+   * @return {Promise}
    */
-  hydrate(renderType, callback) {
-    callback();
+  hydrate(renderType) {
+    throw new Error('Abstract method not implemented.');
   }
 }

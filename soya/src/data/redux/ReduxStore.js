@@ -206,6 +206,7 @@ export default class ReduxStore extends Store {
    * @param {Function} PromiseImpl
    */
   constructor(PromiseImpl) {
+    super();
     this._segments = {};
     this._reducers = {};
     this._subscribers = {};

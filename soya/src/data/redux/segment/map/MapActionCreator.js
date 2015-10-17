@@ -16,39 +16,58 @@ export default class MapActionCreator extends ActionCreator {
   _actionType;
 
   /**
-   * @type {{[key: string]: {query: any; options: Object}}}
+   * @type {{[key: string]: {action: Object; expiry: number;}}}
    */
-  _queries;
+  _cache;
 
   /**
    * @param {string} segmentName
    */
   constructor(segmentName) {
-    this._queries = {};
+    super();
     // Since segment name is guaranteed never to clash by ReduxStore, we can
     // safely use segment name as action type.
     this._actionType = ActionNameUtil.generate(segmentName, 'LOAD');
+    this._cache = {};
   }
 
   /**
    * @param {any} query
    * @param {Object} options
    * @param {?boolean} forceLoad
+   * @return {Object | Function}
    */
   createLoadAction(query, options, forceLoad) {
     forceLoad = forceLoad == null ? false : forceLoad;
-    var queryId = this._generateQueryId()
+    var queryId = this._generateQueryId(query);
+    return this._createLoadActionWithQueryId(query, options, forceLoad, queryId);
   }
 
   /**
-   * Fetches the data, returns a promise that resolves to the data payload.
+   * TODO: Implement caching.
+   * TODO: Implement polling.
+   *
+   * @param {any} query
+   * @param {options} options
+   * @param {boolean} forceLoad
+   * @param {string} queryId
+   * @return {Object | Function}
+   */
+  _createLoadActionWithQueryId(query, options, forceLoad, queryId) {
+    return this._createThunkAction(query, queryId);
+  }
+
+  /**
+   * Returns a thunk function that returns a Promise. Returned function accepts
+   * dispatch.
    *
    * ABSTRACT: To be overridden by child classes.
    *
-   * @param query
-   * @return {Promise}
+   * @param {any} query
+   * @param {string} queryId
+   * @return {Function}
    */
-  _fetchData(query) {
+  _createThunkAction(query, queryId) {
 
   }
 

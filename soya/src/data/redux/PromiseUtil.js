@@ -5,7 +5,8 @@
  */
 export default {
   /**
-   * Runs all promises inside the array in parallel.
+   * Runs all promises inside the array in parallel. Will reject if any of
+   * the given promises rejects.
    *
    * NOTE: I know I can use Promise.all() - but preliminary investigation
    * seems to conclude that it runs promises serially? Correct me if I'm wrong.
@@ -24,7 +25,9 @@ export default {
         }
       };
       for (i = 0; i < promises.length; i++) {
-        promises[i].then(this.createResolveFunc(i, registerResult));
+        promises[i].then(this.createResolveFunc(i, registerResult), function(error) {
+          reject(error);
+        });
       }
     });
   },

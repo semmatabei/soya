@@ -87,6 +87,11 @@ export default class RenderResult {
   head;
 
   /**
+   * @type {?Store}
+   */
+  store;
+
+  /**
    * @type {[key: string]: Cookie}
    */
   cookies;

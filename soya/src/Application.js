@@ -3,6 +3,7 @@ import Compiler from './compiler/Compiler';
 import Router from './router/Router';
 import EntryPoint from './EntryPoint';
 import ServerHttpRequest from './http/ServerHttpRequest';
+import { SERVER } from './data/RenderType';
 
 var path = require('path');
 var http = require('http');
@@ -229,42 +230,71 @@ export default class Application {
       throw new Error('Unable to route request, page ' + routeResult.pageName + ' doesn\'t exist');
     }
 
-    page.render(httpRequest, routeResult.routeArgs, (renderResult) => {
-      var pageDep = this._compileResult.pages[routeResult.pageName];
-      if (!pageDep) {
-        throw new Error('Unable to render page server side, dependencies unknown for entry point: ' + routeResult.componentName);
+    page.render(httpRequest, routeResult.routeArgs,
+      this._handleRenderResult.bind(this, routeResult, request, httpRequest, response));
+  }
+
+  /**
+   * @param {RouteResult} routeResult
+   * @param {http.incomingMessage} request
+   * @param {ServerHttpRequest} httpRequest
+   * @param {httpServerResponse} response
+   * @param {RenderResult} renderResult
+   */
+  _handleRenderResult(routeResult, request, httpRequest, response, renderResult) {
+    var pageDep = this._compileResult.pages[routeResult.pageName];
+    if (!pageDep) {
+      throw new Error('Unable to render page server side, dependencies unknown for entry point: ' + routeResult.componentName);
+    }
+
+    var promise = Promise.resolve(null);
+    if (renderResult.store) {
+      promise = renderResult.store.hydrate(SERVER);
+    }
+
+    var handlePromiseError = (error) => {
+      // Just in case user store code doesn't reject with Error object.
+      error = this._ensureError(error);
+      this.handleError(error, request, response);
+    };
+
+    var storeResolve = () => {
+      try {
+        var htmlResult = this._compiler.assembleHtml(
+          routeResult.pageName, routeResult.routeArgs, pageDep, renderResult,
+          this._clientConfig, httpRequest.isSecure()
+        );
+
+        response.statusCode = renderResult.httpStatusCode;
+        response.statusMessage = renderResult.httpStatusMessage;
+
+        // TODO: Calculating content length as utf8 is hard-coded. This might be harmful, maybe move as configuration of the compiler?
+        response.setHeader('Content-Length', Buffer.byteLength(htmlResult, 'utf8'));
+        response.setHeader('Content-Type', 'text/html;charset=UTF-8');
+
+        // Set result headers.
+        var key, headerData = renderResult.httpHeaders.getAll();
+        for (key in headerData) {
+          if (!headerData.hasOwnProperty(key)) continue;
+          response.setHeader(key, headerData[key]);
+        }
+
+        // Set result cookies.
+        var values = [];
+        for (key in renderResult.cookies) {
+          if (!renderResult.cookies.hasOwnProperty(key)) continue;
+          values.push(renderResult.cookies[key].toHeaderString());
+        }
+        response.setHeader('Set-Cookie', values);
+
+        // Set result content.
+        response.end(htmlResult);
+      } catch (error) {
+        handlePromiseError(error);
       }
+    };
 
-      var htmlResult = this._compiler.assembleHtml(
-        routeResult.pageName, routeResult.routeArgs, pageDep, renderResult,
-        this._clientConfig, httpRequest.isSecure()
-      );
-
-      response.statusCode = renderResult.httpStatusCode;
-      response.statusMessage = renderResult.httpStatusMessage;
-
-      // TODO: Calculating content length as utf8 is hard-coded. This might be harmful, maybe move as configuration of the compiler?
-      response.setHeader('Content-Length', Buffer.byteLength(htmlResult, 'utf8'));
-      response.setHeader('Content-Type', 'text/html;charset=UTF-8');
-
-      // Set result headers.
-      var key, headerData = renderResult.httpHeaders.getAll();
-      for (key in headerData) {
-        if (!headerData.hasOwnProperty(key)) continue;
-        response.setHeader(key, headerData[key]);
-      }
-
-      // Set result cookies.
-      var values = [];
-      for (key in renderResult.cookies) {
-        if (!renderResult.cookies.hasOwnProperty(key)) continue;
-        values.push(renderResult.cookies[key].toHeaderString());
-      }
-      response.setHeader('Set-Cookie', values);
-
-      // Set result content.
-      response.end(htmlResult);
-    });
+    promise.then(storeResolve).catch(handlePromiseError);
   }
 
   /**
@@ -279,5 +309,15 @@ export default class Application {
     }
 
     this._errorHandler.responseNotSentError(error, request, response);
+  }
+
+  /**
+   * @param {any} error
+   * @return {Error}
+   */
+  _ensureError(error) {
+    if (error instanceof Error) return error;
+    if (typeof error == 'string') return new Error(error);
+    return new Error('Error when resolving store promise! Unable to convert reject arg: ' + error);
   }
 }
