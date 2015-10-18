@@ -1,5 +1,6 @@
 import Page from 'soya/lib/page/Page';
 import RenderResult from 'soya/lib/page/RenderResult';
+import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 import React from 'react';
 
 // Pages can have its own separate components.
@@ -10,9 +11,10 @@ import '../../../shared/sitewide.css';
 
 export default class NotFound extends Page {
   render(httpRequest, routeArgs, callback) {
-    var renderResult = new RenderResult();
-    renderResult.head = '<title>Oops, not found!</title>';
-    renderResult.body = React.createElement(NotFoundReactComponent, {});
+    var reactRenderer = new ReactRenderer();
+    reactRenderer.head = '<title>Oops, not found!</title>';
+    reactRenderer.body = React.createElement(NotFoundReactComponent, {});
+    var renderResult = new RenderResult(reactRenderer);
     renderResult.setStatusCode(404);
     callback(renderResult);
   }

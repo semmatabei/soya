@@ -77,14 +77,9 @@ var STATUS_MESSAGES = {
  */
 export default class RenderResult {
   /**
-   * @type {any}
+   * @type {ContentRenderer}
    */
-  body;
-
-  /**
-   * @type {any}
-   */
-  head;
+  contentRenderer;
 
   /**
    * @type {?Store}
@@ -114,13 +109,9 @@ export default class RenderResult {
   /**
    * NOTE: Application itself is not aware that we are using webpack or react,
    * thus this class should also be unaware of that fact.
-   *
-   * @param {any} body
-   * @param {any} head
    */
-  constructor(head, body) {
-    this.body = body;
-    this.head = head;
+  constructor(contentRenderer) {
+    this.contentRenderer = contentRenderer;
     this.httpHeaders = new Bucket();
     this.cookies = {};
     this.httpStatusCode = 200;

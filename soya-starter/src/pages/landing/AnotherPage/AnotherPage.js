@@ -1,4 +1,5 @@
 import RenderResult from 'soya/lib/page/RenderResult';
+import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 import Page from 'soya/lib/page/Page';
 import React from 'react';
 
@@ -24,9 +25,10 @@ class Component extends React.Component {
 
 export default class AnotherPage extends Page {
   render(httpRequest, routeArgs, callback) {
-    var renderResult = new RenderResult();
-    renderResult.head = '<title>Another Page</title>';
-    renderResult.body = React.createElement(Component, {router: this.router});
+    var reactRenderer = new ReactRenderer();
+    reactRenderer.head = '<title>Another Page</title>';
+    reactRenderer.body = React.createElement(Component, {router: this.router});
+    var renderResult = new RenderResult(reactRenderer);
     renderResult.httpHeaders.set('X-Foo', 'soya-ftw');
     callback(renderResult);
   }

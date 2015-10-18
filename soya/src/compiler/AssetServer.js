@@ -46,6 +46,15 @@ export default class AssetServer {
 
   /**
    * @param {string} path
+   * @param {string} protocol
+   * @returns {string}
+   */
+  toUrlWithProtocol(path, protocol) {
+    return protocol + '://' + this.toUrlWithoutProtocol(path);
+  }
+
+  /**
+   * @param {string} path
    * @param {any} contents
    */
   put(path, contents) {

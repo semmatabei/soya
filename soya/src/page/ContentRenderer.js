@@ -10,15 +10,17 @@
  * is client side rendering, which should use this class instead of hard-coding
  * to React.
  *
- * @CLIENT_SERVER
+ * @SERVER
  */
 export default class ContentRenderer {
   /**
-   * Called by both client and server.
-   *
+   * @param {Object} routeArgs
+   * @param {Object} clientConfig
+   * @param {Object} pageDependencies
+   * @param {boolean} isSecure
    * @returns {string}
    */
-  render() {
+  render(routeArgs, clientConfig, pageDependencies, isSecure) {
     return '';
   }
 }

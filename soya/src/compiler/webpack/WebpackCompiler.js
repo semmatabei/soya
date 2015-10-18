@@ -332,13 +332,13 @@ export default class WebpackCompiler extends Compiler {
         };
 
         for (j = 0; j < commonsChunk.files.length; j++) {
-          pageDep.jsDependencies.push(self._assetServer.toUrlWithoutProtocol(
-            commonsChunk.files[j]
+          pageDep.jsDependencies.push(self._assetServer.toUrlWithProtocol(
+            commonsChunk.files[j], this._frameworkConfig.assetProtocol
           ));
         }
         for (j = 0; j < entryPointChunk.files.length; j++) {
-          pageDep.jsDependencies.push(self._assetServer.toUrlWithoutProtocol(
-            entryPointChunk.files[j]
+          pageDep.jsDependencies.push(self._assetServer.toUrlWithProtocol(
+            entryPointChunk.files[j], this._frameworkConfig.assetProtocol
           ));
         }
 
@@ -386,51 +386,6 @@ export default class WebpackCompiler extends Compiler {
     }
 
     return middlewares;
-  }
-
-  /**
-   * TODO: Find out a library for escaping URLs to be put in HTML.
-   *
-   * @param {string} componentName
-   * @param {Object} routeArgs
-   * @param {Object} pageDependencies
-   * @param {RenderResult} renderResult
-   * @param {Config} clientConfig
-   * @param {boolean} isSecure
-   * @returns {string}
-   */
-  assembleHtml(componentName, routeArgs, pageDependencies,
-               renderResult, clientConfig, isSecure) {
-    var result = '<html>';
-    result += '<head>';
-    if (renderResult.head) result += renderResult.head;
-
-    result += '<script type="text/javascript">';
-    result += 'var config = ' + JSON.stringify(clientConfig) + ';';
-    result += 'var routeArgs = ' + JSON.stringify(routeArgs) + ';';
-    result += '</script>';
-
-    var i, url;
-    for (i = 0; i < pageDependencies.cssDependencies.length; i++) {
-      url = this._frameworkConfig.assetProtocol + "://";
-      url += pageDependencies.cssDependencies[i];
-      result += '<link rel="stylesheet" type="text/css" src="' + url + '">';
-    }
-
-    result += '</head>';
-    result += '<body><div id="__body">';
-    if (renderResult.body) result += this._react.renderToString(renderResult.body);
-    result += '</div>';
-
-    for (i = 0; i < pageDependencies.jsDependencies.length; i++) {
-      url = this._frameworkConfig.assetProtocol + "://";
-      url += pageDependencies.jsDependencies[i];
-      result += '<script type="text/javascript" src="' + url + '"></script>';
-    }
-
-    result += '</body>';
-    result += '</html>';
-    return result;
   }
 
   _cleanTempDir() {
@@ -482,7 +437,7 @@ export default class WebpackCompiler extends Compiler {
       'window.page = new Page(window.config, window.router);' +
       'page.render(new ClientHttpRequest(), window.routeArgs, function(renderResult) {' +
         'window.renderResult = renderResult;' +
-        'window.reactElement = React.render(renderResult.body, document.getElementById("__body"));' +
+        'window.reactElement = React.render(renderResult.contentRenderer.body, document.getElementById("__body"));' +
       '});';
     return result;
   }

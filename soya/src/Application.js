@@ -247,6 +247,8 @@ export default class Application {
       throw new Error('Unable to render page server side, dependencies unknown for entry point: ' + routeResult.componentName);
     }
 
+    // TODO: Store needs to render twice, how to make it generic?
+
     var promise = Promise.resolve(null);
     if (renderResult.store) {
       promise = renderResult.store.hydrate(SERVER);
@@ -259,39 +261,33 @@ export default class Application {
     };
 
     var storeResolve = () => {
-      try {
-        var htmlResult = this._compiler.assembleHtml(
-          routeResult.pageName, routeResult.routeArgs, pageDep, renderResult,
-          this._clientConfig, httpRequest.isSecure()
-        );
+      var htmlResult = renderResult.contentRenderer.render(
+        routeResult.routeArgs, this._clientConfig, pageDep, httpRequest.isSecure());
 
-        response.statusCode = renderResult.httpStatusCode;
-        response.statusMessage = renderResult.httpStatusMessage;
+      response.statusCode = renderResult.httpStatusCode;
+      response.statusMessage = renderResult.httpStatusMessage;
 
-        // TODO: Calculating content length as utf8 is hard-coded. This might be harmful, maybe move as configuration of the compiler?
-        response.setHeader('Content-Length', Buffer.byteLength(htmlResult, 'utf8'));
-        response.setHeader('Content-Type', 'text/html;charset=UTF-8');
+      // TODO: Calculating content length as utf8 is hard-coded. This might be harmful, maybe move as configuration of the compiler?
+      response.setHeader('Content-Length', Buffer.byteLength(htmlResult, 'utf8'));
+      response.setHeader('Content-Type', 'text/html;charset=UTF-8');
 
-        // Set result headers.
-        var key, headerData = renderResult.httpHeaders.getAll();
-        for (key in headerData) {
-          if (!headerData.hasOwnProperty(key)) continue;
-          response.setHeader(key, headerData[key]);
-        }
-
-        // Set result cookies.
-        var values = [];
-        for (key in renderResult.cookies) {
-          if (!renderResult.cookies.hasOwnProperty(key)) continue;
-          values.push(renderResult.cookies[key].toHeaderString());
-        }
-        response.setHeader('Set-Cookie', values);
-
-        // Set result content.
-        response.end(htmlResult);
-      } catch (error) {
-        handlePromiseError(error);
+      // Set result headers.
+      var key, headerData = renderResult.httpHeaders.getAll();
+      for (key in headerData) {
+        if (!headerData.hasOwnProperty(key)) continue;
+        response.setHeader(key, headerData[key]);
       }
+
+      // Set result cookies.
+      var values = [];
+      for (key in renderResult.cookies) {
+        if (!renderResult.cookies.hasOwnProperty(key)) continue;
+        values.push(renderResult.cookies[key].toHeaderString());
+      }
+      response.setHeader('Set-Cookie', values);
+
+      // Set result content.
+      response.end(htmlResult);
     };
 
     promise.then(storeResolve).catch(handlePromiseError);

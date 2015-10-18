@@ -3,6 +3,7 @@ import Cookie from 'soya/lib/page/Cookie';
 import {prop} from 'soya/lib/helper';
 import Page from 'soya/lib/page/Page';
 import RenderResult from 'soya/lib/page/RenderResult';
+import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 
 // Import reusable component.
 import PhotoCaption from '../../../components/common/PhotoCaption/PhotoCaption';
@@ -40,9 +41,10 @@ class Component extends React.Component {
 
 export default class HomePage extends Page {
   render(httpRequest, routeArgs, callback) {
-    var renderResult = new RenderResult();
-    renderResult.head = '<title>Hello World!</title>';
-    renderResult.body = React.createElement(Component, {router: this.router});
+    var reactRenderer = new ReactRenderer();
+    reactRenderer.head = '<title>Hello World!</title>';
+    reactRenderer.body = React.createElement(Component, {router: this.router});
+    var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);
   }
 }

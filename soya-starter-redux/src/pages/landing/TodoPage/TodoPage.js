@@ -4,6 +4,7 @@ import {prop} from 'soya/lib/helper';
 import {Provider} from 'react-redux';
 import Page from 'soya/lib/page/Page';
 import RenderResult from 'soya/lib/page/RenderResult';
+import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 import App from './App.js';
@@ -27,10 +28,11 @@ class Component extends React.Component {
 export default class HomePage extends Page {
   render(httpRequest, routeArgs, callback) {
     var store = todos();
-    var renderResult = new RenderResult();
-    renderResult.head = '<title>Hello World!</title>';
+    var reactRenderer = new ReactRenderer();
+    reactRenderer.head = '<title>Hello World!</title>';
+    reactRenderer.body = React.createElement(Component, {router: this.router, store: store});
+    var renderResult = new RenderResult(reactRenderer);
     renderResult.component = Component;
-    renderResult.body = React.createElement(Component, {router: this.router, store: store});
     callback(renderResult);
   }
 }
