@@ -18,8 +18,6 @@ export default class ReactRenderer extends ContentRenderer {
   body;
 
   /**
-   * TODO: Find out a library for escaping URLs to be put in HTML.
-   *
    * @param {?string} head
    * @param {?ReactElement} body
    */
@@ -30,12 +28,17 @@ export default class ReactRenderer extends ContentRenderer {
   }
 
   /**
+   * TODO: Send http request headers, request method, etc - if a config knob is turned on!
+   * TODO: Find out a library for escaping URLs to be put in HTML.
+   * TODO: Also print reverse routing data.
+   *
    * @param {Object} routeArgs
+   * @param {Object} routes
    * @param {Object} clientConfig
    * @param {Object} pageDependencies
    * @returns {string}
    */
-  render(routeArgs, clientConfig, pageDependencies) {
+  render(routeArgs, routes, clientConfig, pageDependencies) {
     var result = '<html>';
     result += '<head>';
     if (this.head) result += this.head;
@@ -43,6 +46,7 @@ export default class ReactRenderer extends ContentRenderer {
     result += '<script type="text/javascript">';
     result += 'var config = ' + JSON.stringify(clientConfig) + ';';
     result += 'var routeArgs = ' + JSON.stringify(routeArgs) + ';';
+    result += 'var routes = ' + JSON.stringify(routes) + ';';
     result += '</script>';
 
     var i, url;

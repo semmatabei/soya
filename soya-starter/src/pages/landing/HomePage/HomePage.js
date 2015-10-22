@@ -2,6 +2,7 @@ import React from 'react';
 import Cookie from 'soya/lib/page/Cookie';
 import {prop} from 'soya/lib/helper';
 import Page from 'soya/lib/page/Page';
+import register from 'soya/lib/client/Register.js';
 import RenderResult from 'soya/lib/page/RenderResult';
 import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 
@@ -39,7 +40,15 @@ class Component extends React.Component {
   }
 }
 
-export default class HomePage extends Page {
+class HomePage extends Page {
+  static get pageName() {
+    return 'HomePage';
+  }
+
+  getRouteRequirements() {
+    return ['ANOTHER_PAGE'];
+  }
+
   render(httpRequest, routeArgs, callback) {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Hello World!</title>';
@@ -48,3 +57,6 @@ export default class HomePage extends Page {
     callback(renderResult);
   }
 }
+
+register(HomePage);
+export default HomePage;

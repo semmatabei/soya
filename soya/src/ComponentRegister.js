@@ -48,7 +48,13 @@ export default class ComponentRegister {
    */
   regPage(name, absDir, clazz) {
     if (typeof clazz.prototype.render != 'function') {
-      throw new Error('Page class doesn\'t implement render(): ' + absDir);
+      throw new Error('Page class doesn\'t implement render(): \'' + absDir + '\'.');
+    }
+    if (!clazz.pageName) {
+      throw new Error('Page class doesn\'t have static name property: \'' + absDir + '\'.');
+    }
+    if (clazz.pageName != name) {
+      throw new Error('Page class static name property and actual directory name differs: ' + clazz.pageName + ' and ' + name + '.');
     }
     this._regComponent(PAGE_VENDOR, name, absDir, clazz);
   }

@@ -6,6 +6,71 @@ import EmptyPathNode from './EmptyPathNode';
  */
 export default class PathNode extends Node {
   /**
+   * @returns {number}
+   */
+  static get order() {
+    return 30;
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get nodeName() {
+    return 'path';
+  }
+
+  /**
+   * @param {Array<string>} argArray
+   * @return {Array<Node>}
+   */
+  static constructFromConfig(argArray) {
+    if (argArray.length != 1) {
+      throw new Error('Domain node only receives one argument! Got ' + argArray.length + '.');
+    }
+    return PathNode.createFromPath(argArray[0] + '');
+  }
+
+  /**
+   * Create list of PathNode representing the given path.
+   *
+   * @param {string} path
+   * @return {Array<PathNode>}
+   */
+  static createFromPath(path) {
+    var i, result = [], pathSegments = PathNode.toPathSegments(path);
+    for (i = 0; i < pathSegments.length; i++) {
+      result.push(new PathNode(pathSegments[i]));
+    }
+    if (result.length == 0) {
+      // Path is empty, assume it's for home page.
+      result.push(new EmptyPathNode());
+    }
+    return result;
+  }
+
+  /**
+   * Split path into array of segments.
+   *
+   * '/' --> []
+   * '/foo/bar' --> ['foo', 'bar']
+   * '/foo/bar/' --> ['foo', 'bar', '']
+   *
+   * @param {string} path
+   * @return {Array<string>}
+   */
+  static toPathSegments(path) {
+    var splitPath = path.split('/');
+
+    // Slash prefix is not useful at routing, as it always exists.
+    // Slash at the end, however, is necessary for routing, so we want to keep that.
+    if (splitPath[0] == '') {
+      splitPath = splitPath.slice(1);
+    }
+
+    return splitPath;
+  }
+
+  /**
    * @type {string}
    */
   _segment;
@@ -73,45 +138,5 @@ export default class PathNode extends Node {
    */
   equals(node) {
     return node instanceof PathNode && node._segment == this._segment;
-  }
-
-  /**
-   * Create list of PathNode representing the given path.
-   *
-   * @param {string} path
-   * @return {Array<PathNode>}
-   */
-  static createFromPath(path) {
-    var i, result = [], pathSegments = PathNode.toPathSegments(path);
-    for (i = 0; i < pathSegments.length; i++) {
-      result.push(new PathNode(pathSegments[i]));
-    }
-    if (result.length == 0) {
-      // Path is empty, assume it's for home page.
-      result.push(new EmptyPathNode());
-    }
-    return result;
-  }
-
-  /**
-   * Split path into array of segments.
-   *
-   * '/' --> []
-   * '/foo/bar' --> ['foo', 'bar']
-   * '/foo/bar/' --> ['foo', 'bar', '']
-   *
-   * @param {string} path
-   * @return {Array<string>}
-   */
-  static toPathSegments(path) {
-    var splitPath = path.split('/');
-
-    // Slash prefix is not useful at routing, as it always exists.
-    // Slash at the end, however, is necessary for routing, so we want to keep that.
-    if (splitPath[0] == '') {
-      splitPath = splitPath.slice(1);
-    }
-
-    return splitPath;
   }
 }

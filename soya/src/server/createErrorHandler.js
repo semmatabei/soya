@@ -6,14 +6,14 @@
  * @SERVER
  */
 
-var ErrorHandler = require('soya/lib/ErrorHandler');
+var ErrorHandler = require('../ErrorHandler');
 
 /**
  * @param {Object} config Server-side configuration.
  * @param {Logger} logger
  * @returns {ErrorHandler}
  */
-module.exports = function(config, logger) {
+export default function createErrorHandler(config, logger) {
   // Ideally you'd return a different error handler depending on whether or not
   // we are in production.
   return new ErrorHandler(logger);

@@ -6,14 +6,15 @@
  * @SERVER
  */
 
-var Logger = require('soya/lib/logger/Logger');
+var Logger = require('../logger/Logger');
 
 /**
- * @param {Object} config Server-side configuration.
+ * @param {Object} serverConfig Server-side configuration.
  * @returns {Logger}
  */
-module.exports = function(config) {
+export default function createLogger(serverConfig) {
   // Ideally you should change logger configuration depending on whether or
   // not we are in production.
+  // TODO: Move debug settings to user configuration.
   return new Logger(false);
 };

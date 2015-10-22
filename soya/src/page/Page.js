@@ -38,6 +38,16 @@ export default class Page {
   }
 
   /**
+   * Returns an array of string IDs. This method specifies IDs of routes that
+   * this page wanted to use for reverse-routing (URL generation).
+   *
+   * @returns {Array<string>}
+   */
+  getRouteRequirements() {
+    return [];
+  }
+
+  /**
    * This method is also run in both server and client side. On server side,
    * framework code will generate a complete HTML document from RenderResult.
    * On client side, framework will just run the instantiated ReactComponent.

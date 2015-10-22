@@ -15,12 +15,12 @@
 export default class ContentRenderer {
   /**
    * @param {Object} routeArgs
+   * @param {Object} routes
    * @param {Object} clientConfig
    * @param {Object} pageDependencies
-   * @param {boolean} isSecure
    * @returns {string}
    */
-  render(routeArgs, clientConfig, pageDependencies, isSecure) {
+  render(routeArgs, routes, clientConfig, pageDependencies) {
     return '';
   }
 }

@@ -43,6 +43,11 @@ var DEFAULT_FRAMEWORK_CONFIG = {
  */
 export default class Application {
   /**
+   * @type {Object}
+   */
+  _routeForPages;
+
+  /**
    * @type {Router}
    */
   _router;
@@ -115,25 +120,24 @@ export default class Application {
   /**
    * @param {Logger} logger
    * @param {ComponentRegister} componentRegister
+   * @param {Object} routes
    * @param {Router} router
    * @param {Compiler} compiler
    * @param {ErrorHandler} errorHandler
+   * @param {ReverseRouter} reverseRouter
    * @param {Object} frameworkConfig
    * @param {Object} serverConfig
    * @param {Object} clientConfig
    */
-  constructor(logger, componentRegister, router, errorHandler, compiler, frameworkConfig,
-              serverConfig, clientConfig) {
-    // Validate pages and set logger for Router. Logger is not provided at
-    // constructor since we will replace Router with ReverseRouter for client.
-    router.validatePages(componentRegister);
-    router.setLogger(logger);
-
-    // We need to add some values to client replace, but only if user hasn't
-    // overridden our settings.
-    if (!frameworkConfig.clientReplace.hasOwnProperty('soya/lib/router/Router')) {
-      frameworkConfig.clientReplace['soya/lib/router/Router'] = 'soya/lib/router/PageRouter';
+  constructor(logger, componentRegister, routes, router, reverseRouter, errorHandler,
+              compiler, frameworkConfig, serverConfig, clientConfig) {
+    // We need to put some framework specific client replacement.
+    if (frameworkConfig.hotReload) {
+      this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClientHot');
+    } else {
+      this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClient');
     }
+    this._addReplace(frameworkConfig, 'soya/lib/page/react/ReactRenderer', 'soya/lib/page/react/ReactRendererClient');
 
     this._logger = logger;
     this._serverCreated = false;
@@ -145,10 +149,11 @@ export default class Application {
     this._router = router;
     this._errorHandler = errorHandler;
     this._pages = {};
+    this._routeForPages = {};
     this._entryPoints = [];
 
     var i, pageCmpt, page, pageComponents = componentRegister.getPages();
-    var pageRouter = router.createPageRouter();
+    var routeRequirements, j, routeId;
     for (i in pageComponents) {
       if (!pageComponents.hasOwnProperty(i)) continue;
       pageCmpt = pageComponents[i];
@@ -158,15 +163,35 @@ export default class Application {
 
       try {
         // Instantiate page.
-        page = new pageCmpt.clazz(serverConfig, pageRouter);
+        page = new pageCmpt.clazz(serverConfig, reverseRouter);
       } catch (e) {
         throw new Error('Unable to instantiate page: ' + pageCmpt.name + ' at ' + pageCmpt.absDir);
+      }
+
+      this._routeForPages[pageCmpt.name] = {};
+      routeRequirements = page.getRouteRequirements();
+      for (j = 0; j < routeRequirements.length; j++) {
+        routeId = routeRequirements[j];
+        if (!routes.hasOwnProperty(routeId)) {
+          throw new Error('Page ' + pageCmpt.name + ' has dependencies to unknown route: ' + routeId + '.');
+        }
+        this._routeForPages[pageCmpt.name][routeId] = routes[routeId];
       }
 
       this._pages[pageCmpt.name] = page;
     }
 
     this._middlewares = [];
+  }
+
+  /**
+   * @param {Object} frameworkConfig
+   * @param {string} source
+   * @param {string} replacement
+   */
+  _addReplace(frameworkConfig, source, replacement) {
+    frameworkConfig.clientReplace[source] = replacement;
+    frameworkConfig.clientReplace[source + '.js'] = replacement;
   }
 
   /**
@@ -262,7 +287,8 @@ export default class Application {
 
     var storeResolve = () => {
       var htmlResult = renderResult.contentRenderer.render(
-        routeResult.routeArgs, this._clientConfig, pageDep, httpRequest.isSecure());
+        routeResult.routeArgs, this._routeForPages[routeResult.pageName],
+        this._clientConfig, pageDep, httpRequest.isSecure());
 
       response.statusCode = renderResult.httpStatusCode;
       response.statusMessage = renderResult.httpStatusMessage;

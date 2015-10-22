@@ -284,14 +284,11 @@ export default class WebpackCompiler extends Compiler {
       configuration.plugins.push(new this._webpack.optimize.UglifyJsPlugin({}));
     }
 
-    var clientRuntime, entryPointFileName, pageToRequire;
+    var pageToRequire;
     for (i = 0; i < entryPoints.length; i++) {
       entryPoint = entryPoints[i];
       pageToRequire = path.join(entryPoint.rootAbsolutePath, entryPoint.name + '.js');
-      entryPointFileName = path.join(this._absoluteClientBuildDir, '__entry-' + entryPoint.name + '.js');
-      clientRuntime = this._generateClientRuntime(pageToRequire);
-      fs.writeFileSync(entryPointFileName, clientRuntime);
-      configuration.entry[entryPoint.name] = entryPointFileName;
+      configuration.entry[entryPoint.name] = pageToRequire;
       entryPointList.push(entryPoint.name);
     }
 
@@ -412,34 +409,6 @@ export default class WebpackCompiler extends Compiler {
     var error = new Error('Webpack compilation error!');
     this._logger.error('Webpack compilation error -> ', error, [stats.compilation.errors]);
     throw error;
-  }
-
-  /**
-   * TODO: Page caching for history API!
-   * TODO: Send http request headers, request method, etc - if a config knob is turned on!
-   * TODO: This shouldn't be in WebpackCompiler, client runtime strictly belongs to Application and should not know that we are using Webpack!
-   *
-   * @param {string} pageToRequire
-   * @returns {string}
-   */
-  _generateClientRuntime(pageToRequire) {
-    var pagePath = pageToRequire.replace(/'/g, '\\\'');
-    var routerPath = path.join(this._frameworkConfig.absoluteProjectDir, 'router.js');
-    routerPath = routerPath.replace(/'/g, '\\\'');
-    var result = '';
-    if (this._frameworkConfig.hotReload) {
-      result += 'window.HotReload = require(\'webpack-hot-middleware/client\');';
-    }
-    result += 'var Page = require(\'' + pagePath + '\');' +
-      'var React = require("react");' +
-      'var ClientHttpRequest = require("soya/lib/http/ClientHttpRequest");' +
-      'window.router = require(\'' + routerPath + '\')(window.config);' +
-      'window.page = new Page(window.config, window.router);' +
-      'page.render(new ClientHttpRequest(), window.routeArgs, function(renderResult) {' +
-        'window.renderResult = renderResult;' +
-        'window.reactElement = React.render(renderResult.contentRenderer.body, document.getElementById("__body"));' +
-      '});';
-    return result;
   }
 
   _createPlugin() {

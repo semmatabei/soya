@@ -5,6 +5,31 @@ import Node from './Node';
  */
 export default class MethodNode extends Node {
   /**
+   * @returns {number}
+   */
+  static get order() {
+    return 20;
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get nodeName() {
+    return 'method';
+  }
+
+  /**
+   * @param {Array<any>} argArray
+   * @returns {Array<Node>}
+   */
+  static constructFromConfig(argArray) {
+    if (argArray.length != 1) {
+      throw new Error('Domain node only receives one argument! Got ' + argArray.length + '.');
+    }
+    return [new MethodNode(argArray[0] + '')];
+  }
+
+  /**
    * @type {string}
    */
   _method;

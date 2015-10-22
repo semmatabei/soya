@@ -1,0 +1,14 @@
+HOME_PAGE:
+  page: HomePage
+  nodes:
+    - [method, GET]
+    - [path, /]
+
+ANOTHER_PAGE:
+  page: AnotherPage
+  nodes:
+    - [method, GET]
+    - [path, /another-page]
+
+NOT_FOUND:
+  page: NotFound

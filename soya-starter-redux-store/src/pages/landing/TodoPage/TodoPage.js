@@ -4,6 +4,7 @@ import {prop} from 'soya/lib/helper';
 import {Provider} from 'react-redux';
 import Page from 'soya/lib/page/Page';
 import RenderResult from 'soya/lib/page/RenderResult';
+import register from 'soya/lib/client/Register';
 import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
@@ -25,7 +26,11 @@ class Component extends React.Component {
   }
 }
 
-export default class HomePage extends Page {
+class TodoPage extends Page {
+  static get pageName() {
+    return 'TodoPage';
+  }
+
   render(httpRequest, routeArgs, callback) {
     var store = todos();
     var reactRenderer = new ReactRenderer();
@@ -36,3 +41,6 @@ export default class HomePage extends Page {
     callback(renderResult);
   }
 }
+
+register(TodoPage);
+export default TodoPage;

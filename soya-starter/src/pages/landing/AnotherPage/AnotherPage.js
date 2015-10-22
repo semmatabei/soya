@@ -1,7 +1,9 @@
+import register from 'soya/lib/client/Register';
 import RenderResult from 'soya/lib/page/RenderResult';
 import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 import Page from 'soya/lib/page/Page';
 import React from 'react';
+
 
 // Import the reusable component.
 import PhotoCaption from '../../../components/common/PhotoCaption/PhotoCaption.js';
@@ -23,7 +25,15 @@ class Component extends React.Component {
   }
 }
 
-export default class AnotherPage extends Page {
+class AnotherPage extends Page {
+  static get pageName() {
+    return 'AnotherPage';
+  }
+
+  getRouteRequirements() {
+    return ['HOME_PAGE'];
+  }
+
   render(httpRequest, routeArgs, callback) {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Another Page</title>';
@@ -33,3 +43,6 @@ export default class AnotherPage extends Page {
     callback(renderResult);
   }
 }
+
+register(AnotherPage);
+export default AnotherPage;

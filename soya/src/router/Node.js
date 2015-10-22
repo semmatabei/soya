@@ -42,6 +42,13 @@ export default class Node {
   }
 
   /**
+   * @return {string}
+   */
+  getType() {
+    throw new Error('Node implementation does not implement this required method.');
+  }
+
+  /**
    * Returns true if the current active path segment (or other request specific
    * metadata) matches. If something other than true is returned, the routing
    * will stop and not found route result will be returned.

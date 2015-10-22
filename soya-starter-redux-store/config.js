@@ -7,6 +7,7 @@
  * careful of what you put there.
  *
  * @SERVER
+ * @WEBPACK
  */
 
 var path = require('path');
@@ -30,6 +31,7 @@ var frameworkConfig = {
   absoluteServerBuildDir: path.join(dirname, 'build/server'),
   absoluteClientBuildDir: path.join(dirname, 'build/client'),
   hotReload: true,
+  routesFilePath: path.join(dirname, 'routes.yml'),
   clientResolve: [],
   clientReplace: {},
   minifyJs: false

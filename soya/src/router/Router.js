@@ -1,13 +1,16 @@
-/* @flow */
-
 import Page from '../page/Page.js';
 import RouteResult from './RouteResult.js';
 import ServerHttpRequest from '../http/ServerHttpRequest';
 import RoutingData from './RoutingData';
-import ReverseRoutingData from './ReverseRoutingData.js';
 import PathNode from './PathNode';
 import FinalPathNode from './FinalPathNode';
-import PageRouter from './PageRouter.js';
+
+/*
+type RouteConfig = {
+  page: string;
+  nodes: Array<Array<any>>;
+};
+*/
 
 /**
  * Simple router implementation. You can create your own router implementation.
@@ -19,16 +22,6 @@ import PageRouter from './PageRouter.js';
  * @SERVER
  */
 export default class Router {
-  /**
-   * @type {Array<Node>}
-   */
-  _preProcessNodes;
-
-  /**
-   * @type {Array<Node>}
-   */
-  _postProcessNodes;
-
   /**
    * @type {{[key: string]: Node}}
    */
@@ -55,45 +48,46 @@ export default class Router {
   _pageNames;
 
   /**
-   * @param {?Array<Node>} preProcessNodes
-   * @param {?Array<Node>} postProcessNodes
+   * @type {NodeFactory}
    */
-  constructor(preProcessNodes, postProcessNodes) {
-    this._preProcessNodes = preProcessNodes == null ? [] : preProcessNodes;
-    this._postProcessNodes = postProcessNodes == null ?  [] : postProcessNodes;
+  _nodeFactory;
+
+  /**
+   * @type {ComponentRegister}
+   */
+  _componentRegister;
+
+  /**
+   * @type {Array<Node>}
+   */
+  _preProcessNodes;
+
+  /**
+   * @type {Array<Node>}
+   */
+  _postProcessNodes;
+
+  /**
+   * @param {NodeFactory} nodeFactory
+   * @param {ComponentRegister} componentRegister
+   * @param {Logger} logger
+   */
+  constructor(logger, nodeFactory, componentRegister) {
+    this._logger = logger;
+    this._nodeFactory = nodeFactory;
+    this._componentRegister = componentRegister;
     this._routeNodes = {};
     this._graph = [];
     this._pageNames = [];
+    this._preProcessNodes = [];
+    this._postProcessNodes = [];
   }
 
   /**
-   * @returns {PageRouter}
+   * @return {boolean}
    */
-  createPageRouter() {
-    return new PageRouter(
-      this._preProcessNodes, this._postProcessNodes, this._routeNodes);
-  }
-
-  /**
-   * @param {ComponentRegister} componentRegister
-   */
-  validatePages(componentRegister) {
-    var i;
-    for (i = 0; i < this._pageNames.length; i++) {
-      if (!componentRegister.hasPage(this._pageNames[i])) {
-        throw new Error('Route registered for non-existent page: \'' + this._pageNames[i] + '\'.');
-      }
-    }
-    if (!componentRegister.hasPage(this._notFoundRouteResult.pageName)) {
-      throw new Error('Route registered for 404 page is not found (oh, the irony!): \'' + this._notFoundRouteResult.pageName + '\'.');
-    }
-  }
-
-  /**
-   * @param {Logger} logger
-   */
-  setLogger(logger) {
-    this._logger = logger;
+  getNotFoundRouteResult() {
+    return this._notFoundRouteResult;
   }
 
   /**
@@ -108,22 +102,32 @@ export default class Router {
 
   /**
    * @param {string} routeId
-   * @param {string} pageName
-   * @param {?Array<Node>} startNodes
-   * @param {string} path
-   * @param {?Array<Node>} endNodes
+   * @param {Object} configObj
    */
-  reg(routeId, pageName, startNodes, path, endNodes) {
+  reg(routeId, configObj) {
     if (routeId[0] == '_') {
       throw new Error('Route ID must not start with underscore: ' + routeId);
     }
     if (this._routeNodes.hasOwnProperty(routeId)) {
       throw new Error('Duplicate route ID: ' + routeId);
     }
+
+    // Validate page.
+    var pageName = configObj.page;
+    if (!this._componentRegister.hasPage(pageName)) {
+      throw new Error('Route registered for non-existent page: \'' + pageName + '\'.');
+    }
     this._pageNames.push(pageName);
 
+    var configNodes = configObj.nodes;
+    if (!configNodes) {
+      // If no nodes specified, then this is the default 404 page.
+      this.set404NotFoundPage(configObj.page);
+      return;
+    }
 
-    var nodes = PageRouter.joinNodes(startNodes, path, endNodes);
+    // Create an array of nodes.
+    var nodes = this._nodeFactory.createFromConfig(configNodes);
     if (nodes.length < 1) {
       throw new Error('Invalid route, no nodes discovered: ' + routeId);
     }
@@ -131,6 +135,7 @@ export default class Router {
     // Set nodes for reverse routing.
     this._routeNodes[routeId] = nodes;
 
+    // Find parent node to chain with.
     var i, parentNode;
     for (i = 0; i < this._graph.length; i++) {
       if (this._graph[i].equals(nodes[0])) {
@@ -139,13 +144,14 @@ export default class Router {
       }
     }
 
+    // If no reusable parent node, add the node to the graph list and start
+    // chaining from there.
     if (!parentNode) {
-      // If no reusable parent node, add the node to the graph list and start
-      // chaining from there.
       this._graph.push(nodes[0]);
       parentNode = nodes[0];
     }
 
+    // Start chaining nodes together.
     var curIndex = 1, children, foundEqual;
     while (curIndex < nodes.length) {
       if (!nodes[curIndex].isLeaf()) {
@@ -173,20 +179,11 @@ export default class Router {
   }
 
   /**
-   * @param {string} routeId
-   * @param {?Object} routeArgs
-   * @param {?string} fragment
-   * @return {string}
-   */
-  reverseRoute(routeId, routeArgs, fragment) {
-    return PageRouter.reverseRoute(routeId, routeArgs, fragment, this._routeNodes);
-  }
-
-  /**
    * @param {ServerHttpRequest} httpRequest
    * @return {?RouteResult}
    */
   route(httpRequest) {
+    debugger;
     var i, routingData = new RoutingData(httpRequest);
 
     // Start pre processing. Pre processing may invalidate routes.

@@ -6,19 +6,20 @@
  * @SERVER
  */
 
-var React = require('react');
-var path = require('path');
-var webpack = require('webpack');
-var config = require('./config.js');
-var createServer = require('soya/lib/compiler/webpack/createServer');
+import path from 'path';
 
-var logger = require('./logger')(config);
-var register = require('./register')(config, logger);
-var errorHandler = require('./error')(config, logger);
-var router = require('./router')(config.serverConfig);
+import server from 'soya/lib/server';
+import config from './config.js';
 
-// TODO: Figure out how to handle dev and prod server.js - prod version should not load webpack dev/hot middleware.
-var webpackDevMiddleware = require('webpack-dev-middleware');
-var webpackHotMiddleware = require('webpack-hot-middleware');
+// Can't place these lines in config since config is run
+// Haven't found a better way to do this yet. So for now, consider page and
+// component directory as not configurable.
+// TODO: Separate compilation and actual framework config so that these lines can be configurable from config.js.
+var frameworkConfig = config.frameworkConfig;
+frameworkConfig.absolutePageRequirePath = path.join(frameworkConfig.absoluteProjectDir, 'src/pages');
+frameworkConfig.absoluteComponentRequirePath = path.join(frameworkConfig.absoluteProjectDir, 'src/components');
+frameworkConfig.pageRequireContext = require.context('./src/pages', true, /\.js$/);
+frameworkConfig.componentRequireContext = require.context('./src/components', true, /\.js$/);
 
-createServer(config, webpack, React, logger, register, router, errorHandler, webpackDevMiddleware, webpackHotMiddleware);
+// Run server.
+server(config);

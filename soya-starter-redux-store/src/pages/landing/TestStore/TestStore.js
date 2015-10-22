@@ -1,6 +1,7 @@
 import React from 'react';
 import Page from 'soya/lib/page/Page';
 import RenderResult from 'soya/lib/page/RenderResult';
+import register from 'soya/lib/client/Register';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 class Component extends React.Component {
@@ -13,8 +14,15 @@ class Component extends React.Component {
   }
 }
 
-export default class TestStore extends Page {
+class TestStore extends Page {
+  static get pageName() {
+    return 'TestStore';
+  }
+
   render(httpRequest, routeArgs, callback) {
 
   }
 }
+
+register(TestStore);
+export default TestStore;
