@@ -351,9 +351,12 @@ export default class ReduxStore extends Store {
         hydrationState = queries[queryId];
         if (hydrationState.isHydrated) continue;
         if (hydrationState.option[renderType] == NOOP) continue;
+        // Server-side doesn't need to run non-blocking hydration requests.
+        if (renderType == SERVER && hydrationState.option[renderType] == NON_BLOCKING) continue;
         action = this._segments[segmentName]._createHydrateAction(queryId);
         promise = this.dispatch(action);
-        if (hydrationState.option[renderType] == BLOCKING) {
+        // Client-side runs everything as non-blocking.
+        if (renderType == SERVER && hydrationState.option[renderType] == BLOCKING) {
           blockingHydrationPromises.push(promise);
         }
       }
