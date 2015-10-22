@@ -131,13 +131,24 @@ export default class Application {
    */
   constructor(logger, componentRegister, routes, router, reverseRouter, errorHandler,
               compiler, frameworkConfig, serverConfig, clientConfig) {
-    // We need to put some framework specific client replacement.
+    // Change register function to our real client runtime function.
     if (frameworkConfig.hotReload) {
+      // Load hot reload client runtime if needed.
       this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClientHot');
     } else {
       this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClient');
     }
+
+    // Change react renderer to client version.
     this._addReplace(frameworkConfig, 'soya/lib/page/react/ReactRenderer', 'soya/lib/page/react/ReactRendererClient');
+
+    // Replace custom node registration function for client.
+    if (frameworkConfig.routerNodeRegistrationAbsolutePath) {
+      if (typeof frameworkConfig.routerNodeRegistrationFunction != 'function') {
+        throw new Error('You must set both routerNodeRegistrationFunction and routerNodeRegistrationFilePath to register your custom router nodes.');
+      }
+      this._addReplace(frameworkConfig, 'soya/lib/server/registerRouterNodes', frameworkConfig.routerNodeRegistrationAbsolutePath);
+    }
 
     this._logger = logger;
     this._serverCreated = false;

@@ -17,9 +17,9 @@ import WebpackCompiler from '../compiler/webpack/WebpackCompiler.js';
 import Application from '../Application.js';
 
 // These dependencies can all be overwritten by user.
-import registerRouterNodes from './registerRouterNodes.js';
-import createLogger from './createLogger.js';
-import createErrorHandler from './createErrorHandler.js';
+import defaultRegisterRouterNodes from './registerRouterNodes.js';
+import defaultCreateLogger from './createLogger.js';
+import defaultCreateErrorHandler from './createErrorHandler.js';
 
 /**
  * @param {Object} config
@@ -29,6 +29,24 @@ export default function server(config) {
   var frameworkConfig = config.frameworkConfig;
   var serverConfig = config.serverConfig;
   var clientConfig = config.clientConfig;
+
+  var createLogger = defaultCreateLogger;
+  var createErrorHandler = defaultCreateErrorHandler;
+  var registerRouterNodes = defaultRegisterRouterNodes;
+
+  // Load custom logger and error handler factory.
+  if (typeof frameworkConfig.loggerFactoryFunction == 'function') {
+    createLogger = frameworkConfig.loggerFactoryFunction;
+  }
+  if (typeof frameworkConfig.errorHandlerFactoryFunction == 'function') {
+    createErrorHandler = frameworkConfig.errorHandlerFactorFunction;
+  }
+  if (typeof frameworkConfig.routerNodeRegistrationFunction == 'function') {
+    if (!frameworkConfig.routerNodeRegistrationAbsolutePath) {
+      throw new Error('You must set both routerNodeRegistrationFunction and routerNodeRegistrationFilePath to register your custom router nodes.');
+    }
+    registerRouterNodes = frameworkConfig.routerNodeRegistrationFunction;
+  }
 
   var logger = createLogger(serverConfig);
   var errorHandler = createErrorHandler(serverConfig, logger);

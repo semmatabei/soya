@@ -3,8 +3,12 @@ import NodeFactory from '../router/NodeFactory.js';
 import DomainNode from '../router/DomainNode.js';
 import MethodNode from '../router/MethodNode.js';
 import PathNode from '../router/PathNode.js';
-import registerRouteNodes from '../server/registerRouterNodes.js';
 import ClientHttpRequest from '../http/ClientHttpRequest.js';
+
+// The reason we use full path is to make webpack's resolve.alias work.
+// We need to replace custom node registration with user file so that
+// custom nodes can be loaded in both client and server side.
+import registerRouteNodes from 'soya/lib/server/registerRouterNodes.js';
 
 /**
  * Responsible for client runtime.
