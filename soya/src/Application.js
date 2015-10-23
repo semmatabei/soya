@@ -293,7 +293,7 @@ export default class Application {
         // found a better way yet.
         renderResult.contentRenderer.render(
           routeResult.routeArgs, this._routeForPages[routeResult.pageName],
-          this._clientConfig, pageDep, httpRequest.isSecure());
+          this._clientConfig, null, pageDep, httpRequest.isSecure());
       }
 
       // TODO: How to pass state to the renderer?

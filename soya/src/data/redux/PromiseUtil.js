@@ -16,6 +16,7 @@ export default {
    * @returns {Promise}
    */
   allParallel(Promise, promises) {
+    if (promises.length <= 0) return Promise.resolve(null);
     return new Promise((resolve, reject) => {
       var i, result = [];
       var registerResult = function(index, value) {

@@ -59,7 +59,7 @@ export default class Logger {
    * Detailed debug information. Ignored in production.
    */
   debug(message, error, extras) {
-    if (shouldDebug) this._print('[DEBUG] ' + message, error, extras);
+    if (this.shouldDebug) this._print('[DEBUG] ' + message, error, extras);
   }
 
   /**

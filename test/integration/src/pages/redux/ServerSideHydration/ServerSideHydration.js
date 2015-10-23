@@ -44,7 +44,7 @@ class ServerSideHydration extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Server-Side Hydration</title>';
     reactRenderer.body = React.createElement(Component, { reduxStore: reduxStore });
-    var renderResult = new RenderResult(reactRenderer);
+    var renderResult = new RenderResult(reactRenderer, reduxStore);
     callback(renderResult);
   }
 }

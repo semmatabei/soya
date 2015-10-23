@@ -109,9 +109,13 @@ export default class RenderResult {
   /**
    * NOTE: Application itself is not aware that we are using webpack or react,
    * thus this class should also be unaware of that fact.
+   *
+   * @param {?ContentRenderer} contentRenderer
+   * @param {?Store} store
    */
-  constructor(contentRenderer) {
+  constructor(contentRenderer, store) {
     this.contentRenderer = contentRenderer;
+    this.store = store;
     this.httpHeaders = new Bucket();
     this.cookies = {};
     this.httpStatusCode = 200;
