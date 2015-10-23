@@ -71,17 +71,19 @@ export default class SoyaClient {
   /**
    * @param {string} name
    * @param {Object} routeArgs
+   * @param {?any} hydratedState
    */
-  navigate(name, routeArgs) {
+  navigate(name, routeArgs, hydratedState) {
     var page = this._pages[name];
     if (!page) {
       throw new Error('Navigate call to non-existent or non-loaded page: ' + name);
     }
     var httpRequest = new ClientHttpRequest();
-    page.render(httpRequest, routeArgs, function(renderResult) {
+    var callback = function(renderResult) {
       // TODO: How to do double rendering for store? Should we just render?
       window.renderResult = renderResult;
       renderResult.contentRenderer.render();
-    });
+    };
+    page.render(httpRequest, routeArgs, callback, hydratedState);
   }
 }

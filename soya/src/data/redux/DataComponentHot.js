@@ -1,10 +1,12 @@
-import ContextualComponent from './ContextualComponent.js';
+import DataComponent from './DataComponent.js';
 
 /**
  * Replaces ContextualComponent if hotReload configuration is true.
  *
  * @CLIENT_SERVER
  */
-export default class ContextualComponentHot extends ContextualComponent {
-
+export default class DataComponentHot extends DataComponent {
+  componentWillUpdate() {
+    this.registerSegments();
+  }
 }

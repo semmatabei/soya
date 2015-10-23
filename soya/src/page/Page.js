@@ -58,8 +58,9 @@ export default class Page {
    * @param {ServerHttpRequest | ClientHttpRequest} httpRequest
    * @param {Object} routeArgs
    * @param {Function} complete
+   * @param {?any} hydratedState
    */
-  render(httpRequest, routeArgs, complete) {
+  render(httpRequest, routeArgs, complete, hydratedState) {
     complete(new RenderResult());
   }
 }

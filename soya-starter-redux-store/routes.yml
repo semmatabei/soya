@@ -1,8 +1,0 @@
-TODO_PAGE:
-  page: TodoPage
-  nodes:
-    - [method, GET]
-    - [path, /]
-
-NOT_FOUND:
-  page: NotFound

@@ -17,10 +17,11 @@ export default class ContentRenderer {
    * @param {Object} routeArgs
    * @param {Object} routes
    * @param {Object} clientConfig
+   * @param {any} hydratedState
    * @param {Object} pageDependencies
    * @returns {string}
    */
-  render(routeArgs, routes, clientConfig, pageDependencies) {
+  render(routeArgs, routes, clientConfig, hydratedState, pageDependencies) {
     return '';
   }
 }

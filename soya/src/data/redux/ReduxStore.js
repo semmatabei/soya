@@ -204,14 +204,15 @@ export default class ReduxStore extends Store {
    * ActionCreator implementations.
    *
    * @param {Function} PromiseImpl
+   * @param {any} initialState
    */
-  constructor(PromiseImpl) {
+  constructor(PromiseImpl, initialState) {
     super();
     this._segments = {};
     this._reducers = {};
     this._subscribers = {};
     this._nextSubscriberId = 1;
-    this._store = this._createStore();
+    this._store = this._createStore(initialState);
     this._store.subscribe(this._handleChange.bind(this));
     this._hydrationStates = {};
     this._actionCreators = {};
@@ -219,15 +220,24 @@ export default class ReduxStore extends Store {
   }
 
   /**
-   * @returns {any}
+   * @return {Object}
    */
-  _createStore() {
+  getStore() {
+    return this._store;
+  }
+
+  /**
+   * @param {?Object} initialState
+   * @returns {Object}
+   */
+  _createStore(initialState) {
     // TODO: Disable devTools with configuration.
-    var compose = compose(
+    // TODO: Hot reload reducer/segments?
+    var composedCreateStore = compose(
       applyMiddleware(thunk),
       devTools()
     )(createStore);
-    return compose(this._rootReducer.bind(this));
+    return composedCreateStore(this._rootReducer.bind(this), initialState);
   }
 
   /**
@@ -325,9 +335,17 @@ export default class ReduxStore extends Store {
    * @param {string} queryId
    * @param {string} subscriberId
    */
-  _unregister(segmentName, queryId, subscriberId) {
+  _unsubscribe(segmentName, queryId, subscriberId) {
     // TODO: Might want to keep track of query/segment subscriber count, we might want to call Segment.deactivate().
     delete this._subscribers[segmentName][queryId][subscriberId];
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  shouldRenderBeforeServerHydration() {
+    // We need to all segments to be registered first.
+    return true;
   }
 
   /**
@@ -389,7 +407,7 @@ export default class ReduxStore extends Store {
    * Returns StoreReference, which contains function to get queried state and
    * action creators.
    *
-   * The getState() function will only return state queried by this
+   * The getState() function will only return state queried by the component.
    *
    * Returns a function that can be used to get queried state. It will only
    * return the queried state, this makes it easier to separate concerns and
@@ -397,13 +415,13 @@ export default class ReduxStore extends Store {
    *
    * @param {Segment} segment
    * @param {string} query
-   * @param {options} query
    * @param {Function} callback
    * @param {any} component
+   * @param {?Object} queryOptions
    * @param {?{[key: RenderType]: HydrationType}} hydrationOption
    * @return {StoreReference}
    */
-  register(segment, query, options, callback, component, hydrationOption) {
+  register(segment, query, callback, component, queryOptions, hydrationOption) {
     // TODO: Handle Segment dependencies!
     // Determine subscriber ID.
     var subscriberId = component[SUBSCRIBER_ID];
@@ -430,7 +448,7 @@ export default class ReduxStore extends Store {
     }
 
     // Register query.
-    var queryId = registeredSegment._registerQuery(query, options);
+    var queryId = registeredSegment._registerQuery(query, queryOptions);
     if (!this._hydrationStates[segmentName][queryId]) {
       this._hydrationStates[segmentName][queryId] = {
         isHydrated: false,
@@ -454,6 +472,32 @@ export default class ReduxStore extends Store {
       unsubscribe: this._unsubscribe.bind(this, segmentName, queryId, subscriberId)
     };
     return result;
+  }
+
+  /**
+   * @param {any} component
+   */
+  unsubscribe(component) {
+    var componentSubscriberId = component[SUBSCRIBER_ID];
+    var segmentName, queryId, subscriberId;
+    var unsubscribeList = [];
+    for (segmentName in this._subscribers) {
+      if (!this._subscribers.hasOwnProperty(segmentName)) continue;
+      for (queryId in this._subscribers[segmentName]) {
+        if (!this._subscribers[segmentName].hasOwnProperty(queryId)) continue;
+        for (subscriberId in this._subscribers[segmentName][queryId]) {
+          if (!this._subscribers[segmentName][queryId].hasOwnProperty(subscriberId)) continue;
+          if (subscriberId == componentSubscriberId) {
+            unsubscribeList.push([segmentName, queryId, componentSubscriberId]);
+          }
+        }
+      }
+    }
+
+    var i;
+    for (i = 0; i < unsubscribeList.length; i++) {
+      this._unsubscribe(unsubscribeList[i][0], unsubscribeList[i][1], unsubscribeList[i][2]);
+    }
   }
 
   /**
@@ -491,5 +535,12 @@ export default class ReduxStore extends Store {
     if (!(promise instanceof Promise)) {
       throw new Error('Expected Promise from async action creator, got this instead: ' + promise + '.');
     }
+  }
+
+  /**
+   * @returns {any}
+   */
+  _getState() {
+    return this._store.getState();
   }
 }

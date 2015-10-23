@@ -35,10 +35,11 @@ export default class ReactRenderer extends ContentRenderer {
    * @param {Object} routeArgs
    * @param {Object} routes
    * @param {Object} clientConfig
+   * @param {any} hydratedState
    * @param {Object} pageDependencies
    * @returns {string}
    */
-  render(routeArgs, routes, clientConfig, pageDependencies) {
+  render(routeArgs, routes, clientConfig, hydratedState, pageDependencies) {
     var result = '<html>';
     result += '<head>';
     if (this.head) result += this.head;
@@ -47,6 +48,7 @@ export default class ReactRenderer extends ContentRenderer {
     result += 'var config = ' + JSON.stringify(clientConfig) + ';';
     result += 'var routeArgs = ' + JSON.stringify(routeArgs) + ';';
     result += 'var routes = ' + JSON.stringify(routes) + ';';
+    result += 'var hydratedState = ' + JSON.stringify(hydratedState) + ';';
     result += '</script>';
 
     var i, url;

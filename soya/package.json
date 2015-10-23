@@ -20,7 +20,7 @@
     "watch": "./node_modules/.bin/babel src/ --out-dir lib --source-maps --watch",
     "watch-starter": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter/node_modules/soya/lib\" --source-maps --watch",
     "watch-starter-redux": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter-redux/node_modules/soya/lib\" --source-maps --watch",
-    "watch-starter-redux-store": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter-redux-store/node_modules/soya/lib\" --source-maps --watch",
+    "watch-test-integration": "./node_modules/.bin/babel src/ --out-dir \"../test/integration/node_modules/soya/lib\" --source-maps --watch",
     "watch-tap": "./node_modules/.bin/babel src/ --out-dir \"../../tap/node_modules/soya/lib\" --source-maps --watch"
   },
   "peerDependencies": {

@@ -12,12 +12,13 @@ export default function register(pageClass) {
     var config = window.config;
     var routeArgs = window.routeArgs;
     var routes = window.routes;
+    var hydratedState = window.hydratedState;
 
     // Start and load the page.
     window.__soyaClient = new SoyaClient(config);
     window.__soyaClient.addRouteConfig(routes);
     window.__soyaClient.register(pageClass);
-    window.__soyaClient.navigate(pageClass.name, routeArgs);
+    window.__soyaClient.navigate(pageClass.name, routeArgs, hydratedState);
     return;
   }
 

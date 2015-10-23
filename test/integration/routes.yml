@@ -1,0 +1,26 @@
+TEST_LIST:
+  page: TestList
+  nodes:
+    - [method, GET]
+    - [path, /]
+
+LOAD_COMPONENT:
+  page: LoadComponent
+  nodes:
+    - [method, GET]
+    - [path, /load-component]
+
+SERVER_SIDE_HYDRATION:
+  page: ServerSideHydration
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/server-side-hydration]
+
+USER_JSON:
+  page: UserJson
+  nodes:
+    - [method, GET]
+    - [path, /api/user.json]
+
+NOT_FOUND:
+  page: NotFound

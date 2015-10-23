@@ -9,6 +9,20 @@
  */
 export default class Store {
   /**
+   * @return {any}
+   */
+  _getState() {
+    throw new Error('Abstract method not implemented.');
+  }
+
+  /**
+   * @return {boolean}
+   */
+  shouldRenderBeforeServerHydration() {
+    return false;
+  }
+
+  /**
    * Called by Soya server and client runtime when rendering pages. Calls the
    * given callback when all blocking render is complete.
    *

@@ -135,6 +135,7 @@ export default class Application {
     if (frameworkConfig.hotReload) {
       // Load hot reload client runtime if needed.
       this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClientHot');
+      this._addReplace(frameworkConfig, 'soya/lib/data/redux/DataComponent', 'soya/lib/data/redux/DataComponentHot');
     } else {
       this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClient');
     }
@@ -283,10 +284,21 @@ export default class Application {
       throw new Error('Unable to render page server side, dependencies unknown for entry point: ' + routeResult.componentName);
     }
 
-    // TODO: Store needs to render twice, how to make it generic?
-
     var promise = Promise.resolve(null);
+
     if (renderResult.store) {
+      if (renderResult.store.shouldRenderBeforeServerHydration()) {
+        // Render first to let all segment and query requirements registered
+        // to the store. This is weird and sort of wasteful, but we haven't
+        // found a better way yet.
+        renderResult.contentRenderer.render(
+          routeResult.routeArgs, this._routeForPages[routeResult.pageName],
+          this._clientConfig, pageDep, httpRequest.isSecure());
+      }
+
+      // TODO: How to pass state to the renderer?
+      // TODO: What if the state is part of immutable-js?
+      this._logger.debug('Store requirements gathered, start hydration.', null, renderResult.store);
       promise = renderResult.store.hydrate(SERVER);
     }
 
@@ -297,9 +309,14 @@ export default class Application {
     };
 
     var storeResolve = () => {
+      var state = null;
+      if (renderResult.store) {
+        state = renderResult.store._getState();
+        this._logger.debug('Finish hydration.', null, state);
+      }
       var htmlResult = renderResult.contentRenderer.render(
         routeResult.routeArgs, this._routeForPages[routeResult.pageName],
-        this._clientConfig, pageDep, httpRequest.isSecure());
+        this._clientConfig, state, pageDep, httpRequest.isSecure());
 
       response.statusCode = renderResult.httpStatusCode;
       response.statusMessage = renderResult.httpStatusMessage;
