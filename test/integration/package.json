@@ -23,6 +23,7 @@
     "source-map-support": "^0.3.2",
     "soya": "^0.0.19",
     "style-loader": "^0.12.4",
+    "superagent": "^1.4.0",
     "webpack": "^1.12.2"
   },
   "devDependencies": {

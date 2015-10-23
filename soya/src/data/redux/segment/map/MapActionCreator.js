@@ -13,7 +13,7 @@ export default class MapActionCreator extends ActionCreator {
   /**
    * @type {string}
    */
-  _actionType;
+  _loadActionType;
 
   /**
    * @type {{[key: string]: {action: Object; expiry: number;}}}
@@ -27,7 +27,7 @@ export default class MapActionCreator extends ActionCreator {
     super();
     // Since segment name is guaranteed never to clash by ReduxStore, we can
     // safely use segment name as action type.
-    this._actionType = ActionNameUtil.generate(segmentName, 'LOAD');
+    this._loadActionType = ActionNameUtil.generate(segmentName, 'LOAD');
     this._cache = {};
   }
 
@@ -72,6 +72,43 @@ export default class MapActionCreator extends ActionCreator {
   }
 
   /**
+   * Creates an action object with the given state payload.
+   *
+   * IMPORTANT NOTE: Please make sure that you return a *new* object, as redux
+   * store states are supposed to be immutable.
+   *
+   * @param {string} queryId
+   * @param {void | any} payload
+   * @param {void | Array<any>} errors
+   * @return {Object}
+   */
+  _createLoadActionObject(queryId, payload, errors) {
+    return {
+      type: this._getLoadActionType(),
+      queryId: queryId,
+      payload: {
+        data: payload,
+        errors: errors
+      }
+    };
+  }
+
+  /**
+   * @param {string} queryId
+   * @return {Object}
+   */
+  _createInitActionObject(queryId) {
+    return {
+      type: this._loadActionType,
+      queryId: queryId,
+      payload: {
+        data: null,
+        errors: null
+      }
+    };
+  }
+
+  /**
    * Generates a unique string representing the given query. Same query must
    * generate identical strings. Query ID is used by ReduxStore and Segment
    * to recognize identical queries.
@@ -97,7 +134,14 @@ export default class MapActionCreator extends ActionCreator {
    *
    * @return {string}
    */
-  _getActionType() {
-    return this._actionType;
+  _getLoadActionType() {
+    return this._loadActionType;
+  }
+
+  /**
+   * @returns {string}
+   */
+  _getInitActionType() {
+    return this._initActionType;
   }
 }

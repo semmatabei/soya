@@ -1,5 +1,6 @@
 import Segment from '../../Segment.js';
 import QueryOptionUtil from '../QueryOptionUtil.js';
+import MapActionCreator from './MapActionCreator.js';
 
 /**
  * Promise implementation, in local variable so that our code can be natural.
@@ -75,6 +76,7 @@ export default class MapSegment extends Segment {
    *
    * @param {any} query
    * @param {Object} options
+   * @return {string}
    */
   _registerQuery(query, options) {
     options = QueryOptionUtil.initOptions(options);
@@ -88,6 +90,7 @@ export default class MapSegment extends Segment {
         options: options
       };
     }
+    return queryId;
   }
 
   /**
@@ -100,6 +103,14 @@ export default class MapSegment extends Segment {
       this._queries[queryId].options,
       true
     );
+  }
+
+  /**
+   * @param {string} queryId
+   * @return {Object}
+   */
+  _createInitAction(queryId) {
+    return this._actionCreator._createInitActionObject(queryId);
   }
 
   /**
@@ -144,16 +155,20 @@ export default class MapSegment extends Segment {
    * @return {Function}
    */
   _getReducer() {
-    var loadActionType = this._actionCreator._getActionType();
+    var loadActionType = this._actionCreator._getLoadActionType();
     return function(state, action) {
       var queryId, newState = {};
       if (!state) return newState;
+
+      // Create a new object, redux store state is supposed to be immutable!
+      for (queryId in state) {
+        if (!state.hasOwnProperty(queryId)) continue;
+        newState[queryId] = state[queryId];
+      }
+
       switch(action.type) {
         case loadActionType:
-          for (queryId in state) {
-            if (!state.hasOwnProperty(queryId)) continue;
-            newState[queryId] = state[queryId];
-          }
+          // Replace the map entry with the new loaded one.
           newState[action.queryId] = action.payload;
           return newState;
           break;

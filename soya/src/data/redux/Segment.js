@@ -66,6 +66,17 @@ export default class Segment {
   }
 
   /**
+   * Returns a basic payload object to populate the segment piece with initial
+   * structure.
+   *
+   * @param {string} queryId
+   * @return {Object}
+   */
+  _createInitAction(queryId) {
+
+  }
+
+  /**
    * Uses action creator to create load action of the given query.
    *
    * @param {string} queryId

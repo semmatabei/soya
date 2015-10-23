@@ -183,7 +183,6 @@ export default class Router {
    * @return {?RouteResult}
    */
   route(httpRequest) {
-    debugger;
     var i, routingData = new RoutingData(httpRequest);
 
     // Start pre processing. Pre processing may invalidate routes.

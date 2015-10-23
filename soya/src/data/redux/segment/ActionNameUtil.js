@@ -10,9 +10,9 @@ export default {
    * @param {?string} suffix
    */
   generate(name, prefix, suffix) {
-    var result = !prefix && prefix != '' ? this.prep(prefix) + '_' : '';
+    var result = prefix && prefix != '' ? this.prep(prefix) + '_' : '';
     result += this.prep(name);
-    result += !suffix && suffix != '' ? '_' + this.prep(suffix) : '';
+    result += suffix && suffix != '' ? '_' + this.prep(suffix) : '';
     return result;
   },
 

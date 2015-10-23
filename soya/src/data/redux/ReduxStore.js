@@ -256,7 +256,7 @@ export default class ReduxStore extends Store {
       if (!this._reducers.hasOwnProperty(segmentName)) continue;
       if (!this._segments.hasOwnProperty(segmentName)) continue;
       reducer = this._reducers[segmentName];
-      segment = this._reducers[segmentName];
+      segment = this._segments[segmentName];
       segmentState = state[segmentName];
       nextSegmentState = reducer(segmentState, action);
       isChanged = isChanged || !segment._isStateEqual(segmentState, nextSegmentState);
@@ -430,19 +430,19 @@ export default class ReduxStore extends Store {
     }
 
     // Initialize hydration option.
-    this._initHydrationOption(hydrationOption);
+    hydrationOption = this._initHydrationOption(hydrationOption);
 
     // Register segment.
     var segmentName = segment._getName();
     var registeredSegment = this._segments[segmentName];
     if (!registeredSegment) {
+      registeredSegment = segment;
+      registeredSegment._activate(Promise);
       this._segments[segmentName] = segment;
       this._reducers[segmentName] = segment._getReducer();
       this._hydrationStates[segmentName] = {};
       this._subscribers[segmentName] = {};
       this._actionCreators[segmentName] = segment._getActionCreator();
-      registeredSegment = segment;
-      registeredSegment._activate(Promise);
     } else if (registeredSegment.prototype != segment.prototype) {
       throw new Error('Segment name registered by both ' + registeredSegment + ' and ' + segment + ', with name: ' + segmentName + '.');
     }
@@ -465,6 +465,9 @@ export default class ReduxStore extends Store {
     // Register subscriber.
     if (!this._subscribers[segmentName][queryId]) this._subscribers[segmentName][queryId] = {};
     this._subscribers[segmentName][queryId][subscriberId] = callback;
+
+    // Populate with initial data if not hydrated yet.
+    // TODO: Hydration / load action happens not only at server, but can also be triggered. Thus hydration belongs rightly to Segment/ActionCreator, and should be isLoaded instead.
 
     var result = {
       actionCreator: registeredSegment._getActionCreator(),

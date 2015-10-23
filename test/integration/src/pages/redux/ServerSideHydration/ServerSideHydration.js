@@ -22,7 +22,8 @@ class Component extends React.Component {
         <li>React client side rendering works without inconsistencies in generated markup.</li>
         <li>UI handlers assigned appropriately. <a onClick={this.handleClick}>This link handler</a> must still work.</li>
       </ul>
-      <UserProfile store={this.props.reduxStore}></UserProfile>
+      <h2>Rendered User Profile Badge:</h2>
+      <UserProfile reduxStore={this.props.reduxStore} username={'rickchristie'}></UserProfile>
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore.getStore()} monitor={LogMonitor} />
       </DebugPanel>

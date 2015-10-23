@@ -1,5 +1,7 @@
 import React from 'react';
 
+import ReduxStore from './ReduxStore.js';
+
 /**
  * Components that wanted to use Soya's redux container may use this.
  *
@@ -12,6 +14,10 @@ export default class DataComponent extends React.Component {
       action: {},
       unsubscribe: {}
     };
+
+    if (!(this.getReduxStore() instanceof ReduxStore)) {
+      throw new Error('ReduxStore is not properly wired to this component: ' + this.constructor.name + '.');
+    }
   }
 
   /**
@@ -56,6 +62,7 @@ export default class DataComponent extends React.Component {
     action[segment._getName()] = storeRef.actionCreator;
     unsubscribe[stateName] = storeRef.unsubscribe;
     this.setState({
+     [stateName]: storeRef.getState(),
       action: action,
       unsubscribe: unsubscribe
     });
@@ -76,7 +83,7 @@ export default class DataComponent extends React.Component {
    * Registers the store. Run at both client and server side when rendering.
    */
   componentWillMount() {
-    this.registerStores();
+    this.registerSegments();
   }
 
   /**

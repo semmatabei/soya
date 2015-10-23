@@ -12,7 +12,7 @@ export default class SegmentPiece {
 
   /**
    * Array of errors. Will be null if there are no errors.
-   * @type {void | any}
+   * @type {void | Array<any>}
    */
   errors;
 
