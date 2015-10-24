@@ -19,5 +19,5 @@ export default class SegmentPiece {
   /**
    * @type {boolean}
    */
-  isHydrated;
+  loaded;
 }

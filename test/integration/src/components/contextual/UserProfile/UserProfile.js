@@ -9,13 +9,19 @@ export default class UserProfile extends DataComponent {
   }
 
   render() {
-    return <div>
-        <ul>
-          <li>User name: {this.state.user.username}</li>
-          <li>First name: {this.state.user.firstName}</li>
-          <li>Last name: {this.state.user.lastName}</li>
-          <li>Email: {this.state.user.email}</li>
-        </ul>
+    if (!this.state.user.loaded) {
+      return <div>
+        User data is loading...
       </div>
+    }
+
+    return <div>
+      <ul>
+        <li>User name: {this.state.user.data.username}</li>
+        <li>First name: {this.state.user.data.firstName}</li>
+        <li>Last name: {this.state.user.data.lastName}</li>
+        <li>Email: {this.state.user.data.email}</li>
+      </ul>
+    </div>
   }
 }

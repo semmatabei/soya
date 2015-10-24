@@ -183,7 +183,6 @@ export default class ReduxStore extends Store {
    *   {
    *     segmentName: {
    *       queryId: {
-   *         isHydrated: true,
    *         option: {...}
    *       },
    *       ...
@@ -195,7 +194,7 @@ export default class ReduxStore extends Store {
    *
    * @type {{[key: string]: {[key: string]: boolean}}}
    */
-  _hydrationStates;
+  _hydrationOptions;
 
   /**
    * Receives Promises/A+ implementation. We don't want to load more than 1
@@ -214,7 +213,7 @@ export default class ReduxStore extends Store {
     this._nextSubscriberId = 1;
     this._store = this._createStore(initialState);
     this._store.subscribe(this._handleChange.bind(this));
-    this._hydrationStates = {};
+    this._hydrationOptions = {};
     this._actionCreators = {};
     Promise = PromiseImpl;
   }
@@ -317,17 +316,16 @@ export default class ReduxStore extends Store {
   /**
    * @param {string} segmentName
    * @param {string} queryId
-   * @returns {SegmentPiece}
-   * @private
+   * @returns {Object}
    */
   _getSegmentPiece(segmentName, queryId) {
     var state = this._store.getState();
     var segmentState = state[segmentName];
+    if (!segmentState) return null;
     var pieceObject = this._segments[segmentName]._getPieceObject(segmentState, queryId);
-    var segmentPiece = new SegmentPiece();
-    segmentPiece.data = pieceObject.data;
-    segmentPiece.errors = pieceObject.errors;
-    segmentPiece.isHydrated = this._hydrationStates[segmentName][queryId].isHydrated;
+    // We return the real object so that users can do simple equality check to
+    // see if the object has changed or not.
+    return pieceObject;
   }
 
   /**
@@ -361,13 +359,17 @@ export default class ReduxStore extends Store {
   hydrate(renderType) {
     var action, segmentName, queryId, queries, hydrationState;
     var blockingHydrationPromises = [], promise;
-    for (segmentName in this._hydrationStates) {
-      if (!this._hydrationStates.hasOwnProperty(segmentName)) continue;
-      queries = this._hydrationStates[segmentName];
+    for (segmentName in this._hydrationOptions) {
+      if (!this._hydrationOptions.hasOwnProperty(segmentName)) continue;
+      queries = this._hydrationOptions[segmentName];
       for (queryId in queries) {
         if (!queries.hasOwnProperty(queryId)) continue;
         hydrationState = queries[queryId];
-        if (hydrationState.isHydrated) continue;
+
+        // Don't need to do anything if it's already loaded.
+        var segmentPiece = this._getSegmentPiece(segmentName, queryId);
+        if (segmentPiece.loaded) continue;
+
         if (hydrationState.option[renderType] == NOOP) continue;
         // Server-side doesn't need to run non-blocking hydration requests.
         if (renderType == SERVER && hydrationState.option[renderType] == NON_BLOCKING) continue;
@@ -440,7 +442,7 @@ export default class ReduxStore extends Store {
       registeredSegment._activate(Promise);
       this._segments[segmentName] = segment;
       this._reducers[segmentName] = segment._getReducer();
-      this._hydrationStates[segmentName] = {};
+      this._hydrationOptions[segmentName] = {};
       this._subscribers[segmentName] = {};
       this._actionCreators[segmentName] = segment._getActionCreator();
     } else if (registeredSegment.prototype != segment.prototype) {
@@ -449,14 +451,13 @@ export default class ReduxStore extends Store {
 
     // Register query.
     var queryId = registeredSegment._registerQuery(query, queryOptions);
-    if (!this._hydrationStates[segmentName][queryId]) {
-      this._hydrationStates[segmentName][queryId] = {
-        isHydrated: false,
+    if (!this._hydrationOptions[segmentName][queryId]) {
+      this._hydrationOptions[segmentName][queryId] = {
         option: hydrationOption
       };
     } else {
       // Merge hydration option.
-      var finalHydrationOption = this._hydrationStates[segmentName][queryId].option;
+      var finalHydrationOption = this._hydrationOptions[segmentName][queryId].option;
       if (hydrationOption[SERVER] > finalHydrationOption[SERVER]) finalHydrationOption[SERVER] = hydrationOption[SERVER];
       if (hydrationOption[CLIENT_PARTIAL] > finalHydrationOption[CLIENT_PARTIAL]) finalHydrationOption[CLIENT_PARTIAL] = hydrationOption[CLIENT_PARTIAL];
       if (hydrationOption[CLIENT_FULL] > finalHydrationOption[CLIENT_FULL]) finalHydrationOption[CLIENT_FULL] = hydrationOption[CLIENT_FULL];
@@ -466,8 +467,13 @@ export default class ReduxStore extends Store {
     if (!this._subscribers[segmentName][queryId]) this._subscribers[segmentName][queryId] = {};
     this._subscribers[segmentName][queryId][subscriberId] = callback;
 
-    // Populate with initial data if not hydrated yet.
-    // TODO: Hydration / load action happens not only at server, but can also be triggered. Thus hydration belongs rightly to Segment/ActionCreator, and should be isLoaded instead.
+    // Populate with initial data if not already populated.
+    // Since getSegmentPiece() is supposed to be a fast operation anyway, we
+    // can just check the data.
+    if (!this._getSegmentPiece(segmentName, queryId)) {
+      var initAction = registeredSegment._createInitAction(queryId);
+      this.dispatch(initAction);
+    }
 
     var result = {
       actionCreator: registeredSegment._getActionCreator(),

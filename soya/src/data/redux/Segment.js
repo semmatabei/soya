@@ -67,7 +67,8 @@ export default class Segment {
 
   /**
    * Returns a basic payload object to populate the segment piece with initial
-   * structure.
+   * structure. Segment's reducer should ignore this action if the piece is
+   * already populated.
    *
    * @param {string} queryId
    * @return {Object}

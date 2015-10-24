@@ -123,6 +123,7 @@ export default class MapSegment extends Segment {
   /**
    * @param {Object} state
    * @param {string} queryId
+   * @return {any}
    */
   _getPieceObject(state, queryId) {
     return state[queryId];
@@ -156,25 +157,42 @@ export default class MapSegment extends Segment {
    */
   _getReducer() {
     var loadActionType = this._actionCreator._getLoadActionType();
-    return function(state, action) {
-      var queryId, newState = {};
-      if (!state) return newState;
-
-      // Create a new object, redux store state is supposed to be immutable!
-      for (queryId in state) {
-        if (!state.hasOwnProperty(queryId)) continue;
-        newState[queryId] = state[queryId];
-      }
-
+    var initActionType = this._actionCreator._getInitActionType();
+    return (state, action) => {
+      // If state is undefined, return initial state.
+      if (!state) state = {};
+      var newState;
       switch(action.type) {
         case loadActionType:
           // Replace the map entry with the new loaded one.
+          newState = this._createNewStateObj(state);
           newState[action.queryId] = action.payload;
           return newState;
           break;
-        default:
-          return state;
+        case initActionType:
+          if (!state[action.queryId]) {
+            newState = this._createNewStateObj(state);
+            newState[action.queryId] = action.payload;
+            return newState;
+          }
+          break;
       }
+      return state;
     };
+  }
+
+  /**
+   * Create a new object, redux store state is supposed to immutable!
+   *
+   * @param {Object} state
+   * @return {Object}
+   */
+  _createNewStateObj(state) {
+    var newState = {}, queryId;
+    for (queryId in state) {
+      if (!state.hasOwnProperty(queryId)) continue;
+      newState[queryId] = state[queryId];
+    }
+    return newState;
   }
 }

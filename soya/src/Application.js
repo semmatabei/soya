@@ -267,6 +267,8 @@ export default class Application {
       throw new Error('Unable to route request, page ' + routeResult.pageName + ' doesn\'t exist');
     }
 
+    this._logger.debug('Rendering page: ' + routeResult.pageName + '.', null);
+
     page.render(httpRequest, routeResult.routeArgs,
       this._handleRenderResult.bind(this, routeResult, request, httpRequest, response));
   }

@@ -16,6 +16,11 @@ export default class MapActionCreator extends ActionCreator {
   _loadActionType;
 
   /**
+   * @type {string}
+   */
+  _initActionType;
+
+  /**
    * @type {{[key: string]: {action: Object; expiry: number;}}}
    */
   _cache;
@@ -28,6 +33,7 @@ export default class MapActionCreator extends ActionCreator {
     // Since segment name is guaranteed never to clash by ReduxStore, we can
     // safely use segment name as action type.
     this._loadActionType = ActionNameUtil.generate(segmentName, 'LOAD');
+    this._initActionType = ActionNameUtil.generate(segmentName, 'INIT');
     this._cache = {};
   }
 
@@ -88,7 +94,8 @@ export default class MapActionCreator extends ActionCreator {
       queryId: queryId,
       payload: {
         data: payload,
-        errors: errors
+        errors: errors,
+        loaded: true
       }
     };
   }
@@ -99,11 +106,12 @@ export default class MapActionCreator extends ActionCreator {
    */
   _createInitActionObject(queryId) {
     return {
-      type: this._loadActionType,
+      type: this._getInitActionType(),
       queryId: queryId,
       payload: {
         data: null,
-        errors: null
+        errors: null,
+        loaded: false
       }
     };
   }
