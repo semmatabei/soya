@@ -17,6 +17,7 @@ h1 {
 h2 {
   font-size: 23px;
   font-weight: bold;
+  margin: 12px 0;
 }
 
 p {
@@ -26,4 +27,9 @@ p {
 code {
   font-family: 'Consolas', 'Menlo', 'Monaco', monospace;
   font-size: 87.5%;
+}
+
+ul li {
+  list-style-type: disc;
+  margin-left: 40px;
 }
