@@ -51,6 +51,7 @@ export default class DataComponent extends React.Component {
   register(segment, query, stateName, queryOptions, hydrationOption) {
     // Unregister if already registered.
     this.unregister(stateName);
+    console.log('register', segment, this.state);
     var callback = (newState) => {
       this.setState({[stateName]: newState});
     };
@@ -72,6 +73,7 @@ export default class DataComponent extends React.Component {
    * @param {string} stateName
    */
   unregister(stateName) {
+    console.log('unregister', stateName);
     delete this.state[stateName];
     if (this.state.unsubscribe[stateName]) {
       this.state.unsubscribe[stateName]();
@@ -84,12 +86,14 @@ export default class DataComponent extends React.Component {
    */
   componentWillMount() {
     this.registerSegments();
+    console.log('COMPONENT WILL MOUNT');
   }
 
   /**
    * Unregister all segments.
    */
   componentWillUnmount() {
+    console.log('COMPONENT WILL UNMOUNT');
     this.getReduxStore().unsubscribe(this);
   }
 }

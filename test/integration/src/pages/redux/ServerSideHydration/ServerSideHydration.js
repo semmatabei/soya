@@ -22,11 +22,30 @@ class Component extends React.Component {
         <li>Server rendering is blocked for 5 seconds while fetching user data.</li>
         <li>Initial state from server gets passed to Soya client runtime.</li>
         <li>React client side rendering works without inconsistencies in generated markup.</li>
-        <li>UI handlers assigned appropriately. <a onClick={this.handleClick}>This link handler</a> must still work.</li>
+        <li>UI handlers assigned appropriately. <a href="javascript:void(0)" onClick={this.handleClick}>This link handler</a> must still work.</li>
       </ul>
       <h2>Rendered User Profile Badge:</h2>
       <UserProfile reduxStore={this.props.reduxStore} username={'rickchristie'}></UserProfile>
-    </div>;
+      <h2>Test Re-Render at Client:</h2>
+      <p><a href="javascript:void(0)" onClick={this.forceChangeStore.bind(this)}>Force change store</a></p>
+      <DebugPanel top right bottom>
+        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+      </DebugPanel>
+    </div>
+  }
+
+  forceChangeStore() {
+    var payload = {
+      type: 'LOAD_USER',
+      queryId: 'rickchristie',
+      payload: {
+        username: 'rickchristie',
+        firstName: 'Nama Depan',
+        lastName: 'Nama Belakang',
+        email: 'seven.rchristie@gmail.com'
+      }
+    };
+    this.props.reduxStore._store.dispatch(payload);
   }
 
   handleClick() {

@@ -7,6 +7,6 @@ import DataComponent from './DataComponent.js';
  */
 export default class DataComponentHot extends DataComponent {
   componentWillUpdate() {
-    this.registerSegments();
+    console.log('COMPONENT WILL UPDATE', arguments);
   }
 }
