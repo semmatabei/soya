@@ -5,7 +5,9 @@ import SoyaClient from './SoyaClient';
  * @param {Page} pageClass
  */
 export default function register(pageClass) {
-  if (!window.__soyaClient) {
+  console.log('register page called!', pageClass);
+  if (!window.__soyaClient || true) {
+    console.log('soya client create!');
     // This follows an implicit contract between renderer and client runtime.
     // Config and RouteArgs must be present as a global variable.
     // Haven't found the better way to do this yet.
@@ -20,6 +22,7 @@ export default function register(pageClass) {
     window.__soyaClient.register(pageClass);
     window.__soyaClient.navigate(pageClass.name, routeArgs, hydratedState);
     return;
+
   }
 
   // TODO: Implement History API page navigation!

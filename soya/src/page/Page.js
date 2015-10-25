@@ -47,6 +47,10 @@ export default class Page {
     return [];
   }
 
+  reRender(httpRequest, routeArgs, complete, store) {
+
+  }
+
   /**
    * This method is also run in both server and client side. On server side,
    * framework code will generate a complete HTML document from RenderResult.
@@ -58,9 +62,9 @@ export default class Page {
    * @param {ServerHttpRequest | ClientHttpRequest} httpRequest
    * @param {Object} routeArgs
    * @param {Function} complete
-   * @param {?any} hydratedState
+   * @param {?any} initialState
    */
-  render(httpRequest, routeArgs, complete, hydratedState) {
+  render(httpRequest, routeArgs, complete, initialState) {
     complete(new RenderResult());
   }
 }

@@ -68,5 +68,12 @@ class ServerSideHydration extends Page {
   }
 }
 
+if (module.hot) {
+  module.hot.accept(() => {
+    console.log('================== MODULE HOT ACCEPT');
+    window.__soyaClient = null;
+  });
+}
+
 register(ServerSideHydration);
 export default ServerSideHydration;
