@@ -16,6 +16,18 @@ export default class Store {
   }
 
   /**
+   * Tells this Store that upon first Segment conflict, it has to nullify the
+   * Segment's state, second conflict throws error as usual.
+   *
+   * IMPORTANT NOTE: This only happens on first Segment conflict - second
+   * conflict means there are indeed Segment name clash, and Store should
+   * rightfully throw an Error.
+   */
+  _mayHotReloadSegments() {
+    throw new Error('Abstract method not implemented.');
+  }
+
+  /**
    * @return {boolean}
    */
   shouldRenderBeforeServerHydration() {

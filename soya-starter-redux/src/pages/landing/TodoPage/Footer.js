@@ -1,6 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import classnames from 'classnames';
 import { SHOW_ALL, SHOW_COMPLETED, SHOW_ACTIVE } from '../../../constants/TodoFilters';
+import test from './test.js';
 
 const FILTER_TITLES = {
   [SHOW_ALL]: 'All',
@@ -46,6 +47,7 @@ class Footer extends Component {
   }
 
   render() {
+    test();
     return (
       <footer className="footer">
         {this.renderTodoCount()}

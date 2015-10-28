@@ -29,7 +29,7 @@ class LoadComponent extends Page {
     return 'LoadComponent';
   }
 
-  render(httpRequest, routeArgs, callback) {
+  render(httpRequest, routeArgs, store, callback) {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Load Component</title>';
     reactRenderer.body = React.createElement(Component, {router: this.router});

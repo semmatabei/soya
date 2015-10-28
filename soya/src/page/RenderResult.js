@@ -82,11 +82,6 @@ export default class RenderResult {
   contentRenderer;
 
   /**
-   * @type {?Store}
-   */
-  store;
-
-  /**
    * @type {[key: string]: Cookie}
    */
   cookies;
@@ -111,11 +106,9 @@ export default class RenderResult {
    * thus this class should also be unaware of that fact.
    *
    * @param {?ContentRenderer} contentRenderer
-   * @param {?Store} store
    */
-  constructor(contentRenderer, store) {
+  constructor(contentRenderer) {
     this.contentRenderer = contentRenderer;
-    this.store = store;
     this.httpHeaders = new Bucket();
     this.cookies = {};
     this.httpStatusCode = 200;

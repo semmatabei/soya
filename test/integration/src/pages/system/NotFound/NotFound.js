@@ -15,7 +15,7 @@ class NotFound extends Page {
     return 'NotFound';
   }
 
-  render(httpRequest, routeArgs, callback) {
+  render(httpRequest, routeArgs, store, callback) {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Oops, not found!</title>';
     reactRenderer.body = React.createElement(NotFoundReactComponent, {});

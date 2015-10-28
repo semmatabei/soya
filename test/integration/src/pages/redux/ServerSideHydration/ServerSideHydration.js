@@ -23,11 +23,10 @@ class Component extends React.Component {
         <li>Initial state from server gets passed to Soya client runtime.</li>
         <li>React client side rendering works without inconsistencies in generated markup.</li>
         <li>UI handlers assigned appropriately. <a href="javascript:void(0)" onClick={this.handleClick}>This link handler</a> must still work.</li>
+        <li>Client side re-rendering is triggered when this link is clicked: <a href="javascript:void(0)" onClick={this.forceChangeStore.bind(this)}>forge new profile.</a></li>
       </ul>
       <h2>Rendered User Profile Badge:</h2>
       <UserProfile reduxStore={this.props.reduxStore} username={'rickchristie'}></UserProfile>
-      <h2>Test Re-Render at Client:</h2>
-      <p><a href="javascript:void(0)" onClick={this.forceChangeStore.bind(this)}>Force change store</a></p>
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
@@ -39,10 +38,14 @@ class Component extends React.Component {
       type: 'LOAD_USER',
       queryId: 'rickchristie',
       payload: {
-        username: 'rickchristie',
-        firstName: 'Nama Depan',
-        lastName: 'Nama Belakang',
-        email: 'seven.rchristie@gmail.com'
+        data: {
+          username: 'winston.churchill',
+          firstName: 'Winston',
+          lastName: 'Churchill',
+          email: 'churchill@allied.ww2'
+        },
+        loaded: true,
+        errors: null
       }
     };
     this.props.reduxStore._store.dispatch(payload);
@@ -58,12 +61,16 @@ class ServerSideHydration extends Page {
     return 'ServerSideHydration';
   }
 
-  render(httpRequest, routeArgs, callback, hydratedState) {
-    var reduxStore = new ReduxStore(Promise, hydratedState);
+  createStore(initialState) {
+    var reduxStore = new ReduxStore(Promise, initialState);
+    return reduxStore;
+  }
+
+  render(httpRequest, routeArgs, store, callback) {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Server-Side Hydration</title>';
-    reactRenderer.body = React.createElement(Component, { reduxStore: reduxStore });
-    var renderResult = new RenderResult(reactRenderer, reduxStore);
+    reactRenderer.body = React.createElement(Component, { reduxStore: store });
+    var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);
   }
 }

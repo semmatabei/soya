@@ -4,7 +4,6 @@ import ReactRenderer from 'soya/lib/page/react/ReactRenderer';
 import Page from 'soya/lib/page/Page';
 import React from 'react';
 
-
 // Import the reusable component.
 import PhotoCaption from '../../../components/common/PhotoCaption/PhotoCaption.js';
 
@@ -30,11 +29,11 @@ class AnotherPage extends Page {
     return 'AnotherPage';
   }
 
-  getRouteRequirements() {
+  static getRouteRequirements() {
     return ['HOME_PAGE'];
   }
 
-  render(httpRequest, routeArgs, callback) {
+  render(httpRequest, routeArgs, store, callback) {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Another Page</title>';
     reactRenderer.body = React.createElement(Component, {router: this.router});

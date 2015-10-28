@@ -78,6 +78,16 @@ export default class Segment {
   }
 
   /**
+   * Returns a basic payload object that nullifies the segment data. This is
+   * called when hot reloading a change in Segment.
+   *
+   * @return {Object}
+   */
+  _createCleanAction() {
+
+  }
+
+  /**
    * Uses action creator to create load action of the given query.
    *
    * @param {string} queryId

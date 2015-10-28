@@ -21,6 +21,11 @@ export default class MapActionCreator extends ActionCreator {
   _initActionType;
 
   /**
+   * @type {string}
+   */
+  _cleanActionType;
+
+  /**
    * @type {{[key: string]: {action: Object; expiry: number;}}}
    */
   _cache;
@@ -34,6 +39,7 @@ export default class MapActionCreator extends ActionCreator {
     // safely use segment name as action type.
     this._loadActionType = ActionNameUtil.generate(segmentName, 'LOAD');
     this._initActionType = ActionNameUtil.generate(segmentName, 'INIT');
+    this._cleanActionType = ActionNameUtil.generate(segmentName, 'CLEAN');
     this._cache = {};
   }
 
@@ -47,6 +53,16 @@ export default class MapActionCreator extends ActionCreator {
     forceLoad = forceLoad == null ? false : forceLoad;
     var queryId = this._generateQueryId(query);
     return this._createLoadActionWithQueryId(query, options, forceLoad, queryId);
+  }
+
+  /**
+   * TODO: Mark all public methods as @public to avoid API confusion.
+   * @return {Object}
+   */
+  _createCleanAction() {
+    return {
+      type: this._cleanActionType
+    };
   }
 
   /**
@@ -151,5 +167,12 @@ export default class MapActionCreator extends ActionCreator {
    */
   _getInitActionType() {
     return this._initActionType;
+  }
+
+  /**
+   * @returns {string}
+   */
+  _getCleanActionType() {
+    return this._cleanActionType;
   }
 }

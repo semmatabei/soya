@@ -31,6 +31,10 @@ export default class ReactRendererClient extends ContentRendererClient {
    * TODO: History API navigation render.
    */
   render() {
-    React.render(this.body, document.getElementById('__body'));
+    var domElement = document.getElementById('__body');
+    window.reactElement = React.render(this.body, domElement);
+    return function() {
+      React.unmountComponentAtNode(domElement);
+    };
   }
 }

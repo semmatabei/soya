@@ -6,7 +6,11 @@
  */
 export default class ContentRendererClient {
   /**
-   * Renders directly to DOM, does not return anything.
+   * Renders directly to DOM, does not return anything. Returns a dismantle
+   * function. Called when the page is about to be dismantled, to be replaced by
+   * another page in page navigation or hot reload.
+   *
+   * @return {Function}
    */
   render() {
 

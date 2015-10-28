@@ -3,6 +3,7 @@ import Compiler from './compiler/Compiler';
 import Router from './router/Router';
 import EntryPoint from './EntryPoint';
 import ServerHttpRequest from './http/ServerHttpRequest';
+import Provider from './Provider.js';
 import { SERVER } from './data/RenderType';
 
 var path = require('path');
@@ -88,11 +89,6 @@ export default class Application {
   _entryPoints;
 
   /**
-   * @type {{[key: string]: Page}}
-   */
-  _pages;
-
-  /**
    * @type {ErrorHandler}
    */
   _errorHandler;
@@ -101,6 +97,16 @@ export default class Application {
    * @type {Logger}
    */
   _logger;
+
+  /**
+   * @type {Provider}
+   */
+  _provider;
+
+  /**
+   * @type {{[key: string]: Function}}
+   */
+  _pageClasses;
 
   /**
    * The idea is to have middleware system that is compatible with express
@@ -163,6 +169,8 @@ export default class Application {
     this._pages = {};
     this._routeForPages = {};
     this._entryPoints = [];
+    this._pageClasses = {};
+    this._provider = new Provider(serverConfig, reverseRouter, true);
 
     var i, pageCmpt, page, pageComponents = componentRegister.getPages();
     var routeRequirements, j, routeId;
@@ -171,26 +179,31 @@ export default class Application {
       pageCmpt = pageComponents[i];
 
       // Create entry point.
-      this._entryPoints.push(new EntryPoint(pageCmpt.name, pageCmpt.absDir));
+      this._entryPoints.push(new EntryPoint(
+        pageCmpt.name, pageCmpt.absDir, pageCmpt.clazz));
+      this._pageClasses[pageCmpt.name] = pageCmpt.clazz;
 
       try {
-        // Instantiate page.
-        page = new pageCmpt.clazz(serverConfig, reverseRouter);
+        // Instantiate page. We try to instantiate page at startup to find
+        // potential problems with each page. This allows us to detect factory
+        // naming clash early on while also allowing the start-up process to
+        // populate Provider with ready to use dependencies.
+        page = new pageCmpt.clazz(this._provider);
       } catch (e) {
-        throw new Error('Unable to instantiate page: ' + pageCmpt.name + ' at ' + pageCmpt.absDir);
+        throw e;
       }
 
       this._routeForPages[pageCmpt.name] = {};
-      routeRequirements = page.getRouteRequirements();
-      for (j = 0; j < routeRequirements.length; j++) {
-        routeId = routeRequirements[j];
-        if (!routes.hasOwnProperty(routeId)) {
-          throw new Error('Page ' + pageCmpt.name + ' has dependencies to unknown route: ' + routeId + '.');
+      if (typeof pageCmpt.clazz.getRouteRequirements == 'function') {
+        routeRequirements = pageCmpt.clazz.getRouteRequirements();
+        for (j = 0; j < routeRequirements.length; j++) {
+          routeId = routeRequirements[j];
+          if (!routes.hasOwnProperty(routeId)) {
+            throw new Error('Page ' + pageCmpt.name + ' has dependencies to unknown route: ' + routeId + '.');
+          }
+          this._routeForPages[pageCmpt.name][routeId] = routes[routeId];
         }
-        this._routeForPages[pageCmpt.name][routeId] = routes[routeId];
       }
-
-      this._pages[pageCmpt.name] = page;
     }
 
     this._middlewares = [];
@@ -262,15 +275,19 @@ export default class Application {
       throw new Error('Unable to route request, router returned null');
     }
 
-    var page = this._pages[routeResult.pageName];
-    if (page == null) {
+    var pageClass = this._pageClasses[routeResult.pageName];
+    if (!pageClass) {
       throw new Error('Unable to route request, page ' + routeResult.pageName + ' doesn\'t exist');
     }
 
-    this._logger.debug('Rendering page: ' + routeResult.pageName + '.', null);
+    // Because we tried to instantiate all pages at start-up we can be sure
+    // that pageClass exists.
+    var page = new pageClass(this._provider);
+    var store = page.createStore(null);
 
-    page.render(httpRequest, routeResult.routeArgs,
-      this._handleRenderResult.bind(this, routeResult, request, httpRequest, response));
+    this._logger.debug('Rendering page: ' + routeResult.pageName + '.', null);
+    page.render(httpRequest, routeResult.routeArgs, store,
+      this._handleRenderResult.bind(this, routeResult, request, httpRequest, response, store));
   }
 
   /**
@@ -278,9 +295,10 @@ export default class Application {
    * @param {http.incomingMessage} request
    * @param {ServerHttpRequest} httpRequest
    * @param {httpServerResponse} response
+   * @param {void | Store} store
    * @param {RenderResult} renderResult
    */
-  _handleRenderResult(routeResult, request, httpRequest, response, renderResult) {
+  _handleRenderResult(routeResult, request, httpRequest, response, store, renderResult) {
     var pageDep = this._compileResult.pages[routeResult.pageName];
     if (!pageDep) {
       throw new Error('Unable to render page server side, dependencies unknown for entry point: ' + routeResult.componentName);
@@ -288,8 +306,8 @@ export default class Application {
 
     var promise = Promise.resolve(null);
 
-    if (renderResult.store) {
-      if (renderResult.store.shouldRenderBeforeServerHydration()) {
+    if (store) {
+      if (store.shouldRenderBeforeServerHydration()) {
         // Render first to let all segment and query requirements registered
         // to the store. This is weird and sort of wasteful, but we haven't
         // found a better way yet.
@@ -298,10 +316,8 @@ export default class Application {
           this._clientConfig, null, pageDep, httpRequest.isSecure());
       }
 
-      // TODO: How to pass state to the renderer?
-      // TODO: What if the state is part of immutable-js?
-      this._logger.debug('Store requirements gathered, start hydration.', null, renderResult.store);
-      promise = renderResult.store.hydrate(SERVER);
+      this._logger.debug('Store requirements gathered, start hydration.', null, store);
+      promise = store.hydrate(SERVER);
     }
 
     var handlePromiseError = (error) => {
@@ -312,8 +328,8 @@ export default class Application {
 
     var storeResolve = () => {
       var state = null;
-      if (renderResult.store) {
-        state = renderResult.store._getState();
+      if (store) {
+        state = store._getState();
         this._logger.debug('Finish hydration.', null, state);
       }
       var htmlResult = renderResult.contentRenderer.render(

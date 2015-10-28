@@ -17,7 +17,7 @@ class UserJson extends Page {
     return 'UserJson';
   }
 
-  render(httpRequest, routeArgs, callback) {
+  render(httpRequest, routeArgs, store, callback) {
     var jsonRenderer = new JsonRenderer(userJson);
     var renderResult = new RenderResult(jsonRenderer);
     // Simulate network delay of 5 seconds.

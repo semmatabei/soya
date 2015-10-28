@@ -3,10 +3,9 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Header from './Header';
 import MainSection from './MainSection';
-import DataComponent from 'soya/lib/data/redux/DataComponent';
 import * as TodoActions from '../../../actions/todos';
 
-class App extends DataComponent {
+class App extends React.Component {
   registerStores() {
     console.log('App bwahahahaha');
   }

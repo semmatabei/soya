@@ -45,11 +45,11 @@ class HomePage extends Page {
     return 'HomePage';
   }
 
-  getRouteRequirements() {
+  static getRouteRequirements() {
     return ['ANOTHER_PAGE'];
   }
 
-  render(httpRequest, routeArgs, callback) {
+  render(httpRequest, routeArgs, store, callback) {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Hello World!</title>';
     reactRenderer.body = React.createElement(Component, {router: this.router});

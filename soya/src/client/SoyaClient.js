@@ -4,6 +4,8 @@ import DomainNode from '../router/DomainNode.js';
 import MethodNode from '../router/MethodNode.js';
 import PathNode from '../router/PathNode.js';
 import ClientHttpRequest from '../http/ClientHttpRequest.js';
+import Provider from '../Provider.js';
+import { CLIENT_PARTIAL, CLIENT_FULL } from '../data/RenderType.js';
 
 // The reason we use full path is to make webpack's resolve.alias work.
 // We need to replace custom node registration with user file so that
@@ -22,6 +24,21 @@ export default class SoyaClient {
   _pages;
 
   /**
+   * @type {void | string}
+   */
+  _currentPageName;
+
+  /**
+   * @type {void | {httpRequest: ClientHttpRequest; routeArgs: Object; hydratedState: Object}}
+   */
+  _currentPageArgs;
+
+  /**
+   * @type {Function}
+   */
+  _currentPageDismantle;
+
+  /**
    * @type {Object}
    */
   _clientConfig;
@@ -32,6 +49,16 @@ export default class SoyaClient {
   _reverseRouter;
 
   /**
+   * @type {Provider}
+   */
+  _provider;
+
+  /**
+   * @type {{[key: string]: Store}}
+   */
+  _storeCache;
+
+  /**
    * @param {Object} clientConfig
    */
   constructor(clientConfig) {
@@ -40,12 +67,13 @@ export default class SoyaClient {
     nodeFactory.registerNodeType(DomainNode);
     nodeFactory.registerNodeType(MethodNode);
     nodeFactory.registerNodeType(PathNode);
-
     // TODO: Make sure swapping for custom nodes also work at client side.
     registerRouteNodes(nodeFactory);
 
     this._reverseRouter = new ReverseRouter(nodeFactory);
+    this._provider = new Provider(clientConfig, this._reverseRouter, false);
     this._pages = {};
+    this._storeCache = {};
   }
 
   /**
@@ -55,6 +83,7 @@ export default class SoyaClient {
     if (!routeConfigMap) return;
     var routeId;
     for (routeId in routeConfigMap) {
+      if (!routeConfigMap.hasOwnProperty(routeId)) continue;
       this._reverseRouter.reg(routeId, routeConfigMap[routeId]);
     }
   }
@@ -65,7 +94,26 @@ export default class SoyaClient {
   register(pageClass) {
     // We do overrides just in case there are updates.
     // TODO: Figure out history API navigation.
-    this._pages[pageClass.pageName] = new pageClass(config, this._reverseRouter);
+    this._pages[pageClass.pageName] = pageClass;
+
+    if (this._currentPageName == pageClass.pageName) {
+      // If a registration is made for currently active page, it means we're
+      // hot-reloading. TODO: Reconcile this with history API navigation later.
+      this.refresh();
+    }
+  }
+
+  /**
+   * Re-run rendering for the current page.
+   */
+  refresh() {
+    var pageClass = this._getPageClass(this._currentPageName);
+    var pageArgs = this._currentPageArgs;
+    if (!pageArgs) {
+      throw new Error('Unable to refresh, current page arguments does not exist!');
+    }
+    this._dismantleCurrentPage();
+    this._render(pageClass, pageArgs);
   }
 
   /**
@@ -74,16 +122,79 @@ export default class SoyaClient {
    * @param {?any} hydratedState
    */
   navigate(name, routeArgs, hydratedState) {
-    var page = this._pages[name];
-    if (!page) {
-      throw new Error('Navigate call to non-existent or non-loaded page: ' + name);
-    }
+    this._currentPageName = name;
+    this._currentPageArgs = null;
+
+    var pageClass = this._getPageClass(name);
     var httpRequest = new ClientHttpRequest();
-    var callback = function(renderResult) {
-      // TODO: How to do double rendering for store? Should we just render?
-      window.renderResult = renderResult;
-      renderResult.contentRenderer.render();
+    var pageArgs = {
+      httpRequest: httpRequest,
+      routeArgs: routeArgs,
+      hydratedState: hydratedState
     };
-    page.render(httpRequest, routeArgs, callback, hydratedState);
+    this._currentPageArgs = pageArgs;
+    this._dismantleCurrentPage();
+    this._render(pageClass, this._currentPageArgs);
+  }
+
+  /**
+   * @param {Function} pageClass
+   * @param {Object} pageArgs
+   */
+  _render(pageClass, pageArgs) {
+    // Create new page instance - dependencies should be fetched and cached
+    // by Provider.
+    var page = new pageClass(this._provider);
+    var storeNamespace = '__default';
+    if (typeof pageClass.getStoreNamespace == 'function') {
+      storeNamespace = pageClass.getStoreNamespace();
+    }
+
+    var store = this._storeCache[storeNamespace];
+    if (!store) {
+      store = page.createStore(pageArgs.hydratedState);
+    }
+    var hasStore = !!store;
+
+    if (hasStore) {
+      this._storeCache[storeNamespace] = store;
+      if (module.hot) {
+        store._mayHotReloadSegments();
+      }
+    }
+
+    page.render(pageArgs.httpRequest, pageArgs.routeArgs,
+      store, this._renderCallback.bind(this, store));
+  }
+
+  /**
+   * @param {void | Store} store
+   * @param {RenderResult} renderResult
+   */
+  _renderCallback(store, renderResult) {
+    // Start rendering, this also do Segment registrations.
+    window.renderResult = renderResult;
+    this._currentPageDismantle = renderResult.contentRenderer.render();
+
+    if (store) {
+      // If this page has Store, we need to hydrate.
+      // TODO: Alternate between partial and full render?
+      store.hydrate(CLIENT_PARTIAL);
+    }
+  }
+
+  /**
+   * @param {string} name
+   */
+  _getPageClass(name) {
+    var pageClass = this._pages[name];
+    if (!pageClass) {
+      throw new Error('Call to non-existent or non-loaded page: ' + name);
+    }
+    return pageClass;
+  }
+
+  _dismantleCurrentPage() {
+    if (this._currentPageDismantle) this._currentPageDismantle();
   }
 }

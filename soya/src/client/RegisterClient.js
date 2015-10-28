@@ -6,7 +6,7 @@ import SoyaClient from './SoyaClient';
  */
 export default function register(pageClass) {
   console.log('register page called!', pageClass);
-  if (!window.__soyaClient || true) {
+  if (!window.__soyaClient) {
     console.log('soya client create!');
     // This follows an implicit contract between renderer and client runtime.
     // Config and RouteArgs must be present as a global variable.

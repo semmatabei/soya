@@ -114,6 +114,13 @@ export default class MapSegment extends Segment {
   }
 
   /**
+   * @return {Object}
+   */
+  _createCleanAction() {
+    return this._actionCreator._createCleanAction();
+  }
+
+  /**
    * @return {MapActionCreator}
    */
   _getActionCreator() {
@@ -146,9 +153,18 @@ export default class MapSegment extends Segment {
    * @return {?{data: ?any; errors: ?any}}
    */
   _comparePiece(prevSegmentState, segmentState, queryId) {
+    // If state is equal, nothing has changed, since our reducer always
+    // re-creates the object.
     if (this._isStateEqual(prevSegmentState, segmentState)) {
       return null;
     }
+
+    // Test the query ID, it could be that this query hasn't changed.
+    if (prevSegmentState[queryId] === segmentState[queryId]) {
+      return null;
+    }
+
+    // Otherwise, state has changed, return piece object.
     return this._getPieceObject(segmentState, queryId);
   }
 
@@ -158,11 +174,16 @@ export default class MapSegment extends Segment {
   _getReducer() {
     var loadActionType = this._actionCreator._getLoadActionType();
     var initActionType = this._actionCreator._getInitActionType();
+    var cleanActionType = this._actionCreator._getCleanActionType();
     return (state, action) => {
       // If state is undefined, return initial state.
       if (!state) state = {};
       var newState;
       switch(action.type) {
+        case cleanActionType:
+          // Nullifies the segment:
+          return {};
+          break;
         case loadActionType:
           // Replace the map entry with the new loaded one.
           newState = this._createNewStateObj(state);

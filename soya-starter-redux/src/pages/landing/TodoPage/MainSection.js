@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import TodoItem from './TodoItem';
 import Footer from './Footer';
 import { SHOW_ALL, SHOW_COMPLETED, SHOW_ACTIVE } from '../../../constants/TodoFilters';
+import test from './test.js';
 
 const TODO_FILTERS = {
   [SHOW_ALL]: () => true,
@@ -63,6 +64,8 @@ class MainSection extends Component {
       todo.completed ? count + 1 : count,
       0
     );
+
+    test();
 
     return (
       <section className="main">

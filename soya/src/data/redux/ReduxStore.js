@@ -111,9 +111,11 @@ const DEFAULT_HYDRATION_OPTION = {
 /**
  * Creates and wraps redux store. Responsibilities:
  *
+ * TODO: Fix this comment!
+ *
  * 1. Creates appropriate redux store, with redux-thunk as middlewares.
  * 1. Wraps redux store's subscribe and dispatch.
- * 2. Listen to store changes, then ask each segment to decides whether
+ * 2. Listen to store changes, then ask each segment to decides whether to
  *
  *
  *
@@ -197,6 +199,16 @@ export default class ReduxStore extends Store {
   _hydrationOptions;
 
   /**
+   * @type {{[key: string]: boolean}}
+   */
+  _allowOverwriteSegment;
+
+  /**
+   * @type {boolean}
+   */
+  _allowHandleChange;
+
+  /**
    * Receives Promises/A+ implementation. We don't want to load more than 1
    * promise library, so we'll have the user supply it to us. This should be
    * the same library, or a library compatible with the one used at
@@ -207,6 +219,7 @@ export default class ReduxStore extends Store {
    */
   constructor(PromiseImpl, initialState) {
     super();
+    this._allowHandleChange = true;
     this._segments = {};
     this._reducers = {};
     this._subscribers = {};
@@ -215,6 +228,7 @@ export default class ReduxStore extends Store {
     this._store.subscribe(this._handleChange.bind(this));
     this._hydrationOptions = {};
     this._actionCreators = {};
+    this._allowOverwriteSegment = {};
     Promise = PromiseImpl;
   }
 
@@ -268,6 +282,10 @@ export default class ReduxStore extends Store {
    * @private
    */
   _handleChange() {
+    if (!this._allowHandleChange) {
+      return;
+    }
+
     var state = this._store.getState();
     if (this._previousState == null) {
       // If no change, no need to trigger callbacks.
@@ -285,13 +303,13 @@ export default class ReduxStore extends Store {
       segment = this._segments[segmentName];
       segmentSubscribers = this._subscribers[segmentName];
       segmentState = state[segmentName];
-      prevSegmentState = state[segmentName];
+      prevSegmentState = this._previousState[segmentName];
       for (queryId in segmentSubscribers) {
         if (!segmentSubscribers.hasOwnProperty(queryId)) continue;
         querySubscribers = segmentSubscribers[queryId];
         segmentPiece = segment._comparePiece(prevSegmentState, segmentState, queryId);
         if (segmentPiece != null) {
-          // Segment piece has changed, call all registered subcribers.
+          // Segment piece has changed, call all registered subscribers.
           for (subscriberId in querySubscribers) {
             if (!querySubscribers.hasOwnProperty(subscriberId)) continue;
             querySubscribers[subscriberId](segmentPiece);
@@ -299,6 +317,9 @@ export default class ReduxStore extends Store {
         }
       }
     }
+
+    // Update previous state.
+    this._previousState = state;
   }
 
   /**
@@ -339,6 +360,20 @@ export default class ReduxStore extends Store {
   }
 
   /**
+   * Implements this by creating an allowSegmentOverwrite flag for all segments
+   * that has been registered in this instance. If it was a new Segment, we
+   * don't care since there won't be any conflict anyway.
+   */
+  _mayHotReloadSegments() {
+    this._allowOverwriteSegment = {};
+    var segmentName;
+    for (segmentName in this._segments) {
+      if (!this._segments.hasOwnProperty(segmentName)) continue;
+      this._allowOverwriteSegment[segmentName] = true;
+    }
+  }
+
+  /**
    * @returns {boolean}
    */
   shouldRenderBeforeServerHydration() {
@@ -357,6 +392,11 @@ export default class ReduxStore extends Store {
    * @return {Promise}
    */
   hydrate(renderType) {
+    if (renderType == SERVER) {
+      // If we're rendering at server-side we don't need to handle updates.
+      this._allowHandleChange = false;
+    }
+
     var action, segmentName, queryId, queries, hydrationState;
     var blockingHydrationPromises = [], promise;
     for (segmentName in this._hydrationOptions) {
@@ -428,7 +468,8 @@ export default class ReduxStore extends Store {
     // Determine subscriber ID.
     var subscriberId = component[SUBSCRIBER_ID];
     if (!subscriberId) {
-      component[SUBSCRIBER_ID] = this._nextSubscriberId++;
+      subscriberId = this._nextSubscriberId++;
+      component[SUBSCRIBER_ID] = subscriberId;
     }
 
     // Initialize hydration option.
@@ -445,9 +486,24 @@ export default class ReduxStore extends Store {
       this._hydrationOptions[segmentName] = {};
       this._subscribers[segmentName] = {};
       this._actionCreators[segmentName] = segment._getActionCreator();
-    } else if (registeredSegment.prototype != segment.prototype) {
-      throw new Error('Segment name registered by both ' + registeredSegment + ' and ' + segment + ', with name: ' + segmentName + '.');
     }
+    else if (registeredSegment.prototype != segment.prototype) {
+      if (this._allowOverwriteSegment[segmentName]) {
+        this._segments[segmentName] = segment;
+        this._reducers[segmentName] = segment._getReducer();
+        this._hydrationOptions[segmentName] = {};
+        this._actionCreators[segmentName] = segment._getActionCreator();
+
+        // Nullifies the current segment data, since we are replacing.
+        var cleanAction = segment._createCleanAction();
+        this.dispatch(cleanAction);
+      } else {
+        throw new Error('Segment name registered by both ' + registeredSegment + ' and ' + segment + ', with name: ' + segmentName + '.');
+      }
+    }
+
+    // No longer allow segment overwrites for this segment name.
+    delete this._allowOverwriteSegment[segmentName];
 
     // Register query.
     var queryId = registeredSegment._registerQuery(query, queryOptions);

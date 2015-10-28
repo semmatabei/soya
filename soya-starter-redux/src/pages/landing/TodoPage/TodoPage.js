@@ -31,7 +31,7 @@ class TodoPage extends Page {
     return 'TodoPage';
   }
 
-  render(httpRequest, routeArgs, callback) {
+  render(httpRequest, routeArgs, store, callback) {
     var store = todos();
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Hello World!</title>';

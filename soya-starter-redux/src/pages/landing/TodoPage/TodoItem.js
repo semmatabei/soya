@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import classnames from 'classnames';
 import TodoTextInput from './TodoTextInput';
+import test from './test.js';
 
 class TodoItem extends Component {
   constructor(props, context) {
@@ -24,6 +25,7 @@ class TodoItem extends Component {
   }
 
   render() {
+    test();
     const {todo, completeTodo, deleteTodo} = this.props;
 
     let element;
@@ -41,7 +43,7 @@ class TodoItem extends Component {
                  checked={todo.completed}
                  onChange={() => completeTodo(todo.id)} />
           <label onDoubleClick={this.handleDoubleClick.bind(this)}>
-            {todo.text}
+            {todo.text + ' haha'}
           </label>
           <button className="destroy"
                   onClick={() => deleteTodo(todo.id)} />
