@@ -140,7 +140,7 @@ export default class WebpackCompiler extends Compiler {
       devtool: 'sourcemap',
       module: {
         loaders: [
-          WebpackCompiler.getBabelLoaderConfig(frameworkConfig, [], false),
+          WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(frameworkConfig),
           { test: /\.css$/, loader: "css-loader" }
         ]
@@ -157,34 +157,43 @@ export default class WebpackCompiler extends Compiler {
   }
 
   /**
-   * @param {Object} frameworkConfig
-   * @param {Array<Object>} extraPlugins
-   * @param {boolean} withHotReload
    * @return {Object}
    */
-  static getBabelLoaderConfig(frameworkConfig, extraPlugins, withHotReload) {
-    extraPlugins = Array.isArray(extraPlugins) ? extraPlugins : [];
+  static getBabelLoaderConfig() {
     var result = {
       test: /\.jsx?$/,
       exclude: /(node_modules|bower_components)/,
       loader: 'babel',
       query: {
         optional: ['runtime'],
-        plugins: [
-          "flow-comments"
-        ],
-        extra: {},
-        blacklist: ["flow"],
+        blacklist: [],
         retainLines: true,
         comments: false
       }
     };
+    return result;
+  };
 
-    result.query.plugins = result.query.plugins.concat(extraPlugins);
+  /**
+   * Only called at client side. Adds babel plugins like react-transform and
+   * client resolve operations.
+   *
+   * @return {Object}
+   */
+  getBabelLoaderExtras() {
+    var result = {
+      plugins: [
+        {
+          transformer: this._createPlugin(),
+          position: 'after'
+        }
+      ],
+      extra: {}
+    };
 
-    if (frameworkConfig.hotReload && withHotReload) {
-      result.query.plugins.push('react-transform');
-      result.query.extra['react-transform'] = {
+    if (this._frameworkConfig.hotReload) {
+      result.plugins.push('react-transform');
+      result.extra['react-transform'] = {
         transforms: [
           //{
           //  'transform': 'react-transform-hmr',
@@ -198,9 +207,8 @@ export default class WebpackCompiler extends Compiler {
         ]
       };
     }
-
     return result;
-  };
+  }
 
   static getFileLoaderConfig(config) {
     var test;
@@ -240,31 +248,17 @@ export default class WebpackCompiler extends Compiler {
       },
       module: {
         loaders: [
-          WebpackCompiler.getBabelLoaderConfig(this._frameworkConfig, [], true),
+          WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
           { test: /\.css$/, loader: "style-loader?returnComplete=true!css-loader" }
         ]
       },
-
-      // Right now we don't need these, since we're compiling via webpack.
-      // But we still need to figure out how to send transformer with state
-      // to babel-loader. Maybe use "extra" like react-transform? We need
-      // to send functions, so that could also not work, worst case scenario
-      // is to rely on regex strings instead.
-      // TODO: Fix client resolve feature, make it work.
-      babel: {
-        plugins: [
-          "flow-comments",
-          {
-            transformer: this._createPlugin(),
-            position: 'after'
-          }
-        ]
-      },
-
+      babel: this.getBabelLoaderExtras(),
       resolve: { alias: {} },
       plugins: [ new this._webpack.optimize.OccurenceOrderPlugin() ]
     };
+
+
 
     for (i in this._clientReplace) {
       if (!this._clientReplace.hasOwnProperty(i)) continue;
