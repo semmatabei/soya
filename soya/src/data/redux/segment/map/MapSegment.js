@@ -27,9 +27,6 @@ export default class MapSegment extends Segment {
    */
   _actionCreator;
 
-  /**
-   *
-   */
   constructor() {
     super();
     this._queries = {};
@@ -200,6 +197,57 @@ export default class MapSegment extends Segment {
       }
       return state;
     };
+  }
+
+  /**
+   * Default implementation is to return true if both Segment's and
+   * ActionCreator's prototype are the same.
+   *
+   * Segment dependencies are handled independently, since all of them are
+   * registered in the same way.
+   *
+   * TODO: Mark which method is safe/intended for child class override.
+   *
+   * @param {Segment} segment
+   * @return {boolean}
+   */
+  _isImplementationEqual(segment) {
+    if (!(segment instanceof MapSegment)) {
+      return false;
+    }
+
+    // Note: Since this method is also executed on server, we can depend on
+    // Object.getPrototypeOf() to capture Segment clash. On server side this
+    // will guarantee a thrown Error if there's a clash.
+    if (Object.getPrototypeOf) {
+      var thisPrototype = Object.getPrototypeOf(this);
+      var thatPrototype = Object.getPrototypeOf(segment);
+      var thisActionCreatorPrototype = Object.getPrototypeOf(this._actionCreator);
+      var thatActionCreatorPrototype = Object.getPrototypeOf(segment._actionCreator);
+
+      return thisPrototype === thatPrototype &&
+          thisActionCreatorPrototype === thatActionCreatorPrototype;
+    }
+
+    // Since all Segments are registered at componentWillMount(), we
+    // don't need to check anything at client side. All possible Segment clash
+    // would have already triggered an error at server side.
+    return true;
+  }
+
+  /**
+   * Assume that there are no configuration/extra stuff that makes the behavior
+   * of the other segment differ.
+   *
+   * User's MapSegment implementation may have additional configuration that
+   * may make two prototype-identical instance behave differently. They can
+   * override this method to do so.
+   *
+   * @param {MapSegment} segment
+   * @returns {boolean}
+   */
+  _isBehaviorEqual(segment) {
+    return true;
   }
 
   /**

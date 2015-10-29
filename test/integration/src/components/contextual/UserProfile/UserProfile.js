@@ -7,7 +7,8 @@ var count = 1;
 
 export default class UserProfile extends DataComponent {
   registerSegments() {
-    this.register(new UserSegment(), { username: this.props.username }, 'user');
+    this.register(new UserSegment());
+    this.subscribe(UserSegment.segmentName, { username: this.props.username }, 'user');
   }
 
   render() {

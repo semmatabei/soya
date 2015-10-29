@@ -20,9 +20,10 @@
  */
 export default class Segment {
   /**
-   * Called by ReduxStore when this Segment is registered.
+   * Called by ReduxStore when this Segment is about to be registered.
    *
-   * IMPORTANT NOTE: This operation should be idempotent.
+   * IMPORTANT NOTE: This operation should be idempotent. May be called multiple
+   * times.
    *
    * @param {Function} PromiseImpl
    */
@@ -170,6 +171,44 @@ export default class Segment {
    * @return {Function}
    */
   _getReducer() {
+
+  }
+
+  /**
+   * Check if the behavior of the given Segment is equal to the behavior of
+   * this Segment. If behavior is not equal (e.g. different settings or
+   * different class prototype even), return false.
+   *
+   * Called by ReduxStore to ensure that there are no Segment registration
+   * clash.
+   *
+   * @param {Segment} segment
+   * @return {boolean}
+   */
+  _isEqual(segment) {
+    return this._isImplementationEqual(segment) &&
+        this._isBehaviorEqual(segment);
+  }
+
+  /**
+   * Returns true if the given Segment's prototype and its dependencies
+   * are the same.
+   *
+   * @param {Segment} segment
+   * @return {boolean}
+   */
+  _isImplementationEqual(segment) {
+
+  }
+
+  /**
+   * Returns true if the given Segment's configuration is the same with
+   * this instance.
+   *
+   * @param {Segment} segment
+   * @return {boolean}
+   */
+  _isBehaviorEqual(segment) {
 
   }
 }

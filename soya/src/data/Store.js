@@ -28,6 +28,20 @@ export default class Store {
   }
 
   /**
+   * Called by framework code before it starts rendering.
+   */
+  _startRender() {
+
+  }
+
+  /**
+   * Called by framework code after render is complete.
+   */
+  _endRender() {
+
+  }
+
+  /**
    * @return {boolean}
    */
   shouldRenderBeforeServerHydration() {

@@ -15,6 +15,14 @@ export default class DataComponent extends React.Component {
       unsubscribe: {}
     };
 
+    // Both actions and unsubscribe is not part of state because it shouldn't
+    // affect rendering in any way. Actions are determined at mounting and
+    // shouldn't change throughout this component's lifecycle. Unsubscribe
+    // contains functions that unsubscribes this component from state changes,
+    // but it's the actual state that matters.
+    this.actions = {};
+    this.unsubscribe = {};
+
     if (!(this.getReduxStore() instanceof ReduxStore)) {
       throw new Error('ReduxStore is not properly wired to this component: ' + this.constructor.name + '.');
     }
@@ -43,29 +51,31 @@ export default class DataComponent extends React.Component {
 
   /**
    * @param {Segment} segment
+   */
+  register(segment) {
+    var actionCreator = this.getReduxStore().register(segment);
+    this.actions[segment._getName()] = actionCreator;
+  }
+
+  /**
+   * @param {string} segmentName
    * @param {any} query
    * @param {string} stateName
    * @param {?Object} queryOptions
    * @param {?Object} hydrationOption
    */
-  register(segment, query, stateName, queryOptions, hydrationOption) {
+  subscribe(segmentName, query, stateName, queryOptions, hydrationOption) {
     // Unregister if already registered.
     this.unregister(stateName);
-    console.log('register', segment, this.state);
     var callback = (newState) => {
       this.setState({[stateName]: newState});
     };
 
-    var storeRef = this.getReduxStore().register(segment, query, callback,
-      this, queryOptions, hydrationOption);
-    var action = this.state.action;
-    var unsubscribe = this.state.unsubscribe;
-    action[segment._getName()] = storeRef.actionCreator;
-    unsubscribe[stateName] = storeRef.unsubscribe;
+    var storeRef = this.getReduxStore().subscribe(
+      segmentName, query, callback, this, queryOptions, hydrationOption);
+    this.unsubscribe[segmentName] = storeRef.unsubscribe;
     this.setState({
-     [stateName]: storeRef.getState(),
-      action: action,
-      unsubscribe: unsubscribe
+     [stateName]: storeRef.getState()
     });
   }
 
@@ -73,11 +83,10 @@ export default class DataComponent extends React.Component {
    * @param {string} stateName
    */
   unregister(stateName) {
-    console.log('unregister', stateName);
     delete this.state[stateName];
-    if (this.state.unsubscribe[stateName]) {
-      this.state.unsubscribe[stateName]();
-      delete this.state.unsubscribe[stateName];
+    if (this.unsubscribe[stateName]) {
+      this.unsubscribe[stateName]();
+      delete this.unsubscribe[stateName];
     }
   }
 
@@ -86,14 +95,12 @@ export default class DataComponent extends React.Component {
    */
   componentWillMount() {
     this.registerSegments();
-    console.log('COMPONENT WILL MOUNT');
   }
 
   /**
    * Unregister all segments.
    */
   componentWillUnmount() {
-    console.log('COMPONENT WILL UNMOUNT');
     this.getReduxStore().unsubscribe(this);
   }
 }

@@ -308,12 +308,14 @@ export default class Application {
 
     if (store) {
       if (store.shouldRenderBeforeServerHydration()) {
+        store._startRender();
         // Render first to let all segment and query requirements registered
         // to the store. This is weird and sort of wasteful, but we haven't
         // found a better way yet.
         renderResult.contentRenderer.render(
           routeResult.routeArgs, this._routeForPages[routeResult.pageName],
           this._clientConfig, null, pageDep, httpRequest.isSecure());
+        store._endRender();
       }
 
       this._logger.debug('Store requirements gathered, start hydration.', null, store);
@@ -331,10 +333,14 @@ export default class Application {
       if (store) {
         state = store._getState();
         this._logger.debug('Finish hydration.', null, state);
+        store._startRender();
       }
+
       var htmlResult = renderResult.contentRenderer.render(
         routeResult.routeArgs, this._routeForPages[routeResult.pageName],
         this._clientConfig, state, pageDep, httpRequest.isSecure());
+
+      if (store) store._endRender();
 
       response.statusCode = renderResult.httpStatusCode;
       response.statusMessage = renderResult.httpStatusMessage;

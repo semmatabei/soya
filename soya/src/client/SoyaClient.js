@@ -174,7 +174,9 @@ export default class SoyaClient {
   _renderCallback(store, renderResult) {
     // Start rendering, this also do Segment registrations.
     window.renderResult = renderResult;
+    store._startRender();
     this._currentPageDismantle = renderResult.contentRenderer.render();
+    store._endRender();
 
     if (store) {
       // If this page has Store, we need to hydrate.

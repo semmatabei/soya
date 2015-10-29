@@ -14,90 +14,8 @@ var Promise;
 
 type StoreReference = {
   getState: Function;
-  getActionCreator: Function;
   unregister: Function;
 };
-
-class Component extends DataComponent {
-  // TODO: Use immutable on state?
-  constructor(props, context) {
-    super(props, context);
-    this.state = {
-      actions: {},
-      pieces: {},
-      unregisterFns: {}
-    };
-    this.__soyaReduxStoreId = this.props.store.registerComponent(this);
-  }
-
-  registerStores() {
-    // Subscription then becomes idempotent because it's Segment that calls setState() directly.
-    this.register(new UserSegment({id: this.props.userId}), 'user');
-    this.register(new UserSegment({id: this.props.friendUserId}, 'friendUser');
-    this.setState({userAction: userAction});
-  }
-
-  register(segment, stateVar, hydrationOption) {
-    // Unregister if already registered.
-    this.unregister(stateVar);
-    var callback = (newState) => {
-      this.setState({[stateVar]: newState});
-    };
-    var storeRef = this.props.store.register(segment, callback, hydrationOption);
-    var actions = this.state.actions;
-    var unregister = this.state.unregister;
-    unregister[stateVar] = storeRef.unregister;
-    var stateToSet = {
-      [stateVar]: storeRef.getState(),
-      unregister: unregister
-    };
-    if (!actions[stateVar]) {
-      stateToSet.actions = actions;
-      stateToSet.actions[stateVar] = storeRef.getActionCreator();
-    }
-    this.setState(stateToSet);
-  }
-
-  unregister(name) {
-    if (this.state.unregister[stateVar]) {
-      this.state.unregister[stateVar]();
-      delete this.state.unregister[stateVar];
-      delete this.state.piece[stateVar];
-      // TODO: Also remove action if no action name exist.
-    }
-  }
-
-  render() {
-    // Access queried state.
-    this.state.piece.user.data
-    this.state.piece.friendUser.data
-
-    // Access error information.
-    this.state.piece.user.error
-    this.state.piece.friendUser.error
-
-    // Check if data fetching is done.
-    this.state.piece.user.isHydrated
-    this.state.piece.friendUser.isHydrated
-  }
-
-  handleClick() {
-    // Runtime registration for fetching and subscription is allowed.
-    // After registration this component will be subscribed to the segment piece.
-    this.register(new UserSegment({id: haha}), 'newUser');
-
-    // Changing queries in runtime is also easy. Just re-register with the same
-    // name! Old one will be unregistered!
-    this.register(new UserSegment({id: bleh}, 'user');
-
-    // Do manual data loading (data is loaded and placed to state, but no subscription is made!);
-    var action = this.state.actions.createLoadAction({id: 'haha'}, options, forceLoad);
-    var promise = this.store.dispatch(action);
-    promise.then((data) => {
-      // do stuff..
-    });
-  }
-}
 
 */
 
@@ -209,6 +127,11 @@ export default class ReduxStore extends Store {
   _allowHandleChange;
 
   /**
+   * @type {boolean}
+   */
+  _allowRegisterSegment;
+
+  /**
    * Receives Promises/A+ implementation. We don't want to load more than 1
    * promise library, so we'll have the user supply it to us. This should be
    * the same library, or a library compatible with the one used at
@@ -219,6 +142,7 @@ export default class ReduxStore extends Store {
    */
   constructor(PromiseImpl, initialState) {
     super();
+    this._allowRegisterSegment = false;
     this._allowHandleChange = true;
     this._segments = {};
     this._reducers = {};
@@ -237,6 +161,20 @@ export default class ReduxStore extends Store {
    */
   getStore() {
     return this._store;
+  }
+
+  /**
+   * Only allow Segment registration at render process.
+   */
+  _startRender() {
+    this._allowRegisterSegment = true;
+  }
+
+  /**
+   * Disable segment registration after render process.
+   */
+  _endRender() {
+    this._allowRegisterSegment = false;
   }
 
   /**
@@ -297,7 +235,7 @@ export default class ReduxStore extends Store {
     // when we compare each piece, with the benefits of not doing unnecessary
     // re-rendering.
     var segmentName, segment, segmentState, prevSegmentState, segmentSubscribers,
-        queryId, querySubscribers, subscriberId, segmentPiece;
+        queryId, querySubscribers, subscriberId, segmentPiece, shouldUpdate;
     for (segmentName in this._segments) {
       if (!this._segments.hasOwnProperty(segmentName)) continue;
       segment = this._segments[segmentName];
@@ -307,8 +245,15 @@ export default class ReduxStore extends Store {
       for (queryId in segmentSubscribers) {
         if (!segmentSubscribers.hasOwnProperty(queryId)) continue;
         querySubscribers = segmentSubscribers[queryId];
-        segmentPiece = segment._comparePiece(prevSegmentState, segmentState, queryId);
-        if (segmentPiece != null) {
+        // If segmentState is previously null, then this is a new query call.
+        // First getState() method call should already return the initialized
+        // object, so we don't need to call update.
+        shouldUpdate = false;
+        if (prevSegmentState != null) {
+          segmentPiece = segment._comparePiece(prevSegmentState, segmentState, queryId);
+          shouldUpdate = segmentPiece != null;
+        }
+        if (shouldUpdate) {
           // Segment piece has changed, call all registered subscribers.
           for (subscriberId in querySubscribers) {
             if (!querySubscribers.hasOwnProperty(subscriberId)) continue;
@@ -455,43 +400,42 @@ export default class ReduxStore extends Store {
    * return the queried state, this makes it easier to separate concerns and
    * not have one component asking for a state queried by another component.
    *
+   * TODO: Handle Segment dependencies!
+   *
    * @param {Segment} segment
    * @param {string} query
    * @param {Function} callback
    * @param {any} component
    * @param {?Object} queryOptions
    * @param {?{[key: RenderType]: HydrationType}} hydrationOption
-   * @return {StoreReference}
+   * @return {ActionCreator}
    */
-  register(segment, query, callback, component, queryOptions, hydrationOption) {
-    // TODO: Handle Segment dependencies!
-    // Determine subscriber ID.
-    var subscriberId = component[SUBSCRIBER_ID];
-    if (!subscriberId) {
-      subscriberId = this._nextSubscriberId++;
-      component[SUBSCRIBER_ID] = subscriberId;
+  register(segment) {
+    if (!this._allowRegisterSegment) {
+      throw new Error('Segment registration is only allowed at render process!');
     }
 
-    // Initialize hydration option.
-    hydrationOption = this._initHydrationOption(hydrationOption);
+    // TODO: Fix! This is ugly - activate only exists to ensure ReduxStore and its Segments utilize the same Promise implementation.
+    segment._activate(Promise);
 
     // Register segment.
     var segmentName = segment._getName();
     var registeredSegment = this._segments[segmentName];
     if (!registeredSegment) {
       registeredSegment = segment;
-      registeredSegment._activate(Promise);
       this._segments[segmentName] = segment;
       this._reducers[segmentName] = segment._getReducer();
       this._hydrationOptions[segmentName] = {};
       this._subscribers[segmentName] = {};
       this._actionCreators[segmentName] = segment._getActionCreator();
     }
-    else if (registeredSegment.prototype != segment.prototype) {
+    else if (!registeredSegment._isEqual(segment)) {
       if (this._allowOverwriteSegment[segmentName]) {
+        registeredSegment = segment;
         this._segments[segmentName] = segment;
         this._reducers[segmentName] = segment._getReducer();
         this._hydrationOptions[segmentName] = {};
+        this._subscribers[segmentName] = {};
         this._actionCreators[segmentName] = segment._getActionCreator();
 
         // Nullifies the current segment data, since we are replacing.
@@ -503,7 +447,36 @@ export default class ReduxStore extends Store {
     }
 
     // No longer allow segment overwrites for this segment name.
+    // We only allow segment overwrites for *first* registration.
     delete this._allowOverwriteSegment[segmentName];
+
+    return registeredSegment._getActionCreator();
+  }
+
+  /**
+   * @param {string} segmentName
+   * @param {any} query
+   * @param {Function} callback
+   * @param {any} component
+   * @param {?Object} queryOptions
+   * @param {?{[key: RenderType]: HydrationType}} hydrationOption
+   * @return {}
+   */
+  subscribe(segmentName, query, callback, component, queryOptions, hydrationOption) {
+    // Determine subscriber ID.
+    var subscriberId = component[SUBSCRIBER_ID];
+    if (!subscriberId) {
+      subscriberId = this._nextSubscriberId++;
+      component[SUBSCRIBER_ID] = subscriberId;
+    }
+
+    var registeredSegment = this._segments[segmentName];
+    if (!registeredSegment) {
+      throw new Error('Cannot subscribe, Segment is not registered: ' + segmentName + '.');
+    }
+
+    // Initialize hydration option.
+    hydrationOption = this._initHydrationOption(hydrationOption);
 
     // Register query.
     var queryId = registeredSegment._registerQuery(query, queryOptions);
@@ -519,20 +492,22 @@ export default class ReduxStore extends Store {
       if (hydrationOption[CLIENT_FULL] > finalHydrationOption[CLIENT_FULL]) finalHydrationOption[CLIENT_FULL] = hydrationOption[CLIENT_FULL];
     }
 
-    // Register subscriber.
-    if (!this._subscribers[segmentName][queryId]) this._subscribers[segmentName][queryId] = {};
-    this._subscribers[segmentName][queryId][subscriberId] = callback;
-
     // Populate with initial data if not already populated.
     // Since getSegmentPiece() is supposed to be a fast operation anyway, we
     // can just check the data.
     if (!this._getSegmentPiece(segmentName, queryId)) {
       var initAction = registeredSegment._createInitAction(queryId);
+      if (typeof initAction == 'function') {
+        throw new Error('Init action must be sync! Please return an action object instead!');
+      }
       this.dispatch(initAction);
     }
 
+    // Register subscriber, previous init action is sync, so don't have to worry.
+    if (!this._subscribers[segmentName][queryId]) this._subscribers[segmentName][queryId] = {};
+    this._subscribers[segmentName][queryId][subscriberId] = callback;
+
     var result = {
-      actionCreator: registeredSegment._getActionCreator(),
       getState: this._getSegmentPiece.bind(this, segmentName, queryId),
       unsubscribe: this._unsubscribe.bind(this, segmentName, queryId, subscriberId)
     };
