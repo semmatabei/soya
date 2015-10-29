@@ -34,6 +34,7 @@ var frameworkConfig = {
   routesFilePath: path.join(dirname, 'routes.yml'),
   clientResolve: [],
   clientReplace: {},
+  debug: true,
   minifyJs: false
 };
 

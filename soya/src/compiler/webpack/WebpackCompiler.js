@@ -178,18 +178,26 @@ export default class WebpackCompiler extends Compiler {
    * Only called at client side. Adds babel plugins like react-transform and
    * client resolve operations.
    *
+   * @param {Object<string, boolean>} entryPointAbsolutePathMap
    * @return {Object}
    */
-  getBabelLoaderExtras() {
+  getBabelLoaderExtras(entryPointAbsolutePathMap) {
     var result = {
-      plugins: [
-        {
-          transformer: this._createPlugin(),
-          position: 'after'
-        }
-      ],
+      plugins: [],
       extra: {}
     };
+
+    if (this._frameworkConfig.hotReload) {
+      result.plugins.push({
+        transformer: this._createHotModuleAcceptPlugin(entryPointAbsolutePathMap, this._frameworkConfig),
+        position: 'before'
+      });
+    }
+
+    result.plugins.push({
+      transformer: this._createResolvePlugin(),
+      position: 'after'
+    });
 
     if (this._frameworkConfig.hotReload) {
       result.plugins.push('react-transform');
@@ -253,7 +261,6 @@ export default class WebpackCompiler extends Compiler {
           { test: /\.css$/, loader: "style-loader?returnComplete=true!css-loader" }
         ]
       },
-      babel: this.getBabelLoaderExtras(),
       resolve: { alias: {} },
       plugins: [ new this._webpack.optimize.OccurenceOrderPlugin() ]
     };
@@ -278,13 +285,17 @@ export default class WebpackCompiler extends Compiler {
       configuration.plugins.push(new this._webpack.optimize.UglifyJsPlugin({}));
     }
 
-    var pageToRequire;
+    var pageToRequire, entryPointAbsolutePathMap = {};
     for (i = 0; i < entryPoints.length; i++) {
       entryPoint = entryPoints[i];
       pageToRequire = path.join(entryPoint.rootAbsolutePath, entryPoint.name + '.js');
+      entryPointAbsolutePathMap[pageToRequire] = true;
       configuration.entry[entryPoint.name] = pageToRequire;
       entryPointList.push(entryPoint.name);
     }
+
+    // Add babel plugins.
+    configuration.babel = this.getBabelLoaderExtras(entryPointAbsolutePathMap);
 
     var compiler = this._webpack(configuration);
     var self = this;
@@ -294,6 +305,12 @@ export default class WebpackCompiler extends Compiler {
         // Error occured. Print error messages.
         this._printErrorMessages(stats);
         return;
+      }
+
+      var key;
+      for (key in entryPointAbsolutePathMap) {
+        if (!entryPointAbsolutePathMap.hasOwnProperty(key)) continue;
+        entryPointAbsolutePathMap[key] = true;
       }
 
       var i, chunkMap = {};
@@ -405,10 +422,11 @@ export default class WebpackCompiler extends Compiler {
     throw error;
   }
 
-  _createPlugin() {
+
+  _createResolvePlugin() {
     var self = this;
     return function({ Plugin, types: t }) {
-      return new Plugin("soya-webpack-compiler", {
+      return new Plugin("soya-resolve-plugin", {
         visitor: {
           CallExpression(node, parent) {
             if (t.isIdentifier(node.callee, { name: "require" })) {
@@ -423,6 +441,47 @@ export default class WebpackCompiler extends Compiler {
                     return;
                   }
                 }
+              }
+            }
+          }
+        }
+      });
+    };
+  }
+
+  /**
+   * @param {Object} frameworkConfig
+   * @param {Object<string, boolean>} entryPointAbsolutePathMap
+   */
+  _createHotModuleAcceptPlugin(entryPointAbsolutePathMap, frameworkConfig) {
+    var self = this;
+    return function({ Plugin, types: t }) {
+      return new Plugin("soya-hot-module-accept-plugin", {
+        visitor: {
+          ClassDeclaration(node, parent) {
+            var curFilePath;
+            if (frameworkConfig.hotReload) {
+              curFilePath = this.scope.hub.file.opts.filename;
+              if (entryPointAbsolutePathMap[curFilePath]) {
+                entryPointAbsolutePathMap[curFilePath] = false;
+                this.insertAfter([
+                  t.ifStatement(
+                    t.memberExpression(t.identifier('module'), t.identifier('hot')),
+                    t.blockStatement([
+                      t.expressionStatement(t.callExpression(
+                        t.memberExpression(t.memberExpression(t.identifier('module'), t.identifier('hot')), t.identifier('accept')),
+                        [
+                          t.functionExpression(null, [], t.blockStatement([
+                            t.expressionStatement(t.callExpression(
+                              t.memberExpression(t.identifier('console'), t.identifier('error')),
+                              [t.literal('Unable to accept hot reload module!'), t.identifier('arguments')]
+                            ))
+                          ]))
+                        ]
+                      ))
+                    ])
+                  )
+                ]);
               }
             }
           }
