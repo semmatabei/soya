@@ -23,7 +23,7 @@ export default class DataComponent extends React.Component {
     this.actions = {};
     this.unsubscribe = {};
 
-    if (!(this.getReduxStore() instanceof ReduxStore)) {
+    if (!this.getReduxStore() || !this.getReduxStore().__isReduxStore) {
       throw new Error('ReduxStore is not properly wired to this component: ' + this.constructor.name + '.');
     }
   }
@@ -46,6 +46,10 @@ export default class DataComponent extends React.Component {
    * NOTE: Registration should be done with register() method.
    */
   registerSegments() {
+
+  }
+
+  subscribeQuery(props) {
 
   }
 
@@ -88,6 +92,10 @@ export default class DataComponent extends React.Component {
       this.unsubscribe[stateName]();
       delete this.unsubscribe[stateName];
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+
   }
 
   /**

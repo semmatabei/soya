@@ -9,7 +9,35 @@ var userJson = {
     firstName: 'Ricky',
     lastName: 'Christie',
     email: 'ricky@traveloka.com'
+  },
+  willywonka: {
+    username: 'willywonka',
+    firstName: 'Willy',
+    lastName: 'Wonka',
+    email: 'willy@wonka.com'
+  },
+  captainjack: {
+    username: 'captainjack',
+    firstName: 'Captain',
+    lastName: 'Jack Sparrow',
+    email: 'captain@blackpearl.com'
+  },
+  jedikiller: {
+    username: 'jedikiller',
+    firstName: 'Anakin',
+    lastName: 'Skywalker',
+    email: 'jedikiller@deathstar.com'
+  },
+  meesa: {
+    username: 'meesa',
+    firstName: 'Jar',
+    lastName: 'Jar Binks',
+    email: 'meesa@jarjar.com'
   }
+};
+
+var notFound = {
+  error: 'Username does not exist.'
 };
 
 class UserJson extends Page {
@@ -18,10 +46,19 @@ class UserJson extends Page {
   }
 
   render(httpRequest, routeArgs, store, callback) {
-    var jsonRenderer = new JsonRenderer(userJson);
-    var renderResult = new RenderResult(jsonRenderer);
-    // Simulate network delay of 5 seconds.
-    setTimeout(callback.bind({}, renderResult), 5000);
+    var username = routeArgs.username;
+    var jsonRenderer, renderResult;
+    if (userJson.hasOwnProperty(username)) {
+      jsonRenderer = new JsonRenderer(userJson[username]);
+      renderResult = new RenderResult(jsonRenderer);
+    } else {
+      jsonRenderer = new JsonRenderer(notFound);
+      renderResult = new RenderResult(jsonRenderer);
+      renderResult.setStatusCode(404);
+    }
+
+    // Simulate network delay of 3 seconds.
+    setTimeout(callback.bind({}, renderResult), 3000);
   }
 }
 

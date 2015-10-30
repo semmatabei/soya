@@ -13,9 +13,16 @@ import { Promise } from 'es6-promise';
 import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {
+  componentWillMount() {
+    this.setState({
+      serverUsername: 'rickchristie',
+      clientUsername: 'captainjack'
+    });
+  }
+
   render() {
     return <div>
-      <h1>Server-Side Hydration Test</h1>
+      <h1>Server-Side Hydration</h1>
       <h2>Specs</h2>
       <ul>
         <li>HTML sent by server must already include user profile data.</li>
@@ -23,32 +30,29 @@ class Component extends React.Component {
         <li>Initial state from server gets passed to Soya client runtime.</li>
         <li>React client side rendering works without inconsistencies in generated markup.</li>
         <li>UI handlers assigned appropriately. <a href="javascript:void(0)" onClick={this.handleClick}>This link handler</a> must still work.</li>
-        <li>Client side re-rendering is triggered when this link is clicked: <a href="javascript:void(0)" onClick={this.forceChangeStore.bind(this)}>forge new profile.</a></li>
+        <li>Client side re-rendering is triggered when this link is clicked: <a href="javascript:void(0)" onClick={this.loadAnotherUser.bind(this)}>load another profile.</a></li>
       </ul>
-      <h2>Rendered User Profile Badge:</h2>
-      <UserProfile reduxStore={this.props.reduxStore} username={'rickchristie'}></UserProfile>
+      <h2>Server Hydrated User Profile Badge:</h2>
+      <UserProfile reduxStore={this.props.reduxStore} username={this.state.serverUsername}></UserProfile>
+      <h1>Client-Side Hydration</h1>
+      <h2>Specs</h2>
+      <ul>
+        <li>HTML sent by server doesn't include this user's profile data.</li>
+        <li>This user's data is loaded asynchronously with AJAX.</li>
+        <li>Upon waiting for the data to load, a loading state is returned by the component.</li>
+      </ul>
+      <h2>Client Hydrated User Profile Badge:</h2>
+      <UserProfile reduxStore={this.props.reduxStore} username={this.state.clientUsername} loadAtClient={true}></UserProfile>
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>
   }
 
-  forceChangeStore() {
-    var payload = {
-      type: 'LOAD_USER',
-      queryId: 'rickchristie',
-      payload: {
-        data: {
-          username: 'winston.churchill',
-          firstName: 'Winston',
-          lastName: 'Churchill',
-          email: 'churchill@allied.ww2'
-        },
-        loaded: true,
-        errors: null
-      }
-    };
-    this.props.reduxStore._store.dispatch(payload);
+  loadAnotherUser() {
+    this.setState({
+      serverUsername: 'meesa'
+    });
   }
 
   handleClick() {
@@ -56,9 +60,9 @@ class Component extends React.Component {
   }
 }
 
-class ServerSideHydration extends Page {
+class Hydration extends Page {
   static get pageName() {
-    return 'ServerSideHydration';
+    return 'Hydration';
   }
 
   createStore(initialState) {
@@ -68,12 +72,14 @@ class ServerSideHydration extends Page {
 
   render(httpRequest, routeArgs, store, callback) {
     var reactRenderer = new ReactRenderer();
-    reactRenderer.head = '<title>Server-Side Hydration</title>';
-    reactRenderer.body = React.createElement(Component, { reduxStore: store });
+    reactRenderer.head = '<title>Hydration Test</title>';
+    reactRenderer.body = React.createElement(Component, {
+      reduxStore: store
+    });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);
   }
 }
 
-register(ServerSideHydration);
-export default ServerSideHydration;
+register(Hydration);
+export default Hydration;

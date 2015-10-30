@@ -132,6 +132,11 @@ export default class ReduxStore extends Store {
   _allowRegisterSegment;
 
   /**
+   * @type {boolean}
+   */
+  __isReduxStore;
+
+  /**
    * Receives Promises/A+ implementation. We don't want to load more than 1
    * promise library, so we'll have the user supply it to us. This should be
    * the same library, or a library compatible with the one used at
@@ -142,6 +147,7 @@ export default class ReduxStore extends Store {
    */
   constructor(PromiseImpl, initialState) {
     super();
+    this.__isReduxStore = true;
     this._allowRegisterSegment = false;
     this._allowHandleChange = true;
     this._segments = {};

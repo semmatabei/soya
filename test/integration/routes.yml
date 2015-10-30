@@ -11,16 +11,16 @@ LOAD_COMPONENT:
     - [path, /load-component]
 
 SERVER_SIDE_HYDRATION:
-  page: ServerSideHydration
+  page: Hydration
   nodes:
     - [method, GET]
-    - [path, /data/redux/server-side-hydration]
+    - [path, /data/redux/hydration]
 
 USER_JSON:
   page: UserJson
   nodes:
     - [method, GET]
-    - [path, /api/user.json]
+    - [path, /api/user/:username]
 
 NOT_FOUND:
   page: NotFound

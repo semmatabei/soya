@@ -13,9 +13,9 @@ export default class UserActionCreator extends MapActionCreator {
   _createThunkAction(query, queryId) {
     return (dispatch) => {
       var result = new Promise((resolve, reject) => {
-        request.get('http://localhost:8000/api/user.json').end((err, res) => {
+        request.get('http://localhost:8000/api/user/' + query.username).end((err, res) => {
           if (res.ok) {
-            var payload = JSON.parse(res.text).rickchristie;
+            var payload = JSON.parse(res.text);
             dispatch(this._createLoadActionObject(queryId, payload));
             resolve();
           } else {
