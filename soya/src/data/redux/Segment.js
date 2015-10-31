@@ -58,6 +58,9 @@ export default class Segment {
   /**
    * Returns query ID. To be used by ReduxStore in identifying queries.
    *
+   * NOTE: This method will be called plenty of times, so make sure to skip
+   * query registration if it's already registered.
+   *
    * @param {any} query
    * @param {Object} options
    * @return {string}

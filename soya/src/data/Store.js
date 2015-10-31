@@ -9,6 +9,16 @@
  */
 export default class Store {
   /**
+   * Called by Application and SoyaClient immediately after receiving the Store
+   * instance from Page.
+   *
+   * @param {RenderType} renderType
+   */
+  _setRenderType(renderType) {
+    throw new Error('Abstract method not implemented.');
+  }
+
+  /**
    * @return {any}
    */
   _getState() {
@@ -31,31 +41,30 @@ export default class Store {
    * Called by framework code before it starts rendering.
    */
   _startRender() {
-
+    // no-op.
   }
 
   /**
    * Called by framework code after render is complete.
    */
   _endRender() {
-
+    // no-op.
   }
 
   /**
    * @return {boolean}
    */
-  shouldRenderBeforeServerHydration() {
+  _shouldRenderBeforeServerHydration() {
     return false;
   }
 
   /**
    * Called by Soya server and client runtime when rendering pages. Calls the
-   * given callback when all blocking render is complete.
+   * given callback when all loading is complete.
    *
-   * @param {RenderType} renderType
    * @return {Promise}
    */
-  hydrate(renderType) {
+  hydrate() {
     throw new Error('Abstract method not implemented.');
   }
 }

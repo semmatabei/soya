@@ -138,13 +138,16 @@ export default class Application {
   constructor(logger, componentRegister, routes, router, reverseRouter, errorHandler,
               compiler, frameworkConfig, serverConfig, clientConfig) {
     // Change register function to our real client runtime function.
-    if (frameworkConfig.hotReload) {
-      // Load hot reload client runtime if needed.
-      this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClientHot');
-      this._addReplace(frameworkConfig, 'soya/lib/data/redux/DataComponent', 'soya/lib/data/redux/DataComponentHot');
-    } else {
-      this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClient');
-    }
+    //if (frameworkConfig.hotReload) {
+    //  // Load hot reload client runtime if needed.
+    //  this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClientHot');
+    //  this._addReplace(frameworkConfig, 'soya/lib/data/redux/DataComponent', 'soya/lib/data/redux/DataComponentHot');
+    //} else {
+    //
+    //}
+
+    // Change register to real client registration function.
+    this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClient');
 
     // Change react renderer to client version.
     this._addReplace(frameworkConfig, 'soya/lib/page/react/ReactRenderer', 'soya/lib/page/react/ReactRendererClient');
@@ -284,6 +287,9 @@ export default class Application {
     // that pageClass exists.
     var page = new pageClass(this._provider);
     var store = page.createStore(null);
+    if (store) {
+      store._setRenderType(SERVER);
+    }
 
     this._logger.debug('Rendering page: ' + routeResult.pageName + '.', null);
     page.render(httpRequest, routeResult.routeArgs, store,
@@ -307,7 +313,7 @@ export default class Application {
     var promise = Promise.resolve(null);
 
     if (store) {
-      if (store.shouldRenderBeforeServerHydration()) {
+      if (store._shouldRenderBeforeServerHydration()) {
         store._startRender();
         // Render first to let all segment and query requirements registered
         // to the store. This is weird and sort of wasteful, but we haven't

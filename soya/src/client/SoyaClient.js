@@ -5,7 +5,7 @@ import MethodNode from '../router/MethodNode.js';
 import PathNode from '../router/PathNode.js';
 import ClientHttpRequest from '../http/ClientHttpRequest.js';
 import Provider from '../Provider.js';
-import { CLIENT_PARTIAL, CLIENT_FULL } from '../data/RenderType.js';
+import { CLIENT } from '../data/RenderType.js';
 
 // The reason we use full path is to make webpack's resolve.alias work.
 // We need to replace custom node registration with user file so that
@@ -153,6 +153,7 @@ export default class SoyaClient {
     var store = this._storeCache[storeNamespace];
     if (!store) {
       store = page.createStore(pageArgs.hydratedState);
+      store._setRenderType(CLIENT);
     }
     var hasStore = !!store;
 
@@ -177,12 +178,6 @@ export default class SoyaClient {
     store._startRender();
     this._currentPageDismantle = renderResult.contentRenderer.render();
     store._endRender();
-
-    if (store) {
-      // If this page has Store, we need to hydrate.
-      // TODO: Alternate between partial and full render?
-      store.hydrate(CLIENT_PARTIAL);
-    }
   }
 
   /**

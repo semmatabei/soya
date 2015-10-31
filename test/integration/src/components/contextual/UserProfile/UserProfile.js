@@ -2,22 +2,26 @@ import React from 'react';
 
 import UserSegment from '../../../segments/user/UserSegment.js';
 import DataComponent from 'soya/lib/data/redux/DataComponent.js';
-import { SERVER, CLIENT_PARTIAL } from 'soya/lib/data/RenderType.js';
-import { NOOP, NON_BLOCKING } from 'soya/lib/data/HydrationType.js';
+import { SERVER } from 'soya/lib/data/RenderType.js';
 
 export default class UserProfile extends DataComponent {
-  registerSegments() {
+  registerSegments(nextProps) {
+    this.register(new UserSegment());
+  }
+
+  /**
+   * @param nextProps
+   */
+  subscribeQueries(nextProps) {
     var hydrationOption = null;
-    if (this.props.loadAtClient) {
+    if (nextProps.loadAtClient) {
       hydrationOption = {
-        SERVER: NOOP,
-        CLIENT_PARTIAL: NON_BLOCKING
+        SERVER: false
       };
     }
 
-    this.register(new UserSegment());
     this.subscribe(
-      UserSegment.segmentName, { username: this.props.username }, 'user',
+      UserSegment.segmentName, { username: nextProps.username }, 'user',
       null, hydrationOption);
   }
 
