@@ -137,15 +137,6 @@ export default class Application {
    */
   constructor(logger, componentRegister, routes, router, reverseRouter, errorHandler,
               compiler, frameworkConfig, serverConfig, clientConfig) {
-    // Change register function to our real client runtime function.
-    //if (frameworkConfig.hotReload) {
-    //  // Load hot reload client runtime if needed.
-    //  this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClientHot');
-    //  this._addReplace(frameworkConfig, 'soya/lib/data/redux/DataComponent', 'soya/lib/data/redux/DataComponentHot');
-    //} else {
-    //
-    //}
-
     // Change register to real client registration function.
     this._addReplace(frameworkConfig, 'soya/lib/client/Register', 'soya/lib/client/RegisterClient');
 

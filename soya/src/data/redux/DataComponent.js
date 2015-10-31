@@ -1,10 +1,27 @@
 import React from 'react';
 
 import ReduxStore from './ReduxStore.js';
+import ActionCreator from './ActionCreator.js';
 import { isEqualShallow } from './helper.js';
 
 /**
  * Components that wanted to use Soya's redux container may use this.
+ * DataComponent encapsulates how, when, what, and where to fetch context.
+ * Relationship between DataComponent and ReduxStore is as follows:
+ *
+ * 1) DataComponent may register Segments that it needs from ReduxStore.
+ * 2) DataComponent may manually query pieces of Segments it has registered
+ *    using each Segment's ActionCreator.
+ * 3) DataComponent may subscribe to a query. This automatically sets the
+ *    query result to its React state. Each change in the query result will
+ *    also trigger a setState() call to the subscribing DataComponent.
+ *
+ * DataComponent extends React's prop and state relationship:
+ *
+ * 1) Props are given by owner components to their ownee.
+ * 2) Props is the prime determinator of state in components.
+ * 3) Props is the prime determinator of query subscription in DataComponent.
+ * 4) Query subscription determines part of DataComponent's state.
  *
  * @CLIENT_SERVER
  */
@@ -107,11 +124,42 @@ export default class DataComponent extends React.Component {
    * @param {string} stateName
    */
   unsubscribe(stateName) {
-    console.log('[DATA] Un-register', this, stateName);
     if (this.__soyaUnsubscribe[stateName]) {
+      console.log('[DATA] Un-subscribe', this, stateName);
       this.__soyaUnsubscribe[stateName]();
       delete this.__soyaUnsubscribe[stateName];
     }
+  }
+
+  /**
+   * Returns action creator of an already registered segment.
+   *
+   * @param {string} segmentName
+   * @return {ActionCreator}
+   */
+  getActionCreator(segmentName) {
+    if (this.__soyaActions[segmentName] instanceof ActionCreator) {
+      throw new Error('Unable to get action creator for segment \'' + segmentName + '\', segment is not registered.');
+    }
+    return this.__soyaActions[segmentName];
+  }
+
+  /**
+   * Semantics are very similar to shouldComponentUpdate(). This method
+   * determines whether to re-run subscribeQueries() or not when this component
+   * will receive new props.
+   *
+   * Props is the prime determinator of query subscription in DataComponent.
+   *
+   * Default implementation uses shallowEqual. User can override as needed.
+   *
+   * @param {Object} nextProps
+   * @return {boolean}
+   */
+  shouldSubscriptionsUpdate(nextProps) {
+    var shouldUpdateSubscription = !isEqualShallow(this.props, nextProps);
+    console.log('[DATA] Should update subscriptions', this, shouldUpdateSubscription);
+    return shouldUpdateSubscription;
   }
 
   /**
@@ -128,6 +176,10 @@ export default class DataComponent extends React.Component {
    * Based on the above assumptions, this method will do a shallow comparison of
    * both state and props. If the above assumptions are not correct, user can
    * override this method.
+   *
+   * @param {Object} nextProps
+   * @param {Object} nextState
+   * @return {boolean}
    */
   shouldComponentUpdate(nextProps, nextState) {
     var shouldUpdate = !isEqualShallow(this.props, nextProps) || !isEqualShallow(this.state, nextState);
@@ -144,8 +196,14 @@ export default class DataComponent extends React.Component {
    */
   componentWillReceiveProps(nextProps) {
     // TODO: Logger at client! Remove if debug is set to false!
-    console.log('[DATA] Receive new props', this, nextProps);
-    this.subscribeQueries(nextProps);
+    if (this.shouldSubscriptionsUpdate(nextProps)) {
+      // If query subscriptions update, we need to remove past subscriptions.
+      // Otherwise this component may unnecessarily re-render each time the
+      // already unrelated segment piece changes. Since this is costly, this
+      // is why shouldSubscriptionsUpdate() is important.
+      this.getReduxStore().unsubscribe(this);
+      this.subscribeQueries(nextProps);
+    }
   }
 
   /**

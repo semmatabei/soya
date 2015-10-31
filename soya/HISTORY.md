@@ -10,6 +10,8 @@
   shouldComponentUpdate() by default.
 - DataComponent now uses componentWillReceiveProps() to update internal state
   with segment pieces.
+- DataComponent now has shouldSubscriptionsUpdate() - which determines whether
+  we should unsubscribe everything and re-run subscribeQueries() again.
 - Simplified RenderType to just CLIENT and SERVER.
 - Removed HydrationType, CLIENT subscription now *always* load data, while
   SERVER subscription *never* loads. Server hydration is done explicitly with
