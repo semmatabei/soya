@@ -1,0 +1,91 @@
+import React from 'react';
+import Page from 'soya/lib/page/Page';
+import RenderResult from 'soya/lib/page/RenderResult';
+import ReactRenderer from 'soya/lib/page/react/ReactRenderer.js'
+import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
+import register from 'soya/lib/client/Register';
+import UserProfile from '../../../components/contextual/UserProfile/UserProfile.js';
+import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
+
+// TODO: Figure out how to do promise polyfill.
+import { Promise } from 'es6-promise';
+
+import style from '../../../shared/sitewide.css';
+
+class Component extends React.Component {
+  componentWillMount() {
+    this.setState({
+      index: 0,
+      components: []
+    });
+  }
+
+  render() {
+    return <div>
+      <h1>Runtime Data Components</h1>
+      <h3>Specs</h3>
+      <ul>
+        <li>Each time <a href="javascript:void(0)" onClick={this.addProfile.bind(this)}>this link</a> is clicked, a new <code>DataComponent</code> should appear.</li>
+        <li>Queries of the created <code>DataComponent</code> should run automatically.</li>
+        <li>There are {this.props.queries.length} distinct query(s) available. Queries will loop back to the first one.</li>
+        <li>Data should not be fetched more than once for each query.</li>
+      </ul>
+      {this.state.components}
+      <DebugPanel top right bottom>
+        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+      </DebugPanel>
+    </div>;
+  }
+
+  addProfile() {
+    if (this.props.queries.length == 0) {
+      alert('No queries defined in test case!');
+      return;
+    }
+
+    var nextIndex = this.state.index + 1;
+    if (nextIndex >= this.props.queries.length) {
+      nextIndex = 0;
+    }
+    var query = this.props.queries[this.state.index];
+    var components = this.state.components;
+    components.push(
+      <UserProfile reduxStore={this.props.reduxStore} username={query} />
+    );
+    this.setState({
+      index: nextIndex,
+      components: components
+    });
+  }
+}
+
+class RuntimeComponent extends Page {
+  static get pageName() {
+    return 'RuntimeComponent';
+  }
+
+  createStore(initialState) {
+    var reduxStore = new ReduxStore(Promise, initialState);
+    return reduxStore;
+  }
+
+  render(httpRequest, routeArgs, store, callback) {
+    var reactRenderer = new ReactRenderer();
+    reactRenderer.head = '<title>Runtime Data Component</title>';
+    reactRenderer.body = React.createElement(Component, {
+      reduxStore: store,
+      queries: [
+        'rickchristie',
+        'willywonka',
+        'captainjack',
+        'jedikiller',
+        'meesa'
+      ]
+    });
+    var renderResult = new RenderResult(reactRenderer);
+    callback(renderResult);
+  }
+}
+
+register(RuntimeComponent);
+export default RuntimeComponent;

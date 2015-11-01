@@ -10,7 +10,13 @@ LOAD_COMPONENT:
     - [method, GET]
     - [path, /load-component]
 
-SERVER_SIDE_HYDRATION:
+RUNTIME_COMPONENT:
+  page: RuntimeComponent
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/runtime-component]
+
+HYDRATION:
   page: Hydration
   nodes:
     - [method, GET]

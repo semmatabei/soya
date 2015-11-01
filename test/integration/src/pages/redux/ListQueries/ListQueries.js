@@ -14,9 +14,9 @@ class Component extends React.Component {
   }
 }
 
-class MultipleServerHydration extends Page {
+class ListQueries extends Page {
   static get pageName() {
-    return 'MultipleServerHydration';
+    return 'ListQueries';
   }
 
   render(httpRequest, routeArgs, callback) {
@@ -24,5 +24,5 @@ class MultipleServerHydration extends Page {
   }
 }
 
-register(MultipleServerHydration);
-export default MultipleServerHydration;
+register(ListQueries);
+export default ListQueries;
