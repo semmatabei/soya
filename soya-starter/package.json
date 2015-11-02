@@ -16,7 +16,7 @@
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "source-map-support": "^0.3.2",
-    "soya": "^0.0.21",
+    "soya": "^0.0.22",
     "style-loader": "^0.12.4",
     "webpack": "^1.12.2"
   },
