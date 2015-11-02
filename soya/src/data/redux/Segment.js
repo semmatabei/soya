@@ -176,42 +176,4 @@ export default class Segment {
   _getReducer() {
 
   }
-
-  /**
-   * Check if the behavior of the given Segment is equal to the behavior of
-   * this Segment. If behavior is not equal (e.g. different settings or
-   * different class prototype even), return false.
-   *
-   * Called by ReduxStore to ensure that there are no Segment registration
-   * clash.
-   *
-   * @param {Segment} segment
-   * @return {boolean}
-   */
-  _isEqual(segment) {
-    return this._isImplementationEqual(segment) &&
-        this._isBehaviorEqual(segment);
-  }
-
-  /**
-   * Returns true if the given Segment's prototype and its dependencies
-   * are the same.
-   *
-   * @param {Segment} segment
-   * @return {boolean}
-   */
-  _isImplementationEqual(segment) {
-
-  }
-
-  /**
-   * Returns true if the given Segment's configuration is the same with
-   * this instance.
-   *
-   * @param {Segment} segment
-   * @return {boolean}
-   */
-  _isBehaviorEqual(segment) {
-
-  }
 }

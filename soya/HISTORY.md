@@ -2,7 +2,10 @@
 
 ## 0.0.22
 
--
+- Change registerSegments() into createSegments(), a static method.
+- Create ReduxStore.registerDataComponent() to allow conditional runtime
+  creation of DataComponents.
+- Move Segment equality check to ReduxStore().
 
 ## 0.0.21
 

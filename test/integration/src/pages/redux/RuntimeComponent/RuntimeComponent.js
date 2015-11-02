@@ -14,6 +14,7 @@ import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {
   componentWillMount() {
+    this.props.reduxStore.registerDataComponent(UserProfile);
     this.setState({
       index: 0,
       components: []
@@ -49,9 +50,8 @@ class Component extends React.Component {
     }
     var query = this.props.queries[this.state.index];
     var components = this.state.components;
-    components.push(
-      <UserProfile reduxStore={this.props.reduxStore} username={query} />
-    );
+    components.push(<h3>Profile {this.state.index}</h3>);
+    components.push(<UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={query} />);
     this.setState({
       index: nextIndex,
       components: components
@@ -74,6 +74,7 @@ class RuntimeComponent extends Page {
     reactRenderer.head = '<title>Runtime Data Component</title>';
     reactRenderer.body = React.createElement(Component, {
       reduxStore: store,
+      config: this.config,
       queries: [
         'rickchristie',
         'willywonka',

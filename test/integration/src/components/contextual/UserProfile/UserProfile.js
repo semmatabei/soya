@@ -5,8 +5,8 @@ import DataComponent from 'soya/lib/data/redux/DataComponent.js';
 import { SERVER } from 'soya/lib/data/RenderType.js';
 
 export default class UserProfile extends DataComponent {
-  registerSegments(nextProps) {
-    this.register(new UserSegment());
+  static createSegments(config) {
+    return [new UserSegment()];
   }
 
   /**

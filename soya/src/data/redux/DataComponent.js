@@ -47,8 +47,13 @@ export default class DataComponent extends React.Component {
     this.__soyaActions = {};
     this.__soyaUnsubscribe = {};
 
-    if (!this.getReduxStore() || !this.getReduxStore().__isReduxStore) {
-      throw new Error('ReduxStore is not properly wired to this component: ' + this.constructor.name + '.');
+    var reduxStore = this.getReduxStore();
+    var config = this.getConfig();
+    if (!reduxStore || !reduxStore.__isReduxStore) {
+      throw new Error('ReduxStore is not properly wired to this data component: ' + this.constructor + '.');
+    }
+    if (!config || typeof config != 'object') {
+      throw new Error('Config object is not properly wired to this data component: ' + this.constructor + '.');
     }
   }
 
@@ -63,21 +68,33 @@ export default class DataComponent extends React.Component {
   }
 
   /**
-   * Registers Segment and queries required by this component to ReduxStore
-   * instance. Child components should override this to specify their data
-   * requirements.
+   * Defaults to getting Config object from props.config. If you want to use
+   * context you can override this method.
    *
-   * NOTE: Registration must be done with register() method.
-   *
-   * @param {Object} nextProps
+   * @returns {Object}
    */
-  registerSegments(nextProps) {
+  getConfig() {
+    return this.props.config;
+  }
 
+  /**
+   * This method is called at componentWilMount(). DataComponent will register
+   * the returned Segment instances to ReduxStore. Child components must
+   * override this static method to specify their data requirements.
+   *
+   * Client-side or server-side config will be provided, depending on where
+   * this DataComponent is instantiated.
+   *
+   * @param {Object} config
+   * @return {Array<Segment>}
+   */
+  static createSegments(config) {
+    return [];
   }
 
   /**
    * Subscribes to queries to a Segment already registered at
-   * registerSegments().
+   * createSegments().
    *
    * NOTE: Subscription must be done with subscribe() method. Method must also
    * use the given props instead of this.props.
@@ -86,14 +103,6 @@ export default class DataComponent extends React.Component {
    */
   subscribeQueries(nextProps) {
 
-  }
-
-  /**
-   * @param {Segment} segment
-   */
-  register(segment) {
-    var actionCreator = this.getReduxStore().register(segment);
-    this.__soyaActions[segment._getName()] = actionCreator;
   }
 
   /**
@@ -163,6 +172,14 @@ export default class DataComponent extends React.Component {
   }
 
   /**
+   * @param {Segment} segment
+   */
+  _register(segment) {
+    var actionCreator = this.getReduxStore().register(segment);
+    this.__soyaActions[segment._getName()] = actionCreator;
+  }
+
+  /**
    * This implementation assumes:
    *
    * 1) All DataComponent(s) render only using props and states (i.e. they
@@ -211,7 +228,10 @@ export default class DataComponent extends React.Component {
    */
   componentWillMount() {
     console.log('[DATA] Mounting', this, this.props);
-    this.registerSegments(this.props);
+    var i, segments = this.constructor.createSegments(this.getConfig());
+    for (i = 0; i < segments.length; i++) {
+      this._register(segments[i]);
+    }
     this.subscribeQueries(this.props);
   }
 

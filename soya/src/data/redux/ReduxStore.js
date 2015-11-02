@@ -2,6 +2,7 @@ import Store from '../Store.js';
 import { SERVER, CLIENT } from '../RenderType.js';
 import PromiseUtil from './PromiseUtil.js';
 import SegmentPiece from './SegmentPiece.js';
+import DataComponent from './DataComponent.js';
 
 import { compose, createStore, applyMiddleware } from 'redux';
 import { devTools, persistState } from 'redux-devtools';
@@ -131,6 +132,11 @@ export default class ReduxStore extends Store {
   _allowRegisterSegment;
 
   /**
+   * @type {Object}
+   */
+  _config;
+
+  /**
    * @type {boolean}
    */
   __isReduxStore;
@@ -143,11 +149,13 @@ export default class ReduxStore extends Store {
    *
    * @param {Function} PromiseImpl
    * @param {any} initialState
+   * @param {Object} config
    */
-  constructor(PromiseImpl, initialState) {
+  constructor(PromiseImpl, initialState, config) {
     super();
     this.__isReduxStore = true;
     this._allowRegisterSegment = false;
+    this._config = config;
     this._segments = {};
     this._registeredQueries = {};
     this._reducers = {};
@@ -379,6 +387,18 @@ export default class ReduxStore extends Store {
   }
 
   /**
+   * Registers all Segment instances required by the given DataComponent class.
+   *
+   * @param {Function} DataComponentConstructor
+   */
+  registerDataComponent(DataComponentConstructor) {
+    var i, segments = DataComponentConstructor.createSegments(this._config);
+    for (i = 0; i < segments.length; i++) {
+      this.register(segments[i]);
+    }
+  }
+
+  /**
    * TODO: Update comment!
    *
    * Accepts a segment, specific query, and a subscriber. Each of these elements
@@ -422,21 +442,28 @@ export default class ReduxStore extends Store {
    * @return {ActionCreator}
    */
   register(segment) {
-    if (!this._allowRegisterSegment) {
-      throw new Error('Segment registration is only allowed at render process!');
-    }
-
     // TODO: Fix! This is ugly - activate only exists to ensure ReduxStore and its Segments utilize the same Promise implementation.
     segment._activate(Promise);
 
-    // Register segment.
     var segmentName = segment._getName();
     var registeredSegment = this._segments[segmentName];
+
+    if (!this._allowRegisterSegment) {
+      var isNewSegment = !registeredSegment || !this._isSegmentEqual(registeredSegment, segment);
+      if (isNewSegment) {
+        // We only throw error if it's an attempt to register a new Segment.
+        throw new Error('Segment registration is only allowed at render process!');
+      }
+      // Otherwise, it's a no-op.
+      return registeredSegment._getActionCreator();
+    }
+
+    // Register segment.
     if (!registeredSegment) {
       registeredSegment = segment;
       this._initSegment(segment);
     }
-    else if (!registeredSegment._isEqual(segment)) {
+    else if (!this._isSegmentEqual(registeredSegment, segment)) {
       if (this._allowOverwriteSegment[segmentName]) {
         // TODO: Create a DEBUG flag using webpack so that we can silent logging in production? or..
         // TODO: Make two logger implementation, client and server, then use clientReplace accordingly.
@@ -471,6 +498,46 @@ export default class ReduxStore extends Store {
     this._subscribers[segmentName] = {};
     this._actionCreators[segmentName] = segment._getActionCreator();
     this._registeredQueries[segmentName] = {};
+  }
+
+  /**
+   * Returns true if the prototypes of Segment and its ActionCreator is the
+   * same. Segment implementations are not allowed to have configurations that
+   * changes its behavior, so we only need to check implementation.
+   *
+   * Segment dependencies equality are handled independently, since all of them
+   * are going to be registered in the same way.
+   *
+   * We ensure that no Segment clash will happen without an exception being
+   * thrown at server side as long as these assumptions are true:
+   *
+   * 1) This method is executed at server-side, where we have guaranteed access
+   *    to Object.getPrototypeOf().
+   * 2) All segment registration is made explicit, even the conditional ones,
+   *    and they are all registered at server-side.
+   *    a) Segment registration is only allowed at ContentRenderer.render().
+   *    b) ContentRenderer.render() is a sync method.
+   *
+   * @param {Segment} registeredSegment
+   * @param {Segment} segment
+   * @return {boolean}
+   */
+  _isSegmentEqual(registeredSegment, segment) {
+    if (registeredSegment === segment) {
+      return true;
+    }
+
+    if (Object.getPrototypeOf) {
+      return (
+        Object.getPrototypeOf(registeredSegment) === Object.getPrototypeOf(segment) &&
+        Object.getPrototypeOf(registeredSegment._getActionCreator()) === Object.getPrototypeOf(segment._getActionCreator())
+      );
+    }
+
+    // Since everything is already checked at server-side, safely assume
+    // that the given Segment implementation is the same. All possible Segment
+    // clashes would have already triggered an error at server-side.
+    return true;
   }
 
   /**

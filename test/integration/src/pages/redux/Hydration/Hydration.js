@@ -36,7 +36,7 @@ class Component extends React.Component {
       </ul>
       <h3>Server Hydrated User Profile Badge:</h3>
       <p>Viewing: <a href="javascript:void(0)" onClick={this.loadAnotherUser.bind(this, 'rickchristie')}>rickchristie</a> | <a href="javascript:void(0)" onClick={this.loadAnotherUser.bind(this, 'meesa')}>meesa</a></p>
-      <UserProfile reduxStore={this.props.reduxStore} username={this.state.serverUsername}></UserProfile>
+      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={this.state.serverUsername}></UserProfile>
       <h1>Client-Side Hydration</h1>
       <h3>Specs</h3>
       <ul>
@@ -45,16 +45,16 @@ class Component extends React.Component {
         <li>Upon waiting for the data to load, a loading state is returned by the component.</li>
       </ul>
       <h3>Client Hydrated User Profile Badge:</h3>
-      <UserProfile reduxStore={this.props.reduxStore} username={this.state.clientUsername} loadAtClient={true}></UserProfile>
+      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={this.state.clientUsername} loadAtClient={true}></UserProfile>
       <h1>Multiple Server-Side Hydration</h1>
       <h3>Specs</h3>
       <ul>
         <li>All user profile badge below must already be included in user profile data.</li>
       </ul>
       <h3>Profile 1</h3>
-      <UserProfile reduxStore={this.props.reduxStore} username={'jedikiller'}></UserProfile>
+      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={'jedikiller'}></UserProfile>
       <h3>Profile 2</h3>
-      <UserProfile reduxStore={this.props.reduxStore} username={'willywonka'}></UserProfile>
+      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={'willywonka'}></UserProfile>
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
@@ -78,7 +78,7 @@ class Hydration extends Page {
   }
 
   createStore(initialState) {
-    var reduxStore = new ReduxStore(Promise, initialState);
+    var reduxStore = new ReduxStore(Promise, initialState, this.config);
     return reduxStore;
   }
 
@@ -86,7 +86,8 @@ class Hydration extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Hydration Test</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store
+      reduxStore: store,
+      config: this.config
     });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);
