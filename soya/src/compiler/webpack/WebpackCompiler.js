@@ -142,7 +142,7 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(frameworkConfig),
-          { test: /\.css$/, loader: "css-loader" }
+          { test: /\.css$/, loader: "css-loader/locals?modules" }
         ]
       },
       plugins: [
@@ -258,7 +258,7 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
-          { test: /\.css$/, loader: "style-loader?returnComplete=true!css-loader" }
+          { test: /\.css$/, loader: "style-loader!css-loader?modules" }
         ]
       },
       resolve: { alias: {} },

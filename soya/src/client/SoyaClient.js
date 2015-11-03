@@ -153,7 +153,7 @@ export default class SoyaClient {
     var store = this._storeCache[storeNamespace];
     if (!store) {
       store = page.createStore(pageArgs.hydratedState);
-      store._setRenderType(CLIENT);
+      if (!store) store._setRenderType(CLIENT);
     }
     var hasStore = !!store;
 

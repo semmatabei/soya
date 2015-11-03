@@ -1,5 +1,10 @@
 # Version 0.0.x
 
+## 0.0.23
+
+- Access CSS class names no longer with helper function:
+  - https://github.com/webpack/style-loader/pull/77#issuecomment-148506208
+
 ## 0.0.22
 
 - Change registerSegments() into createSegments(), a static method.
