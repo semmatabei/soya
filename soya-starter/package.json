@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "nodemon": "./node_modules/.bin/nodemon ./build/server"
+    "start": "webpack && node build/server",
+    "nodemon": "nodemon ./build/server"
   },
   "dependencies": {
     "babel": "^5.8.23",
