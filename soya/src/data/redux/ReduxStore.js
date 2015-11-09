@@ -1,3 +1,5 @@
+/* @flow */
+
 import Store from '../Store.js';
 import { SERVER, CLIENT } from '../RenderType.js';
 import PromiseUtil from './PromiseUtil.js';
