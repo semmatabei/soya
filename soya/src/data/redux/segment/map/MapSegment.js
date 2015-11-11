@@ -175,7 +175,7 @@ export default class MapSegment extends Segment {
     return (state, action) => {
       // If state is undefined, return initial state.
       if (!state) state = {};
-      var newState;
+      var newState, isUninitialized;
       switch(action.type) {
         case cleanActionType:
           // Nullifies the segment:
@@ -188,7 +188,8 @@ export default class MapSegment extends Segment {
           return newState;
           break;
         case initActionType:
-          if (!state[action.queryId]) {
+          isUninitialized = (!state[action.queryId] || !state[action.queryId].loaded);
+          if (isUninitialized) {
             newState = this._createNewStateObj(state);
             newState[action.queryId] = action.payload;
             return newState;
