@@ -32,6 +32,8 @@ export default class Store {
    * IMPORTANT NOTE: This only happens on first Segment conflict - second
    * conflict means there are indeed Segment name clash, and Store should
    * rightfully throw an Error.
+   *
+   * TODO: This is abstraction leak. Soya shouldn't assume that Store has Segments.
    */
   _mayHotReloadSegments() {
     throw new Error('Abstract method not implemented.');

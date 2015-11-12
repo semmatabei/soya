@@ -1,8 +1,6 @@
 import ActionCreator from '../../ActionCreator.js';
 import ActionNameUtil from '../ActionNameUtil.js';
 
-var Promise;
-
 /**
  * Abstract implementation, to be used in tandem with MapSegment. Handles
  * caching so that user only need to define the action creator.
@@ -66,9 +64,6 @@ export default class MapActionCreator extends ActionCreator {
   }
 
   /**
-   * TODO: Implement caching.
-   * TODO: Implement polling.
-   *
    * @param {any} query
    * @param {options} options
    * @param {boolean} forceLoad
@@ -144,13 +139,6 @@ export default class MapActionCreator extends ActionCreator {
    */
   _generateQueryId(query) {
 
-  }
-
-  /**
-   * @param {Promise} PromiseImpl
-   */
-  _setPromise(PromiseImpl) {
-    Promise = PromiseImpl;
   }
 
   /**

@@ -58,6 +58,11 @@ export default class ReduxStore extends Store {
   _nextSubscriberId;
 
   /**
+   * @type {{[key: string}: Class<Segment>}
+   */
+  _segmentClasses;
+
+  /**
    * @type {{[key: string]: Segment}}
    */
   _segments;
@@ -159,6 +164,7 @@ export default class ReduxStore extends Store {
     this._allowRegisterSegment = false;
     this._config = config;
     this._segments = {};
+    this._segmentClasses = {};
     this._registeredQueries = {};
     this._reducers = {};
     this._subscribers = {};
@@ -394,7 +400,7 @@ export default class ReduxStore extends Store {
    * @param {Function} DataComponentConstructor
    */
   registerDataComponent(DataComponentConstructor) {
-    var i, segments = DataComponentConstructor.createSegments(this._config);
+    var i, segments = DataComponentConstructor.getSegmentDependencies();
     for (i = 0; i < segments.length; i++) {
       this.register(segments[i]);
     }
@@ -435,23 +441,23 @@ export default class ReduxStore extends Store {
    *
    * TODO: Handle Segment dependencies!
    *
-   * @param {Segment} segment
-   * @param {string} query
-   * @param {Function} callback
-   * @param {any} component
-   * @param {?Object} queryOptions
-   * @param {?{[key: RenderType]: HydrationType}} hydrationOption
+   * @param {Class<Segment>} SegmentClass
    * @return {ActionCreator}
    */
-  register(segment) {
-    // TODO: Fix! This is ugly - activate only exists to ensure ReduxStore and its Segments utilize the same Promise implementation.
-    segment._activate(Promise);
+  register(SegmentClass) {
+    // First let's register all dependencies that this Segment class has.
+    var i, dependencies = SegmentClass.getSegmentDependencies();
+    for (i = 0; i < dependencies.length; i++) {
+      this.register(dependencies[i]);
+    }
 
-    var segmentName = segment._getName();
-    var registeredSegment = this._segments[segmentName];
+    // Get the segment ID to see if we already have registered the segment.
+    var id = SegmentClass.id();
+    var registeredSegment = this._segments[id];
+    var RegisteredSegmentClass = this._segmentClasses[id];
 
     if (!this._allowRegisterSegment) {
-      var isNewSegment = !registeredSegment || !this._isSegmentEqual(registeredSegment, segment);
+      var isNewSegment = !registeredSegment || SegmentClass !== RegisteredSegmentClass;
       if (isNewSegment) {
         // We only throw error if it's an attempt to register a new Segment.
         throw new Error('Segment registration is only allowed at render process!');
@@ -462,44 +468,51 @@ export default class ReduxStore extends Store {
 
     // Register segment.
     if (!registeredSegment) {
-      registeredSegment = segment;
-      this._initSegment(segment);
+      registeredSegment = this._initSegment(SegmentClass);
+      RegisteredSegmentClass = SegmentClass;
     }
-    else if (!this._isSegmentEqual(registeredSegment, segment)) {
-      if (this._allowOverwriteSegment[segmentName]) {
+    else if (SegmentClass !== RegisteredSegmentClass) {
+      if (this._allowOverwriteSegment[id]) {
         // TODO: Create a DEBUG flag using webpack so that we can silent logging in production? or..
         // TODO: Make two logger implementation, client and server, then use clientReplace accordingly.
-        console.log('Replacing segment.. (this should not happen in production!)', registeredSegment, segment);
-        registeredSegment = segment;
-        this._initSegment(segment);
+        console.log('Replacing segment.. (this should not happen in production!)', RegisteredSegmentClass, SegmentClass);
+        registeredSegment = this._initSegment(SegmentClass);
+        RegisteredSegmentClass = SegmentClass;
 
         // Nullifies the current segment data. Because we are replacing Segment
         // implementation, state data may differ.
-        var cleanAction = segment._createCleanAction();
+        var cleanAction = registeredSegment._createCleanAction();
         this.dispatch(cleanAction);
       } else {
-        throw new Error('Segment name registered by both ' + registeredSegment + ' and ' + segment + ', with name: ' + segmentName + '.');
+        throw new Error('Segment id clash! Claimed by ' + RegisteredSegmentClass + ' and ' + SegmentClass + ', with id: ' + id + '.');
       }
     }
 
     // No longer allow segment overwrites for this segment name.
     // We only allow segment overwrites for *first* registration.
-    delete this._allowOverwriteSegment[segmentName];
+    delete this._allowOverwriteSegment[id];
 
     return registeredSegment._getActionCreator();
   }
 
   /**
-   * @param {Segment} segment
+   * Returns the instantiated segment.
+   *
+   * @param {Class<Segment>} SegmentClass
+   * @return {Segment}
    */
-  _initSegment(segment) {
-    var segmentName = segment._getName();
-    this._segments[segmentName] = segment;
-    this._reducers[segmentName] = segment._getReducer();
-    this._hydrationOptions[segmentName] = {};
-    this._subscribers[segmentName] = {};
-    this._actionCreators[segmentName] = segment._getActionCreator();
-    this._registeredQueries[segmentName] = {};
+  _initSegment(SegmentClass) {
+    var id = SegmentClass.id();
+    // TODO: Fix! This is ugly - Promise only exists to ensure ReduxStore and its Segments utilize the same Promise implementation.
+    var segment = new SegmentClass(this._config, this._provider, Promise);
+    this._segments[id] = segment;
+    this._segmentClasses[id] = SegmentClass;
+    this._reducers[id] = segment._getReducer();
+    this._hydrationOptions[id] = {};
+    this._subscribers[id] = {};
+    this._actionCreators[id] = segment._getActionCreator();
+    this._registeredQueries[id] = {};
+    return segment;
   }
 
   /**
@@ -549,7 +562,7 @@ export default class ReduxStore extends Store {
    * @param {any} component
    * @param {?Object} queryOptions
    * @param {?{[key: RenderType]: HydrationType}} hydrationOption
-   * @return {}
+   * @return {StoreReference}
    */
   subscribe(segmentName, query, callback, component, queryOptions, hydrationOption) {
     // Determine subscriber ID.
@@ -610,6 +623,18 @@ export default class ReduxStore extends Store {
       unsubscribe: this._unsubscribe.bind(this, segmentName, queryId, subscriberId)
     };
     return result;
+  }
+
+  /**
+   * Creates the load action that fetches data. Returns Promise that resolves
+   * with the newly stored Segment piece.
+   *
+   * @param {string} segmentName
+   * @param {any} query
+   * @return {Promise}
+   */
+  query(segmentName, query) {
+
   }
 
   /**

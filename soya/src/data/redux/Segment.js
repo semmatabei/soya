@@ -20,39 +20,33 @@
  */
 export default class Segment {
   /**
-   * Called by ReduxStore when this Segment is about to be registered.
-   *
-   * IMPORTANT NOTE: This operation should be idempotent. May be called multiple
-   * times.
-   *
-   * @param {Function} PromiseImpl
+   * @param {Object} config
+   * @param {Provider} provider
+   * @param {Promise} Promise
    */
-  _activate(PromiseImpl) {
-
+  constructor(config, provider, Promise) {
+    // No-op. This constructor is only here to be interface.
   }
 
   /**
-   * Called by ReduxStore when no component subscribes to this Segment anymore.
-   * This is used to stop polling or other background processes that might
-   * be running.
+   * Returns an array of Segment classes that this Segment has dependencies to.
+   * Child classes can override this static method to declare their Segment
+   * dependencies.
    *
-   * IMPORTANT NOTE: This operation should be idempotent;
+   * @returns {Array<Class<Segment>}
    */
-  _deactivate() {
-
+  static getSegmentDependencies() {
+    return [];
   }
 
   /**
-   * Called by ReduxStore when no component subscribes to the given Segment
-   * query anymore. This is used to stop polling or other background processes
-   * related to the given query.
+   * Get the segment name. Segment's name is hard-coded by each segment
+   * implementation and must never change.
    *
-   * IMPORTANT NOTE: This operation should be idempotent.
-   *
-   * @param {string} queryId
+   * @return {string}
    */
-  _deactivateQuery(queryId) {
-
+  static id() {
+    throw new Error('Segment implementation must provide ID!');
   }
 
   /**
@@ -99,16 +93,6 @@ export default class Segment {
    */
   _createHydrateAction(queryId) {
 
-  }
-
-  /**
-   * Get the segment name. Segment's name is hard-coded by each segment
-   * implementation and must never change.
-   *
-   * @return {string}
-   */
-  _getName() {
-    return '';
   }
 
   /**

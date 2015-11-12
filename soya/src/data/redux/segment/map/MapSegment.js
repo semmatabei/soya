@@ -27,8 +27,18 @@ export default class MapSegment extends Segment {
    */
   _actionCreator;
 
-  constructor() {
-    super();
+  /**
+   * @param config
+   * @param provider
+   * @param PromiseImpl
+   */
+  constructor(config, provider, PromiseImpl) {
+    super(config, provider, PromiseImpl);
+    Promise = PromiseImpl;
+    this._actionCreator = this._createActionCreator();
+    if (!(this._actionCreator instanceof MapActionCreator)) {
+      throw new Error('MapSegment must be used in tandem with MapActionCreator.');
+    }
     this._queries = {};
   }
 
@@ -51,20 +61,6 @@ export default class MapSegment extends Segment {
    */
   _mergeOptions(optionA, optionB) {
     return QueryOptionUtil.mergeOptions(optionA, optionB);
-  }
-
-  /**
-   * @param {Function} PromiseImpl
-   */
-  _activate(PromiseImpl) {
-    Promise = PromiseImpl;
-    if (!this._actionCreator) {
-      this._actionCreator = this._createActionCreator();
-    }
-    if (!(this._actionCreator instanceof MapActionCreator)) {
-      throw new Error('MapSegment must be used in tandem with MapActionCreator.');
-    }
-    this._actionCreator._setPromise(PromiseImpl);
   }
 
   /**

@@ -79,22 +79,21 @@ export default class DataComponent extends React.Component {
 
   /**
    * This method is called at componentWilMount(). DataComponent will register
-   * the returned Segment instances to ReduxStore. Child components must
+   * the returned Segment constructors to ReduxStore. Child components must
    * override this static method to specify their data requirements.
    *
    * Client-side or server-side config will be provided, depending on where
    * this DataComponent is instantiated.
    *
-   * @param {Object} config
-   * @return {Array<Segment>}
+   * @return {Array<Class<Segment>>}
    */
-  static createSegments(config) {
+  static getSegmentDependencies() {
     return [];
   }
 
   /**
    * Subscribes to queries to a Segment already registered at
-   * createSegments().
+   * getSegmentDependencies().
    *
    * NOTE: Subscription must be done with subscribe() method. Method must also
    * use the given props instead of this.props.
@@ -172,11 +171,11 @@ export default class DataComponent extends React.Component {
   }
 
   /**
-   * @param {Segment} segment
+   * @param {Class<Segment>} segmentClass
    */
-  _register(segment) {
-    var actionCreator = this.getReduxStore().register(segment);
-    this.__soyaActions[segment._getName()] = actionCreator;
+  _register(segmentClass) {
+    var actionCreator = this.getReduxStore().register(segmentClass);
+    this.__soyaActions[segmentClass.id()] = actionCreator;
   }
 
   /**
@@ -228,9 +227,9 @@ export default class DataComponent extends React.Component {
    */
   componentWillMount() {
     console.log('[DATA] Mounting', this, this.props);
-    var i, segments = this.constructor.createSegments(this.getConfig());
-    for (i = 0; i < segments.length; i++) {
-      this._register(segments[i]);
+    var i, segmentClasses = this.constructor.getSegmentDependencies();
+    for (i = 0; i < segmentClasses.length; i++) {
+      this._register(segmentClasses[i]);
     }
     this.subscribeQueries(this.props);
   }

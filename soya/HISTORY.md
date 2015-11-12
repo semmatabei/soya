@@ -1,5 +1,13 @@
 # Version 0.0.x
 
+## 0.0.26
+
+- Segment instantiation is now done by ReduxStore.
+  - Segment equality check is done by checking the given constructor function.
+  - DataComponent returns array of Segment constructor functions.
+  - Segment.getName() becomes a static id() method.
+  - Remove Segment._activate(), constructor is used instead.
+
 ## 0.0.23
 
 - Access CSS class names no longer with helper function:

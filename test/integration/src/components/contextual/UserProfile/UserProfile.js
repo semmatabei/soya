@@ -5,8 +5,8 @@ import DataComponent from 'soya/lib/data/redux/DataComponent.js';
 import { SERVER } from 'soya/lib/data/RenderType.js';
 
 export default class UserProfile extends DataComponent {
-  static createSegments(config) {
-    return [new UserSegment()];
+  static getSegmentDependencies(config) {
+    return [UserSegment];
   }
 
   /**
@@ -21,7 +21,7 @@ export default class UserProfile extends DataComponent {
     }
 
     this.subscribe(
-      UserSegment.segmentName, { username: nextProps.username }, 'user',
+      UserSegment.id(), { username: nextProps.username }, 'user',
       null, hydrationOption);
   }
 
