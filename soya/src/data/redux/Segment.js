@@ -64,6 +64,28 @@ export default class Segment {
   }
 
   /**
+   * Creates a load action that is ready to be dispatched. Method should also
+   * read options (if given). Options may affect the behavior of the load
+   * action.
+   *
+   * For example, if the option says "cache" - this may mean additional
+   * calls for createLoadAction will return the same generated action until
+   * the cache has expired.
+   *
+   * Another example, the option may tell the action creator to "keep-fresh",
+   * which makes this action creator creates polling or web-socket connection
+   * that frequently updates the value with a new one from the server.
+   *
+   * @param {any} query
+   * @param {?Object} options
+   * @param {boolean} forceLoad
+   * @return {Object | Function}
+   */
+  createLoadAction(query, options, forceLoad) {
+    throw new Error('Method not implemented!');
+  }
+
+  /**
    * Returns a basic payload object to populate the segment piece with initial
    * structure. Segment's reducer should ignore this action if the piece is
    * already populated or loaded.
@@ -89,20 +111,9 @@ export default class Segment {
    * Uses action creator to create load action of the given query.
    *
    * @param {string} queryId
-   * @return {Object | Function}
+   * @return {Object | Thunk}
    */
-  _createHydrateAction(queryId) {
-
-  }
-
-  /**
-   * When called, returns the ActionCreator instance. Unlike reducer,
-   * ActionCreator can be a stateful object. This is allowed since ActionCreator
-   * has to deal with caching and AJAX requests.
-   *
-   * @return {ActionCreator}
-   */
-  _getActionCreator() {
+  _createLoadAction(queryId) {
 
   }
 
@@ -158,6 +169,17 @@ export default class Segment {
    * @return {Function}
    */
   _getReducer() {
+
+  }
+
+  /**
+   * Returns an object containing action functions. Unlike reducer,
+   * ActionCreator can be stateful objects. This is allowed since ActionCreator
+   * has to deal with caching and AJAX requests.
+   *
+   * @return {Object}
+   */
+  _getActionCreator() {
 
   }
 }

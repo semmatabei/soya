@@ -7,6 +7,17 @@
   - DataComponent returns array of Segment constructor functions.
   - Segment.getName() becomes a static id() method.
   - Remove Segment._activate(), constructor is used instead.
+- Removed custom ActionCreator class, Segment becomes the class that is
+  responsible for both Reducer and Action Creator of a state tree segment.
+  - MapSegment.getActionCreator() now just returns an object with bound
+    function.
+- Prevent double querying.
+  - Separate subscribe and query function.
+  - User can do manual query through ReduxStore.query(), which checks segment
+    state first.
+  - ReduxStore.query() also re-uses Promises cached by dispatch(), ensuring that
+    at any given time, there are no more than 1 identical query.
+  - User can force load with query() and action creator.
 
 ## 0.0.23
 

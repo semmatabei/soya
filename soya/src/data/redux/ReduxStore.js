@@ -5,6 +5,8 @@ import { SERVER, CLIENT } from '../RenderType.js';
 import PromiseUtil from './PromiseUtil.js';
 import SegmentPiece from './SegmentPiece.js';
 import DataComponent from './DataComponent.js';
+import Thunk from './Thunk.js';
+import QueryDependencies from './QueryDependencies.js';
 
 import { compose, createStore, applyMiddleware } from 'redux';
 import { devTools, persistState } from 'redux-devtools';
@@ -66,6 +68,20 @@ export default class ReduxStore extends Store {
    * @type {{[key: string]: Segment}}
    */
   _segments;
+
+  /**
+   * <pre>
+   *   {
+   *     segmentId: {
+   *       queryId: Promise,
+   *       queryId: Promise
+   *     }
+   *   }
+   * </pre>
+   *
+   * @type {{[key: string]: {[key: string]: Promise}}}
+   */
+  _promises;
 
   /**
    * @type {{[key: string]: Function}}
@@ -165,6 +181,7 @@ export default class ReduxStore extends Store {
     this._config = config;
     this._segments = {};
     this._segmentClasses = {};
+    this._promises = {};
     this._registeredQueries = {};
     this._reducers = {};
     this._subscribers = {};
@@ -385,7 +402,7 @@ export default class ReduxStore extends Store {
         );
 
         if (shouldLoad) {
-          action = this._segments[segmentName]._createHydrateAction(queryId);
+          action = this._segments[segmentName]._createLoadAction(queryId);
           promise = this.dispatch(action);
         }
         hydrationPromises.push(promise);
@@ -556,7 +573,7 @@ export default class ReduxStore extends Store {
   }
 
   /**
-   * @param {string} segmentName
+   * @param {string} segmentId
    * @param {any} query
    * @param {Function} callback
    * @param {any} component
@@ -564,7 +581,7 @@ export default class ReduxStore extends Store {
    * @param {?{[key: RenderType]: HydrationType}} hydrationOption
    * @return {StoreReference}
    */
-  subscribe(segmentName, query, callback, component, queryOptions, hydrationOption) {
+  subscribe(segmentId, query, callback, component, queryOptions, hydrationOption) {
     // Determine subscriber ID.
     var subscriberId = component[SUBSCRIBER_ID];
     if (!subscriberId) {
@@ -573,9 +590,9 @@ export default class ReduxStore extends Store {
       component[SUBSCRIBER_ID] = subscriberId;
     }
 
-    var registeredSegment = this._segments[segmentName];
+    var registeredSegment = this._segments[segmentId];
     if (!registeredSegment) {
-      throw new Error('Cannot subscribe, Segment is not registered: ' + segmentName + '.');
+      throw new Error('Cannot subscribe, Segment is not registered: ' + segmentId + '.');
     }
 
     // Initialize hydration option.
@@ -583,44 +600,26 @@ export default class ReduxStore extends Store {
 
     // Register query.
     var queryId = registeredSegment._registerQuery(query, queryOptions);
-    if (!this._hydrationOptions[segmentName][queryId]) {
-      this._hydrationOptions[segmentName][queryId] = hydrationOption;
+    if (!this._hydrationOptions[segmentId][queryId]) {
+      this._hydrationOptions[segmentId][queryId] = hydrationOption;
     } else {
       // Merge hydration option. If one of the queries ask for it to be loaded
       // at server-side, load at server-side.
       if (hydrationOption[SERVER]) {
-        this._hydrationOptions[segmentName][queryId][SERVER] = hydrationOption[SERVER];
+        this._hydrationOptions[segmentId][queryId][SERVER] = hydrationOption[SERVER];
       }
     }
 
-    // Get the piece (data might already be loaded). Since getSegmentPiece() is
-    // supposed to be a fast operation anyway, we can just grab segment piece
-    // directly.
-    var segmentPiece = this._getSegmentPiece(segmentName, queryId);
-
-    if (!segmentPiece) {
-      // Populate with initial data if not already populated..
-      var initAction = registeredSegment._createInitAction(queryId);
-      if (typeof initAction == 'function') {
-        throw new Error('Init action must be sync! Please return an action object instead!');
-      }
-      this.dispatch(initAction);
-    }
-
-    // If not loaded, and we're at client side, LOAD immediately.
-    segmentPiece = this._getSegmentPiece(segmentName, queryId);
-    if (!segmentPiece.loaded && this._renderType == CLIENT) {
-      var loadAction = registeredSegment._createHydrateAction(queryId);
-      this.dispatch(loadAction);
-    }
+    // Query but don't force load.
+    this.query(segmentId, query, false);
 
     // Register subscriber, previous init action is sync, so don't have to worry.
-    if (!this._subscribers[segmentName][queryId]) this._subscribers[segmentName][queryId] = {};
-    this._subscribers[segmentName][queryId][subscriberId] = callback;
+    if (!this._subscribers[segmentId][queryId]) this._subscribers[segmentId][queryId] = {};
+    this._subscribers[segmentId][queryId][subscriberId] = callback;
 
     var result = {
-      getState: this._getSegmentPiece.bind(this, segmentName, queryId),
-      unsubscribe: this._unsubscribe.bind(this, segmentName, queryId, subscriberId)
+      getState: this._getSegmentPiece.bind(this, segmentId, queryId),
+      unsubscribe: this._unsubscribe.bind(this, segmentId, queryId, subscriberId)
     };
     return result;
   }
@@ -629,12 +628,53 @@ export default class ReduxStore extends Store {
    * Creates the load action that fetches data. Returns Promise that resolves
    * with the newly stored Segment piece.
    *
-   * @param {string} segmentName
+   * @param {string} segmentId
    * @param {any} query
+   * @param {?boolean} forceLoad
    * @return {Promise}
    */
-  query(segmentName, query) {
+  query(segmentId, query, forceLoad) {
+    var segment = this._segments[segmentId];
+    if (!segment) {
+      throw new Error('Cannot subscribe, Segment is not registered: ' + segmentId + '.');
+    }
 
+    // Get the piece (data might already be loaded). Since getSegmentPiece() is
+    // supposed to be a fast operation anyway, we can just grab segment piece
+    // directly.
+    var queryId = segment._generateQueryId(query);
+    var segmentPiece = this._getSegmentPiece(segmentId, queryId);
+
+    if (!segmentPiece) {
+      // Populate with initial data if not already populated..
+      var initAction = segment._createInitAction(queryId);
+      if (typeof initAction == 'function') {
+        throw new Error('Init action must be sync! Please return an action object instead!');
+      }
+      this.dispatch(initAction);
+    }
+
+    // Up until this point, segment piece will never be empty.
+    // If already loaded, return immediately.
+    segmentPiece = this._getSegmentPiece(segmentId, queryId);
+    if (segmentPiece.loaded && !forceLoad) {
+      return Promise.resolve(null);
+    }
+
+    // Re-use promise from another dispatch to prevent double fetching.
+    if (!forceLoad && this._promises[queryId]) {
+      return this._promises[queryId];
+    }
+
+    // Right now either segment isn't loaded yet or this is a force load.
+    if (this._renderType == CLIENT) {
+      var loadAction = segment._createLoadAction(queryId);
+      return this.dispatch(loadAction);
+    }
+
+    // Else we are at server, return a promise that never resolves.
+    // We assume that manual queries are always hydrated at client side.
+    return new Promise();
   }
 
   /**
@@ -674,21 +714,35 @@ export default class ReduxStore extends Store {
    * returns a Promise or not. If not, it will throw an error. Otherwise the
    * Promise is returned.
    *
-   * @param {Function | Object} action
+   * @param {Thunk | Object} action
    * @return {Promise}
    */
   dispatch(action) {
     var result;
-    if (typeof action != 'function') {
-      result = this._store.dispatch(action);
-      return new Promise(function(resolve) {
-        resolve(result);
+    if (action instanceof Thunk) {
+      // Immediately create a promise so we can ensure no identical fetching
+      // can happen at the same time with query() or subscribe().
+      return this._promises[action.queryId] = new Promise((resolve, reject) => {
+        // Resolve dependencies first.
+        var depResolvedPromise = Promise.resolve(null);
+        if (action.dependencies instanceof QueryDependencies) {
+          depResolvedPromise = action.dependencies.run(this);
+        }
+
+        // After dependencies are resolved, run the thunk function. The thunk
+        // function should still have reference to QueryDependencies, allowing
+        // it to access its dependencies' query results.
+        depResolvedPromise.then(() => {
+          // TODO: Cache the bound store dispatch.
+          result = action.func(this._store.dispatch.bind(this._store));
+          this._ensurePromise(result);
+          result.then(resolve, reject);
+        });
       });
     }
 
-    result = this._store.dispatch(action);
-    this._ensurePromise(result);
-    return result;
+    this._store.dispatch(action);
+    return Promise.resolve(null);
   }
 
   /**
