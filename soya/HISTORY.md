@@ -18,6 +18,10 @@
   - ReduxStore.query() also re-uses Promises cached by dispatch(), ensuring that
     at any given time, there are no more than 1 identical query.
   - User can force load with query() and action creator.
+- Removed query registration from Segment, it's now the responsibility of
+  ReduxStore.
+- Removed query options. They complicate things, cache and poll will be
+  implemented without using query options.
 
 ## 0.0.23
 

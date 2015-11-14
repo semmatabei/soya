@@ -22,7 +22,7 @@ export default class UserProfile extends DataComponent {
 
     this.subscribe(
       UserSegment.id(), { username: nextProps.username }, 'user',
-      null, hydrationOption);
+      hydrationOption);
   }
 
   render() {

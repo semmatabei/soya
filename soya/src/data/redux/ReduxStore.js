@@ -73,30 +73,40 @@ export default class ReduxStore extends Store {
    * <pre>
    *   {
    *     segmentId: {
-   *       queryId: Promise,
-   *       queryId: Promise
+   *       queryId: {
+   *         promise: thenable,
+   *         query: any
+   *       }
    *     }
    *   }
    * </pre>
    *
-   * @type {{[key: string]: {[key: string]: Promise}}}
+   * @type {{[key: string]: {[key: string]: { promise: ?Promise, query: any }}}}
    */
-  _promises;
-
-  /**
-   * @type {{[key: string]: Function}}
-   */
-  _reducers;
-
-  /**
-   * @type {{[key: string]: ActionCreator}}
-   */
-  _actionCreators;
+  _queries;
 
   /**
    * <pre>
    *   {
-   *     segmentName: {
+   *     segmentId: {
+   *       queryId: {
+   *         [SERVER]: true/false
+   *       },
+   *       ...
+   *     },
+   *     ...
+   *   }
+   * </pre>
+   *
+   *
+   * @type {{[key: string]: {[key: string]: boolean}}}
+   */
+  _hydrationOptions;
+
+  /**
+   * <pre>
+   *   {
+   *     segmentId: {
    *       queryId: {
    *         subscriberId: subscribeFunc,
    *         subscriberId: subscribeFunc
@@ -108,6 +118,30 @@ export default class ReduxStore extends Store {
    * @type {{[key: string]: {[key: string]: {[key: string]: Function}}}}
    */
   _subscribers;
+
+  /**
+   * <pre>
+   *   {
+   *     segmentId: function() {...},
+   *     segmentId: function() {...}
+   *   }
+   * </pre>
+   *
+   * @type {{[key: string]: Function}}
+   */
+  _reducers;
+
+  /**
+   * <pre>
+   *   {
+   *     segmentId: {...},
+   *     segmentId: {...}
+   *   }
+   * </pre>
+   *
+   * @type {{[key: string]: Object}}
+   */
+  _actionCreators;
 
   /**
    * Redux store.
@@ -125,24 +159,6 @@ export default class ReduxStore extends Store {
    * @type {{[key: string]: boolean}}
    */
   _registeredQueries;
-
-  /**
-   * <pre>
-   *   {
-   *     segmentName: {
-   *       queryId: {
-   *         [SERVER]: true/false
-   *       },
-   *       ...
-   *     },
-   *     ...
-   *   }
-   * </pre>
-   *
-   *
-   * @type {{[key: string]: {[key: string]: boolean}}}
-   */
-  _hydrationOptions;
 
   /**
    * @type {{[key: string]: boolean}}
@@ -181,7 +197,7 @@ export default class ReduxStore extends Store {
     this._config = config;
     this._segments = {};
     this._segmentClasses = {};
-    this._promises = {};
+    this._queries = {};
     this._registeredQueries = {};
     this._reducers = {};
     this._subscribers = {};
@@ -199,13 +215,6 @@ export default class ReduxStore extends Store {
    */
   _setRenderType(renderType) {
     this._renderType = renderType;
-  }
-
-  /**
-   * @return {Object}
-   */
-  getStore() {
-    return this._store;
   }
 
   /**
@@ -383,17 +392,18 @@ export default class ReduxStore extends Store {
    * @return {Promise}
    */
   hydrate() {
-    var action, segmentName, queryId, queries, hydrationOption;
-    var hydrationPromises = [], promise;
-    for (segmentName in this._hydrationOptions) {
-      if (!this._hydrationOptions.hasOwnProperty(segmentName)) continue;
-      queries = this._hydrationOptions[segmentName];
+    var action, segmentId, queryId, queries, hydrationOption;
+    var hydrationPromises = [], promise, query;
+    for (segmentId in this._hydrationOptions) {
+      if (!this._hydrationOptions.hasOwnProperty(segmentId)) continue;
+      queries = this._hydrationOptions[segmentId];
       for (queryId in queries) {
         if (!queries.hasOwnProperty(queryId)) continue;
         hydrationOption = queries[queryId];
+        query = this._queries[segmentId][queryId].query;
 
         // Don't need to do anything if it's already loaded.
-        var segmentPiece = this._getSegmentPiece(segmentName, queryId);
+        var segmentPiece = this._getSegmentPiece(segmentId, queryId);
         if (segmentPiece.loaded) continue;
 
         var shouldLoad = (
@@ -402,7 +412,7 @@ export default class ReduxStore extends Store {
         );
 
         if (shouldLoad) {
-          action = this._segments[segmentName]._createLoadAction(queryId);
+          action = this._segments[segmentId]._createLoadAction(query, queryId);
           promise = this.dispatch(action);
         }
         hydrationPromises.push(promise);
@@ -574,14 +584,31 @@ export default class ReduxStore extends Store {
 
   /**
    * @param {string} segmentId
+   * @param {string} queryId
+   * @param {any} query
+   * @private
+   */
+  _initQuery(segmentId, queryId, query) {
+    if (!this._queries.hasOwnProperty(segmentId)) {
+      this._queries[segmentId] = {};
+    }
+    if (!this._queries[segmentId].hasOwnProperty(queryId)) {
+      this._queries[segmentId][queryId] = {};
+    }
+    if (!this._queries[segmentId][queryId].hasOwnProperty('query')) {
+      this._queries[segmentId][queryId].query = query;
+    }
+  }
+
+  /**
+   * @param {string} segmentId
    * @param {any} query
    * @param {Function} callback
    * @param {any} component
-   * @param {?Object} queryOptions
    * @param {?{[key: RenderType]: HydrationType}} hydrationOption
    * @return {StoreReference}
    */
-  subscribe(segmentId, query, callback, component, queryOptions, hydrationOption) {
+  subscribe(segmentId, query, callback, component, hydrationOption) {
     // Determine subscriber ID.
     var subscriberId = component[SUBSCRIBER_ID];
     if (!subscriberId) {
@@ -599,7 +626,10 @@ export default class ReduxStore extends Store {
     hydrationOption = this._initHydrationOption(hydrationOption);
 
     // Register query.
-    var queryId = registeredSegment._registerQuery(query, queryOptions);
+    var queryId = registeredSegment._generateQueryId(query);
+    this._initQuery(segmentId, queryId, query);
+
+    // TODO: Move hydration option to _queries property.
     if (!this._hydrationOptions[segmentId][queryId]) {
       this._hydrationOptions[segmentId][queryId] = hydrationOption;
     } else {
@@ -639,10 +669,12 @@ export default class ReduxStore extends Store {
       throw new Error('Cannot subscribe, Segment is not registered: ' + segmentId + '.');
     }
 
+    var queryId = segment._generateQueryId(query);
+    this._initQuery(segmentId, queryId, query);
+
     // Get the piece (data might already be loaded). Since getSegmentPiece() is
     // supposed to be a fast operation anyway, we can just grab segment piece
     // directly.
-    var queryId = segment._generateQueryId(query);
     var segmentPiece = this._getSegmentPiece(segmentId, queryId);
 
     if (!segmentPiece) {
@@ -662,19 +694,19 @@ export default class ReduxStore extends Store {
     }
 
     // Re-use promise from another dispatch to prevent double fetching.
-    if (!forceLoad && this._promises[queryId]) {
-      return this._promises[queryId];
+    if (!forceLoad && this._queries[segmentId][queryId].promise) {
+      return this._queries[segmentId][queryId].promise;
     }
 
     // Right now either segment isn't loaded yet or this is a force load.
     if (this._renderType == CLIENT) {
-      var loadAction = segment._createLoadAction(queryId);
+      var loadAction = segment._createLoadAction(query, queryId);
       return this.dispatch(loadAction);
     }
 
     // Else we are at server, return a promise that never resolves.
     // We assume that manual queries are always hydrated at client side.
-    return new Promise();
+    return new Promise(function() {});
   }
 
   /**
@@ -720,9 +752,10 @@ export default class ReduxStore extends Store {
   dispatch(action) {
     var result;
     if (action instanceof Thunk) {
+      this._initQuery(action.segmentId, action.queryId, action.query);
       // Immediately create a promise so we can ensure no identical fetching
       // can happen at the same time with query() or subscribe().
-      return this._promises[action.queryId] = new Promise((resolve, reject) => {
+      return this._queries[action.segmentId][action.queryId].promise = new Promise((resolve, reject) => {
         // Resolve dependencies first.
         var depResolvedPromise = Promise.resolve(null);
         if (action.dependencies instanceof QueryDependencies) {

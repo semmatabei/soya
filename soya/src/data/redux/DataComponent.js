@@ -108,10 +108,9 @@ export default class DataComponent extends React.Component {
    * @param {string} segmentName
    * @param {any} query
    * @param {string} stateName
-   * @param {?Object} queryOptions
    * @param {?Object} hydrationOption
    */
-  subscribe(segmentName, query, stateName, queryOptions, hydrationOption) {
+  subscribe(segmentName, query, stateName, hydrationOption) {
     // Unsubscribe if already subscribed.
     this.unsubscribe(stateName);
 
@@ -121,7 +120,7 @@ export default class DataComponent extends React.Component {
     };
 
     var storeRef = this.getReduxStore().subscribe(
-      segmentName, query, callback, this, queryOptions, hydrationOption);
+      segmentName, query, callback, this, hydrationOption);
     this.unsubscribe[segmentName] = storeRef.unsubscribe;
     this.setState({
      [stateName]: storeRef.getState()

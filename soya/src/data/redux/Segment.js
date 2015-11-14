@@ -50,20 +50,6 @@ export default class Segment {
   }
 
   /**
-   * Returns query ID. To be used by ReduxStore in identifying queries.
-   *
-   * NOTE: This method will be called plenty of times, so make sure to skip
-   * query registration if it's already registered.
-   *
-   * @param {any} query
-   * @param {Object} options
-   * @return {string}
-   */
-  _registerQuery(query, options) {
-
-  }
-
-  /**
    * Creates a load action that is ready to be dispatched. Method should also
    * read options (if given). Options may affect the behavior of the load
    * action.
@@ -110,10 +96,11 @@ export default class Segment {
   /**
    * Uses action creator to create load action of the given query.
    *
+   * @param {any} query
    * @param {string} queryId
    * @return {Object | Thunk}
    */
-  _createLoadAction(queryId) {
+  _createLoadAction(query, queryId) {
 
   }
 

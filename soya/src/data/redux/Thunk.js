@@ -8,7 +8,17 @@ export default class Thunk {
   /**
    * @type {string}
    */
+  segmentId;
+
+  /**
+   * @type {string}
+   */
   queryId;
+
+  /**
+   * @type {any}
+   */
+  query;
 
   /**
    * IMPORTANT NOTE: Must return Promise that resolves after dispatch is done
@@ -24,9 +34,13 @@ export default class Thunk {
   dependencies;
 
   /**
+   * @param {string} segmentId
    * @param {string} queryId
+   * @param {any} query
    */
-  constructor(queryId) {
+  constructor(segmentId, queryId, query) {
+    this.segmentId = segmentId;
     this.queryId = queryId;
+    this.query = query;
   }
 }

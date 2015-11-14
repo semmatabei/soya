@@ -1,6 +1,6 @@
 import Segment from '../../Segment.js';
-import QueryOptionUtil from '../QueryOptionUtil.js';
 import ActionNameUtil from '../ActionNameUtil.js';
+import Thunk from '../../Thunk.js';
 
 /**
  * Promise implementation, in local variable so that our code can be natural.
@@ -17,11 +17,6 @@ var Promise;
  * @CLIENT_SERVER
  */
 export default class MapSegment extends Segment {
-  /**
-   * @type {{[key: string]: {query: any; options: Object}}}
-   */
-  _queries;
-
   /**
    * @type {Object}
    */
@@ -58,12 +53,10 @@ export default class MapSegment extends Segment {
     this._initActionType = ActionNameUtil.generate(id, 'INIT');
     this._cleanActionType = ActionNameUtil.generate(id, 'CLEAN');
 
-    this._queries = {};
-    this._promises = {};
     this._actionCreator = {
       load: (query) => {
         var queryId = this._generateQueryId(query);
-        return this._createThunk(query, queryId);
+        return this._createLoadAction(query, queryId);
       }
     };
   }
@@ -92,37 +85,22 @@ export default class MapSegment extends Segment {
    *
    * ABSTRACT: To be overridden by child implementations.
    *
-   * @param {any} query
-   * @param {string} queryId
-   * @return {Function}
+   * @param {Thunk} thunk
    * @private
    */
-  _createThunk(query, queryId) {
-    throw new Error('User must override _fetch method! Instance: ' + this + '.');
+  _generateThunkFunction(thunk) {
+    throw new Error('User must override _generateThunkFunction method! Instance: ' + this + '.');
   }
 
   /**
-   * We need to store both queries and options for later use. If the query is
-   * already registered, we merge its options.
-   *
    * @param {any} query
-   * @return {string}
-   */
-  _registerQuery(query) {
-    var queryId = this._generateQueryId(query);
-    if (!this._queries.hasOwnProperty(queryId)) {
-      this._queries[queryId] = query;
-    }
-    return queryId;
-  }
-
-  /**
    * @param {string} queryId
    * @return {Object | Thunk}
    */
-  _createLoadAction(queryId) {
-    var query = this._queries[queryId];
-    return this._createThunk(query, queryId);
+  _createLoadAction(query, queryId) {
+    var thunk = new Thunk(this.constructor.id(), queryId, query);
+    this._generateThunkFunction(thunk);
+    return thunk;
   }
 
   /**

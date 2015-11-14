@@ -15,8 +15,9 @@ export default class UserSegment extends MapSegment {
     return query.username;
   }
 
-  _createThunk(query, queryId) {
-    var thunk = new Thunk(queryId);
+  _generateThunkFunction(thunk) {
+    var query = thunk.query;
+    var queryId = thunk.queryId;
     thunk.func = (dispatch) => {
       var result = new Promise((resolve, reject) => {
         request.get('http://localhost:8000/api/user/' + query.username).end((err, res) => {
@@ -31,6 +32,5 @@ export default class UserSegment extends MapSegment {
       });
       return result;
     };
-    return thunk;
   }
 }
