@@ -114,7 +114,7 @@ export default class MapSegment extends Segment {
    * @param {void | Array<any>} errors
    * @return {Object}
    */
-  _createLoadActionObject(queryId, payload, errors) {
+  _createSyncLoadActionObject(queryId, payload, errors) {
     return {
       type: this._loadActionType,
       queryId: queryId,
@@ -130,7 +130,7 @@ export default class MapSegment extends Segment {
    * @param {string} queryId
    * @return {Object}
    */
-  _createInitAction(queryId) {
+  _createSyncInitAction(queryId) {
     return {
       type: this._initActionType,
       queryId: queryId,
@@ -145,7 +145,7 @@ export default class MapSegment extends Segment {
   /**
    * @return {Object}
    */
-  _createCleanAction() {
+  _createSyncCleanAction() {
     return {
       type: this._cleanActionType
     };

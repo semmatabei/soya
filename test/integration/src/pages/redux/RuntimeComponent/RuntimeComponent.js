@@ -5,6 +5,7 @@ import ReactRenderer from 'soya/lib/page/react/ReactRenderer.js'
 import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
 import register from 'soya/lib/client/Register';
 import UserProfile from '../../../components/contextual/UserProfile/UserProfile.js';
+import UserSegment from '../../../segments/user/UserSegment.js';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 // TODO: Figure out how to do promise polyfill.
@@ -15,6 +16,7 @@ import style from '../../../shared/sitewide.css';
 class Component extends React.Component {
   componentWillMount() {
     this.props.reduxStore.registerDataComponent(UserProfile);
+    this.props.reduxStore.register(UserSegment);
     this.setState({
       index: 0,
       components: []
@@ -30,6 +32,8 @@ class Component extends React.Component {
         <li>Queries of the created <code>DataComponent</code> should run automatically.</li>
         <li>There are {this.props.queries.length} distinct query(s) available. Queries will loop back to the first one.</li>
         <li>Data should not be fetched more than once for each query.</li>
+        <li>You can <a href="javascript:void(0)" onClick={this.clearProfiles.bind(this)}>clear spawned components</a> for clarity.</li>
+        <li>You can <a href="javascript:void(0)" onClick={this.addProfile.bind(this, true)}>add a component and force re-load</a> the query.</li>
       </ul>
       {this.state.components}
       <DebugPanel top right bottom>
@@ -38,7 +42,14 @@ class Component extends React.Component {
     </div>;
   }
 
-  addProfile() {
+  clearProfiles() {
+    this.setState({
+      index: 0,
+      components: []
+    });
+  }
+
+  addProfile(event, id, realEvent, forceLoad) {
     if (this.props.queries.length == 0) {
       alert('No queries defined in test case!');
       return;
@@ -56,6 +67,10 @@ class Component extends React.Component {
       index: nextIndex,
       components: components
     });
+
+    if (forceLoad) {
+      this.props.reduxStore.query(UserSegment.id(), {username: query}, true);
+    }
   }
 }
 

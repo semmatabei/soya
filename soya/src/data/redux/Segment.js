@@ -79,7 +79,7 @@ export default class Segment {
    * @param {string} queryId
    * @return {Object}
    */
-  _createInitAction(queryId) {
+  _createSyncInitAction(queryId) {
 
   }
 
@@ -89,7 +89,7 @@ export default class Segment {
    *
    * @return {Object}
    */
-  _createCleanAction() {
+  _createSyncCleanAction() {
 
   }
 

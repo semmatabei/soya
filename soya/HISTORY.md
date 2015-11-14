@@ -22,6 +22,9 @@
   ReduxStore.
 - Removed query options. They complicate things, cache and poll will be
   implemented without using query options.
+- Add clear components and force load link to runtime components test.
+- Change _createCleanAction() to _createSyncCleanAction(). Also change other
+  method names to signify that they're supposed to be sync.
 
 ## 0.0.23
 
