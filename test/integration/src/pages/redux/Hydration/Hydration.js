@@ -8,7 +8,7 @@ import UserProfile from '../../../components/contextual/UserProfile/UserProfile.
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 // TODO: Figure out how to do promise polyfill.
-import { Promise } from 'es6-promise';
+////import { Promise } from 'es6-promise';
 
 import style from '../../../shared/sitewide.css';
 
@@ -22,8 +22,8 @@ class Component extends React.Component {
 
   render() {
     return <div>
-      <h1>Server-Side Hydration</h1>
-      <h3>Specs</h3>
+      <h1>Hydration</h1>
+      <h3>Server-Side Hydration</h3>
       <ul>
         <li>HTML sent by server must already include user profile data.</li>
         <li>Server rendering is blocked for 5 seconds while fetching user data.</li>

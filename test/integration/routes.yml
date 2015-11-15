@@ -22,11 +22,29 @@ HYDRATION:
     - [method, GET]
     - [path, /data/redux/hydration]
 
+SEGMENT_DEPENDENCIES:
+  page: SegmentDependencies
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/dependencies]
+
 USER_JSON:
   page: UserJson
   nodes:
     - [method, GET]
     - [path, /api/user/:username]
+
+CONTEXT_JSON:
+  page: ContextJson
+  nodes:
+    - [method, GET]
+    - [path, /api/context]
+
+RANDOM_TIME_ECHO:
+  page: RandomTimeEchoJson
+  nodes:
+    - [method, GET]
+    - [path, /api/random-time-echo/:value]
 
 NOT_FOUND:
   page: NotFound

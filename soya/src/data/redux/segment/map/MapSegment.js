@@ -121,7 +121,7 @@ export default class MapSegment extends Segment {
       payload: {
         data: payload,
         errors: errors,
-        loaded: true
+        loaded: errors ? false : true
       }
     };
   }

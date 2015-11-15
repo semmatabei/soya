@@ -25,6 +25,9 @@
 - Add clear components and force load link to runtime components test.
 - Change _createCleanAction() to _createSyncCleanAction(). Also change other
   method names to signify that they're supposed to be sync.
+- Created QueryDependencies, tested serial and parallel segment dependencies.
+  - ReduxStore.register() also register Segment dependencies recursively.
+  - ReduxStore.dispatch() process QueryDependencies.
 
 ## 0.0.23
 

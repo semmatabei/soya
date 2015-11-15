@@ -6,13 +6,13 @@ import Thunk from 'soya/lib/data/redux/Thunk.js';
 //import { Promise } from 'es6-promise';
 import request from 'superagent';
 
-export default class UserSegment extends MapSegment {
+export default class RandomTimeEchoSegment extends MapSegment {
   static id() {
-    return 'user';
+    return 'randomTimeEcho';
   }
 
   _generateQueryId(query) {
-    return query.username;
+    return query.value;
   }
 
   _generateThunkFunction(thunk) {
@@ -20,7 +20,7 @@ export default class UserSegment extends MapSegment {
     var queryId = thunk.queryId;
     thunk.func = (dispatch) => {
       var result = new Promise((resolve, reject) => {
-        request.get('http://localhost:8000/api/user/' + query.username).end((err, res) => {
+        request.get('http://localhost:8000/api/random-time-echo/' + query.value).end((err, res) => {
           if (res.ok) {
             var payload = JSON.parse(res.text);
             dispatch(this._createSyncLoadActionObject(queryId, payload));

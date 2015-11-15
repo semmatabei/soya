@@ -336,15 +336,26 @@ export default class ReduxStore extends Store {
   }
 
   /**
-   * @param {string} segmentName
+   * @param {string} segmentId
+   * @param {any} query
+   * @return {Object}
+   */
+  _getSegmentPieceWithQuery(segmentId, query) {
+    var segment = this._segments[segmentId];
+    var queryId = segment._generateQueryId(query);
+    return this._getSegmentPiece(segmentId, queryId);
+  }
+
+  /**
+   * @param {string} segmentId
    * @param {string} queryId
    * @returns {Object}
    */
-  _getSegmentPiece(segmentName, queryId) {
+  _getSegmentPiece(segmentId, queryId) {
     var state = this._store.getState();
-    var segmentState = state[segmentName];
+    var segmentState = state[segmentId];
     if (!segmentState) return null;
-    var pieceObject = this._segments[segmentName]._getPieceObject(segmentState, queryId);
+    var pieceObject = this._segments[segmentId]._getPieceObject(segmentState, queryId);
     // We return the real object so that users can do simple equality check to
     // see if the object has changed or not.
     return pieceObject;
@@ -641,7 +652,8 @@ export default class ReduxStore extends Store {
     }
 
     // Query but don't force load.
-    this.query(segmentId, query, false);
+    var subscribePromise = this.query(segmentId, query, false);
+    subscribePromise.catch(PromiseUtil.throwError);
 
     // Register subscriber, previous init action is sync, so don't have to worry.
     if (!this._subscribers[segmentId][queryId]) this._subscribers[segmentId][queryId] = {};
@@ -752,6 +764,8 @@ export default class ReduxStore extends Store {
   dispatch(action) {
     var result;
     if (action instanceof Thunk) {
+      // We initialize the query just in case the user calls dispatch directly
+      // using action creator.
       this._initQuery(action.segmentId, action.queryId, action.query);
       // Immediately create a promise so we can ensure no identical fetching
       // can happen at the same time with query() or subscribe().
@@ -769,8 +783,8 @@ export default class ReduxStore extends Store {
           // TODO: Cache the bound store dispatch.
           result = action.func(this._store.dispatch.bind(this._store));
           this._ensurePromise(result);
-          result.then(resolve, reject);
-        });
+          result.then(resolve).catch(reject);
+        }).catch(reject);
       });
     }
 
