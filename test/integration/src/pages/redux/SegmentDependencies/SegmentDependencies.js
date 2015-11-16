@@ -19,7 +19,11 @@ class Component extends React.Component {
       serialStr: 'Fetch Serial',
       parallelStr: 'Fetch Parallel',
       serialClientComponent: null,
-      parallelClientComponent: null
+      parallelClientComponent: null,
+      serialSerialComponent: null,
+      serialParallelComponent: null,
+      parallelParallelComponent: null,
+      parallelSerialComponent: null
     });
   }
 
@@ -50,10 +54,56 @@ class Component extends React.Component {
         <li>The result printed below should be an anagram of '{this.state.parallelStr}' (because of random time response), and network requests should be parallel.</li>
       </ul>
       {this.state.parallelClientComponent}
+      <h3>Client Recursive Dependency</h3>
+      <ul>
+        <li>This tests recursive characteristics of <code>QueryDependencies</code> class.</li>
+        <li>Test are organized as <code>[Parent]-[Child]</code>. Letter 's' will be replaced with 'soya' with recursive <code>QueryDependencies</code>.</li>
+        <li>If Child is Serial, the string 'soya' should be ordered correctly, otherwise it should be an anagram.</li>
+      </ul>
+      <h4><a href="javascript:void(0)" onClick={this.addSerialSerialComponent.bind(this)}>Load Serial-Serial</a></h4>
+      {this.state.serialSerialComponent}
+      <h4><a href="javascript:void(0)" onClick={this.addSerialParallelComponent.bind(this)}>Load Serial-Parallel</a></h4>
+      {this.state.serialParallelComponent}
+      <h4><a href="javascript:void(0)" onClick={this.addParallelSerialComponent.bind(this)}>Load Parallel-Serial</a></h4>
+      {this.state.parallelSerialComponent}
+      <h4><a href="javascript:void(0)" onClick={this.addParallelParallelComponent.bind(this)}>Load Parallel-Parallel</a></h4>
+      {this.state.parallelParallelComponent}
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>;
+  }
+
+  addSerialSerialComponent() {
+    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
+      config={this.props.config} value={'Olsen'} shouldReplace={true} />;
+    this.setState({
+      serialSerialComponent: component
+    });
+  }
+
+  addSerialParallelComponent() {
+    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
+      config={this.props.config} value={'Olsen'} shouldReplace={true} isReplaceParallel={true} />;
+    this.setState({
+      serialParallelComponent: component
+    });
+  }
+
+  addParallelParallelComponent() {
+    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
+      config={this.props.config} value={'Olsen'} shouldReplace={true} isParallel={true} isReplaceParallel={true} />;
+    this.setState({
+      parallelParallelComponent: component
+    });
+  }
+
+  addParallelSerialComponent() {
+    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
+      config={this.props.config} value={'Olsen'} shouldReplace={true} isParallel={true} />;
+    this.setState({
+      parallelSerialComponent: component
+    });
   }
 
   addSerialDependencyComponent() {

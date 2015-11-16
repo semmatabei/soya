@@ -132,7 +132,7 @@ export default class QueryDependencies {
     for (i = 0; i < this._queries.length; i++) {
       query = this._queries[i];
       if (query.query instanceof QueryDependencies) {
-        promises.push(query.query.run(reduxStore));
+        promises.push(query.query._run(reduxStore));
         continue;
       }
       if (typeof query.query == 'function') {
@@ -212,7 +212,7 @@ export default class QueryDependencies {
    */
   _createSerialRecursiveQueryFunc(reduxStore, queryDependencies) {
     return function() {
-      return queryDependencies.run(reduxStore);
+      return queryDependencies._run(reduxStore);
     };
   }
 

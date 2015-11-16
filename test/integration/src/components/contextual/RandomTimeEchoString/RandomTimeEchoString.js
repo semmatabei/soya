@@ -21,7 +21,9 @@ export default class RandomTimeEchoString extends DataComponent {
 
     var query = {
       value: nextProps.value,
-      isParallel: nextProps.isParallel
+      isParallel: nextProps.isParallel,
+      shouldReplace: nextProps.shouldReplace,
+      isReplaceParallel: nextProps.isReplaceParallel
     };
 
     this.subscribe(ConcatRandomTimeEchoSegment.id(), query, 'concatVal',

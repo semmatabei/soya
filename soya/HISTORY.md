@@ -28,6 +28,7 @@
 - Created QueryDependencies, tested serial and parallel segment dependencies.
   - ReduxStore.register() also register Segment dependencies recursively.
   - ReduxStore.dispatch() process QueryDependencies.
+  - Recursive QueryDependencies tested to be working.
 
 ## 0.0.23
 
