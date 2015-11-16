@@ -115,7 +115,7 @@ export default class QueryDependencies {
    * @param {ReduxStore} reduxStore
    * @return {Promise}
    */
-  run(reduxStore) {
+  _run(reduxStore) {
     if (this._isParallel) {
       return this._runParallel(reduxStore);
     }

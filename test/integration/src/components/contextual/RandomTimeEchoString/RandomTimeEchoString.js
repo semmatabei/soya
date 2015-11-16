@@ -4,6 +4,8 @@ import ConcatRandomTimeEchoSegment from '../../../segments/ConcatRandomTimeEchoS
 import DataComponent from 'soya/lib/data/redux/DataComponent.js';
 import { SERVER } from 'soya/lib/data/RenderType.js';
 
+import style from './style.css';
+
 export default class RandomTimeEchoString extends DataComponent {
   static getSegmentDependencies() {
     return [ConcatRandomTimeEchoSegment];
@@ -31,13 +33,13 @@ export default class RandomTimeEchoString extends DataComponent {
     title += this.props.isParallel ? ', Parallel' : ', Serial' ;
 
     if (!this.state.concatVal.loaded) {
-      return <div>
+      return <div className={style.container}>
         <h3>{title}</h3>
-        <p>Random time echo concatenated string is loading...</p>
+        <p>Loading...</p>
       </div>
     }
 
-    return <div>
+    return <div className={style.container}>
       <h3>{title}</h3>
       <p>Result: {this.state.concatVal.data}</p>
     </div>

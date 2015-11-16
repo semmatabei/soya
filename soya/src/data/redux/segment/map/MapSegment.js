@@ -120,6 +120,7 @@ export default class MapSegment extends Segment {
       queryId: queryId,
       payload: {
         data: payload,
+        updated: Date.now ? Date.now() : new Date().getTime(),
         errors: errors,
         loaded: errors ? false : true
       }
@@ -136,6 +137,7 @@ export default class MapSegment extends Segment {
       queryId: queryId,
       payload: {
         data: null,
+        updated: Date.now ? Date.now() : new Date().getTime(),
         errors: null,
         loaded: false
       }

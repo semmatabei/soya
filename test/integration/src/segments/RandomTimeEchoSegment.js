@@ -20,7 +20,7 @@ export default class RandomTimeEchoSegment extends MapSegment {
     var queryId = thunk.queryId;
     thunk.func = (dispatch) => {
       var result = new Promise((resolve, reject) => {
-        request.get('http://localhost:8000/api/random-time-echo/' + query.value).end((err, res) => {
+        request.get('http://localhost:8000/api/random-time-echo/' + encodeURIComponent(query.value)).end((err, res) => {
           if (res.ok) {
             var payload = JSON.parse(res.text);
             dispatch(this._createSyncLoadActionObject(queryId, payload));

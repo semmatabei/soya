@@ -651,8 +651,8 @@ export default class ReduxStore extends Store {
       }
     }
 
-    // Query but don't force load.
-    var subscribePromise = this.query(segmentId, query, false);
+    // Query but ignore if we are at server (we'll use hydrate).
+    var subscribePromise = this.query(segmentId, query, false, true);
     subscribePromise.catch(PromiseUtil.throwError);
 
     // Register subscriber, previous init action is sync, so don't have to worry.
@@ -673,9 +673,10 @@ export default class ReduxStore extends Store {
    * @param {string} segmentId
    * @param {any} query
    * @param {?boolean} forceLoad
+   * @param {?boolean} ignoreAtServer
    * @return {Promise}
    */
-  query(segmentId, query, forceLoad) {
+  query(segmentId, query, forceLoad, ignoreAtServer) {
     var segment = this._segments[segmentId];
     if (!segment) {
       throw new Error('Cannot subscribe, Segment is not registered: ' + segmentId + '.');
@@ -698,6 +699,12 @@ export default class ReduxStore extends Store {
       this.dispatch(initAction);
     }
 
+    // If we are at server, and is told to ignore, return a promise that
+    // never resolves.
+    if (ignoreAtServer && this._renderType == SERVER) {
+      return new Promise(function() {});
+    }
+
     // Up until this point, segment piece will never be empty.
     // If already loaded, return immediately.
     segmentPiece = this._getSegmentPiece(segmentId, queryId);
@@ -711,14 +718,8 @@ export default class ReduxStore extends Store {
     }
 
     // Right now either segment isn't loaded yet or this is a force load.
-    if (this._renderType == CLIENT) {
-      var loadAction = segment._createLoadAction(query, queryId);
-      return this.dispatch(loadAction);
-    }
-
-    // Else we are at server, return a promise that never resolves.
-    // We assume that manual queries are always hydrated at client side.
-    return new Promise(function() {});
+    var loadAction = segment._createLoadAction(query, queryId);
+    return this.dispatch(loadAction);
   }
 
   /**
@@ -773,7 +774,7 @@ export default class ReduxStore extends Store {
         // Resolve dependencies first.
         var depResolvedPromise = Promise.resolve(null);
         if (action.dependencies instanceof QueryDependencies) {
-          depResolvedPromise = action.dependencies.run(this);
+          depResolvedPromise = action.dependencies._run(this);
         }
 
         // After dependencies are resolved, run the thunk function. The thunk

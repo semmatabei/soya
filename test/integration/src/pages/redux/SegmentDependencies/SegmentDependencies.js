@@ -16,6 +16,8 @@ class Component extends React.Component {
   componentWillMount() {
     this.props.reduxStore.registerDataComponent(RandomTimeEchoString);
     this.setState({
+      serialStr: 'Fetch Serial',
+      parallelStr: 'Fetch Parallel',
       serialClientComponent: null,
       parallelClientComponent: null
     });
@@ -24,16 +26,28 @@ class Component extends React.Component {
   render() {
     return <div>
       <h1>Segment Dependencies</h1>
-      <h3>Serial Dependencies</h3>
+      <h3>Server Serial Dependency</h3>
       <ul>
-        <li><a href="javascript:void(0)" onClick={this.addSerialDependencyComponent.bind(this)}>Click this link</a> to send the string 'fetch-serial' to random time echo API, serially.</li>
-        <li>The result printed below should be exact string 'fetch-serial', and network requests should be serial.</li>
+        <li>HTML response should already contain the text 'Quick Fox' fetched serially below.</li>
+        <li>Redux store state should already contain letters for 'Quick Fox'.</li>
+      </ul>
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Quick Fox'} />
+      <h3>Server Parallel Dependency</h3>
+      <ul>
+        <li>HTML response should already contain an anagram of text 'Jumps Over', fetched parallely below.</li>
+        <li>Redux store state should already contain letters for 'Jumps Over'.</li>
+      </ul>
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Jumps Over'} isParallel={true} />
+      <h3>Client Serial Dependency</h3>
+      <ul>
+        <li><a href="javascript:void(0)" onClick={this.addSerialDependencyComponent.bind(this)}>Click this link</a> to send the string '{this.state.serialStr}' to random time echo API, serially.</li>
+        <li>The result printed below should be exact string '{this.state.serialStr}', and network requests should be serial.</li>
       </ul>
       {this.state.serialClientComponent}
-      <h3>Parallel Dependencies</h3>
+      <h3>Client Parallel Dependency</h3>
       <ul>
-        <li><a href="javascript:void(0)" onClick={this.addParallelDependencyComponent.bind(this)}>Click this link</a> to send the string 'fetch-parallel' to random time echo API, in parallel.</li>
-        <li>The result printed below should be an anagram of 'fetch-parallel' (because of random time response), and network requests should be parallel.</li>
+        <li><a href="javascript:void(0)" onClick={this.addParallelDependencyComponent.bind(this)}>Click this link</a> to send the string '{this.state.parallelStr}' to random time echo API, in parallel.</li>
+        <li>The result printed below should be an anagram of '{this.state.parallelStr}' (because of random time response), and network requests should be parallel.</li>
       </ul>
       {this.state.parallelClientComponent}
       <DebugPanel top right bottom>
@@ -44,7 +58,7 @@ class Component extends React.Component {
 
   addSerialDependencyComponent() {
     var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} loadAtClient={true} value={'fetch-serial'} />;
+      config={this.props.config} loadAtClient={true} value={this.state.serialStr} />;
     this.setState({
       serialClientComponent: component
     });
@@ -52,7 +66,7 @@ class Component extends React.Component {
 
   addParallelDependencyComponent() {
     var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} loadAtClient={true} value={'fetch-parallel'} isParallel={true} />;
+      config={this.props.config} loadAtClient={true} value={this.state.parallelStr} isParallel={true} />;
     this.setState({
       parallelClientComponent: component
     });
