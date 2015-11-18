@@ -5,6 +5,7 @@ import ReactRenderer from 'soya/lib/page/react/ReactRenderer.js';
 import register from 'soya/lib/client/Register';
 import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
 import RandomTimeEchoString from '../../../components/contextual/RandomTimeEchoString/RandomTimeEchoString.js';
+import FibonacciSequence from '../../../components/contextual/FibonacciSequence/FibonacciSequence.js';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 // TODO: Figure out how to do promise polyfill.
@@ -15,6 +16,7 @@ import style from '../../../shared/sitewide.css';
 class Component extends React.Component {
   componentWillMount() {
     this.props.reduxStore.registerDataComponent(RandomTimeEchoString);
+    this.props.reduxStore.registerDataComponent(FibonacciSequence);
     this.setState({
       serialStr: 'Fetch Serial',
       parallelStr: 'Fetch Parallel',
@@ -23,38 +25,27 @@ class Component extends React.Component {
       serialSerialComponent: null,
       serialParallelComponent: null,
       parallelParallelComponent: null,
-      parallelSerialComponent: null
+      parallelSerialComponent: null,
+      fibonacciComponent: null
     });
   }
 
   render() {
     return <div>
-      <h1>Segment Dependencies</h1>
-      <h3>Server Serial Dependency</h3>
-      <ul>
-        <li>HTML response should already contain the text 'Quick Fox' fetched serially below.</li>
-        <li>Redux store state should already contain letters for 'Quick Fox'.</li>
-      </ul>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Quick Fox'} />
-      <h3>Server Parallel Dependency</h3>
-      <ul>
-        <li>HTML response should already contain an anagram of text 'Jumps Over', fetched parallely below.</li>
-        <li>Redux store state should already contain letters for 'Jumps Over'.</li>
-      </ul>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Jumps Over'} isParallel={true} />
-      <h3>Client Serial Dependency</h3>
+      <h1>Client Segment Dependencies</h1>
+      <h3>Serial Dependency</h3>
       <ul>
         <li><a href="javascript:void(0)" onClick={this.addSerialDependencyComponent.bind(this)}>Click this link</a> to send the string '{this.state.serialStr}' to random time echo API, serially.</li>
         <li>The result printed below should be exact string '{this.state.serialStr}', and network requests should be serial.</li>
       </ul>
       {this.state.serialClientComponent}
-      <h3>Client Parallel Dependency</h3>
+      <h3>Parallel Dependency</h3>
       <ul>
         <li><a href="javascript:void(0)" onClick={this.addParallelDependencyComponent.bind(this)}>Click this link</a> to send the string '{this.state.parallelStr}' to random time echo API, in parallel.</li>
         <li>The result printed below should be an anagram of '{this.state.parallelStr}' (because of random time response), and network requests should be parallel.</li>
       </ul>
       {this.state.parallelClientComponent}
-      <h3>Client Recursive Dependency</h3>
+      <h3>Recursive <code>QueryDependencies</code></h3>
       <ul>
         <li>This tests recursive characteristics of <code>QueryDependencies</code> class.</li>
         <li>Test are organized as <code>[Parent]-[Child]</code>. Letter 's' will be replaced with 'soya' with recursive <code>QueryDependencies</code>.</li>
@@ -68,10 +59,25 @@ class Component extends React.Component {
       {this.state.parallelSerialComponent}
       <h4><a href="javascript:void(0)" onClick={this.addParallelParallelComponent.bind(this)}>Load Parallel-Parallel</a></h4>
       {this.state.parallelParallelComponent}
+      <h3>Serial Function Dependencies</h3>
+      <ul>
+        <li>We have an addition API, and we're going to <a href="javascript:void(0)" onClick={this.addFibonacciComponent.bind(this)}>create a Fibonacci sequence</a> using it.</li>
+        <li>Since it's Fibonacci, the next number in the sequence can only be calculated if we know the previous two numbers.</li>
+        <li>We expect the Fibonacci sequence is correct, and the AJAX requests are serial.</li>
+      </ul>
+      {this.state.fibonacciComponent}
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>;
+  }
+
+  addFibonacciComponent() {
+    var component = <FibonacciSequence reduxStore={this.props.reduxStore}
+      config={this.props.config} number={10} />;
+    this.setState({
+      fibonacciComponent: component
+    });
   }
 
   addSerialSerialComponent() {
@@ -123,9 +129,9 @@ class Component extends React.Component {
   }
 }
 
-class SegmentDependencies extends Page {
+class ClientSegmentDependencies extends Page {
   static get pageName() {
-    return 'SegmentDependencies';
+    return 'ClientSegmentDependencies';
   }
 
   createStore(initialState) {
@@ -145,5 +151,5 @@ class SegmentDependencies extends Page {
   }
 }
 
-register(SegmentDependencies);
-export default SegmentDependencies;
+register(ClientSegmentDependencies);
+export default ClientSegmentDependencies;

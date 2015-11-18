@@ -68,6 +68,10 @@ export default class QueryDependencies {
     return new QueryDependencies(PromiseImpl, false);
   }
 
+  setResult(name) {
+
+  }
+
   /**
    * @param {string} name
    * @return {Object} TODO: segment piece object, clarify.
@@ -84,12 +88,25 @@ export default class QueryDependencies {
    */
   add(name, segmentId, query, forceLoad) {
     this._ensureNoNameClash(name);
-    this._results[name] = null;
     this._queries.push({
       name: name,
       segmentId: segmentId,
       query: query,
       forceLoad: forceLoad
+    });
+  }
+
+  /**
+   * @param {string} name
+   * @param {Function} queryFunc
+   */
+  addFunction(name, queryFunc) {
+    this._ensureNoNameClash(name);
+    this._queries.push({
+      name: name,
+      segmentId: '',
+      query: queryFunc,
+      forceLoad: false
     });
   }
 
@@ -135,14 +152,18 @@ export default class QueryDependencies {
         promises.push(query.query._run(reduxStore));
         continue;
       }
+
+      // TODO: How does function sets values to results?
+      // Promise returned by the function should resolve query result, whatever
+      // it is (doesn't have to be a segment piece).
       if (typeof query.query == 'function') {
-        promises.push(query.query(queryFunc, dispatchFunc));
+        promises.push(query.query(queryFunc, dispatchFunc).then(this._createResultSetterFunc(query.name)));
         continue;
       }
 
       // Construct a promise that sets the result to this instance after fetching is complete.
       fetchPromise = reduxStore.query(query.segmentId, query.query, query.forceLoad).then(
-        this._createResultSetterFunc(query.name, query.segmentId, query.query, reduxStore)
+        this._createResultSetterFunc(query.name)
       );
 
       promises.push(fetchPromise);
@@ -166,8 +187,9 @@ export default class QueryDependencies {
           reduxStore, query.query));
         continue;
       }
-      if (query.query instanceof Function) {
-        ready = ready.then(this._createSerialQueryFunc(queryFunc, dispatchFunc, query.query));
+
+      if (typeof query.query == 'function') {
+        ready = ready.then(this._createSerialQueryFunc(queryFunc, dispatchFunc, query.query, query.name));
         continue;
       }
 
@@ -175,7 +197,7 @@ export default class QueryDependencies {
       // promise that will be executed, the next .then call will execute after
       // that promise is resolved.
       ready = ready.then(this._createSerialObjectQueryFunc(reduxStore, query))
-        .then(this._createResultSetterFunc(query.name, query.segmentId, query.query, reduxStore));
+        .then(this._createResultSetterFunc(query.name));
     }
 
     // Since ready is a long chained promise, we don't need to manually set
@@ -187,10 +209,13 @@ export default class QueryDependencies {
    * @param {Function} queryFunc
    * @param {Function} dispatchFunc
    * @param {Function} query
+   * @param {string} name
    */
-  _createSerialQueryFunc(queryFunc, dispatchFunc, query) {
-    return function() {
-      query(queryFunc, dispatchFunc);
+  _createSerialQueryFunc(queryFunc, dispatchFunc, query, name) {
+    return () => {
+      // We expect query functions to return a promise that resolves with the
+      // result variable.
+      return query(queryFunc, dispatchFunc).then(this._createResultSetterFunc(name));
     }
   }
 
@@ -220,15 +245,11 @@ export default class QueryDependencies {
    * Creates a function that sets result with the given name using redux store.
    *
    * @param {string} name
-   * @param {string} segmentId
-   * @param {any} query
-   * @param {ReduxStore} reduxStore
    * @returns {Function}
    */
-  _createResultSetterFunc(name, segmentId, query, reduxStore) {
-    return () => {
-      this._results[name] = reduxStore._getSegmentPieceWithQuery(
-        segmentId, query);
+  _createResultSetterFunc(name) {
+    return (segmentPiece) => {
+      this._results[name] = segmentPiece;
     };
   }
 
@@ -239,5 +260,6 @@ export default class QueryDependencies {
     if (this._results.hasOwnProperty(name)) {
       throw new Error('Query dependencies name clash: \'' + name + '\'.');
     }
+    this._results[name] = null;
   }
 }

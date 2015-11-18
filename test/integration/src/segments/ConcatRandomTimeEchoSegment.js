@@ -77,8 +77,7 @@ export default class ConcatRandomTimeEchoSegment extends MapSegment {
         segmentPiece = resultArray[i];
         resultStr += segmentPiece.loaded ? segmentPiece.data : '?';
       }
-      dispatch(this._createSyncLoadActionObject(queryId, resultStr));
-      return Promise.resolve(null);
+      return dispatch(this._createSyncLoadActionObject(queryId, resultStr));
     };
   }
 }

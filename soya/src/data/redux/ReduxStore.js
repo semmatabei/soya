@@ -709,7 +709,7 @@ export default class ReduxStore extends Store {
     // If already loaded, return immediately.
     segmentPiece = this._getSegmentPiece(segmentId, queryId);
     if (segmentPiece.loaded && !forceLoad) {
-      return Promise.resolve(null);
+      return Promise.resolve(segmentPiece);
     }
 
     // Re-use promise from another dispatch to prevent double fetching.
@@ -719,7 +719,9 @@ export default class ReduxStore extends Store {
 
     // Right now either segment isn't loaded yet or this is a force load.
     var loadAction = segment._createLoadAction(query, queryId);
-    return this.dispatch(loadAction);
+    return this.dispatch(loadAction).then(() => {
+      return this._getSegmentPiece(segmentId, queryId);
+    });
   }
 
   /**
@@ -782,7 +784,7 @@ export default class ReduxStore extends Store {
         // it to access its dependencies' query results.
         depResolvedPromise.then(() => {
           // TODO: Cache the bound store dispatch.
-          result = action.func(this._store.dispatch.bind(this._store));
+          result = action.func(this.dispatch.bind(this));
           this._ensurePromise(result);
           result.then(resolve).catch(reject);
         }).catch(reject);
