@@ -68,10 +68,6 @@ export default class QueryDependencies {
     return new QueryDependencies(PromiseImpl, false);
   }
 
-  setResult(name) {
-
-  }
-
   /**
    * @param {string} name
    * @return {Object} TODO: segment piece object, clarify.
@@ -196,8 +192,8 @@ export default class QueryDependencies {
       // Chain the promises together, our onFulfilled function returns another
       // promise that will be executed, the next .then call will execute after
       // that promise is resolved.
-      ready = ready.then(this._createSerialObjectQueryFunc(reduxStore, query))
-        .then(this._createResultSetterFunc(query.name));
+      ready = ready.then(this._createSerialObjectQueryFunc(reduxStore, query));
+      ready = ready.then(this._createResultSetterFunc(query.name));
     }
 
     // Since ready is a long chained promise, we don't need to manually set

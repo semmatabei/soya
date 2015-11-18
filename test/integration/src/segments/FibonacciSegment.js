@@ -30,7 +30,6 @@ export default class FibonacciSegment extends MapSegment {
 
     var func = function(query, dispatch) {
       return query(AdditionSegment.id(), {a: a, b: b}).then(function(value) {
-        debugger;
         a = b;
         b = value.data;
         return value;
@@ -47,7 +46,6 @@ export default class FibonacciSegment extends MapSegment {
 
     thunk.dependencies = dependencies;
     thunk.func = (dispatch) => {
-      debugger;
       var resultStr = '';
       for (i = 0; i < query.number; i++) {
         resultStr += dependencies.getResult(i + '').data + ' ';

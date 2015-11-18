@@ -17,19 +17,19 @@ import style from '../../../shared/sitewide.css';
 class Component extends React.Component {
   render() {
     return <div>
-      <h1>Server Segment Dependencies</h1>
+      <h1>Client Instant Segment Dependencies</h1>
       <h3>Serial Dependency</h3>
       <ul>
         <li>HTML response should already contain the text 'Quick Fox' fetched serially below.</li>
         <li>Redux store state should already contain letters for 'Quick Fox'.</li>
       </ul>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Quick Fox'} />
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Quick Fox'} />
       <h3>Parallel Dependency</h3>
       <ul>
         <li>HTML response should already contain an anagram of text 'Jumps Over', fetched parallely below.</li>
         <li>Redux store state should already contain letters for 'Jumps Over'.</li>
       </ul>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Jumps Over'} isParallel={true} />
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Jumps Over'} isParallel={true} />
       <h3>Recursive <code>QueryDependencies</code></h3>
       <ul>
         <li>This tests recursive characteristics of <code>QueryDependencies</code> class.</li>
@@ -37,22 +37,22 @@ class Component extends React.Component {
         <li>If Child is Serial, the string 'soya' should be ordered correctly, otherwise it should be an anagram.</li>
       </ul>
       <h4>Serial-Serial</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Olsen'} shouldReplace={true} />
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} />
       <h4>Serial-Parallel</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Olsen'} shouldReplace={true} isReplaceParallel={true} />
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} isReplaceParallel={true} />
       <h4>Parallel-Serial</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Olsen'} shouldReplace={true} isParallel={true} />
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} isParallel={true} />
       <h4>Parallel-Parallel</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} value={'Olsen'} shouldReplace={true} isParallel={true} isReplaceParallel={true} />
+      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} isParallel={true} isReplaceParallel={true} />
       <h3>Serial Function Dependencies</h3>
       <ul>
         <li>We have an addition API, and we're going to create a Fibonacci sequence using it.</li>
         <li>Since it's Fibonacci, the next number in the sequence can only be calculated if we know the previous two numbers.</li>
         <li>We expect the Fibonacci sequence is correct, and it must be present in the HTML.</li>
       </ul>
-      <FibonacciSequence reduxStore={this.props.reduxStore} config={this.props.config} number={10} />
+      <FibonacciSequence reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} number={10} />
       <h3>Recursive Segment Dependencies</h3>
-      <FibonacciTotal reduxStore={this.props.reduxStore} config={this.props.config} number={10} />
+      <FibonacciTotal reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} number={10} />
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
@@ -60,9 +60,9 @@ class Component extends React.Component {
   }
 }
 
-class ServerSegmentDependencies extends Page {
+class ClientInstantSegmentDependencies extends Page {
   static get pageName() {
-    return 'ServerSegmentDependencies';
+    return 'ClientInstantSegmentDependencies';
   }
 
   createStore(initialState) {
@@ -82,5 +82,5 @@ class ServerSegmentDependencies extends Page {
   }
 }
 
-register(ServerSegmentDependencies);
-export default ServerSegmentDependencies;
+register(ClientInstantSegmentDependencies);
+export default ClientInstantSegmentDependencies;

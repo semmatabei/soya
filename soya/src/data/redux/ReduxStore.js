@@ -425,8 +425,8 @@ export default class ReduxStore extends Store {
         if (shouldLoad) {
           action = this._segments[segmentId]._createLoadAction(query, queryId);
           promise = this.dispatch(action);
+          hydrationPromises.push(promise);
         }
-        hydrationPromises.push(promise);
       }
     }
     return PromiseUtil.allParallel(Promise, hydrationPromises);
@@ -712,16 +712,18 @@ export default class ReduxStore extends Store {
       return Promise.resolve(segmentPiece);
     }
 
+    var getSegmentPiece = () => {
+      return this._getSegmentPiece(segmentId, queryId);
+    };
+
     // Re-use promise from another dispatch to prevent double fetching.
     if (!forceLoad && this._queries[segmentId][queryId].promise) {
-      return this._queries[segmentId][queryId].promise;
+      return this._queries[segmentId][queryId].promise.then(getSegmentPiece);
     }
 
     // Right now either segment isn't loaded yet or this is a force load.
     var loadAction = segment._createLoadAction(query, queryId);
-    return this.dispatch(loadAction).then(() => {
-      return this._getSegmentPiece(segmentId, queryId);
-    });
+    return this.dispatch(loadAction).then(getSegmentPiece);
   }
 
   /**

@@ -6,6 +6,7 @@ import register from 'soya/lib/client/Register';
 import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
 import RandomTimeEchoString from '../../../components/contextual/RandomTimeEchoString/RandomTimeEchoString.js';
 import FibonacciSequence from '../../../components/contextual/FibonacciSequence/FibonacciSequence.js';
+import FibonacciTotal from '../../../components/contextual/FibonacciTotal/FibonacciTotal.js';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 // TODO: Figure out how to do promise polyfill.
@@ -17,6 +18,7 @@ class Component extends React.Component {
   componentWillMount() {
     this.props.reduxStore.registerDataComponent(RandomTimeEchoString);
     this.props.reduxStore.registerDataComponent(FibonacciSequence);
+    this.props.reduxStore.registerDataComponent(FibonacciTotal);
     this.setState({
       serialStr: 'Fetch Serial',
       parallelStr: 'Fetch Parallel',
@@ -26,7 +28,8 @@ class Component extends React.Component {
       serialParallelComponent: null,
       parallelParallelComponent: null,
       parallelSerialComponent: null,
-      fibonacciComponent: null
+      fibonacciComponent: null,
+      fibonacciTotalComponent: null
     });
   }
 
@@ -66,6 +69,12 @@ class Component extends React.Component {
         <li>We expect the Fibonacci sequence is correct, and the AJAX requests are serial.</li>
       </ul>
       {this.state.fibonacciComponent}
+      <h3>Recursive Segment Dependencies</h3>
+      <ul>
+        <li><code>FibonacciTotalSegment -> FibonacciSegment -> AdditionSegment</code></li>
+        <li>Returned value should be sum of all numbers in a Fibonacci sequence. Click <a href="javascript:void(0)" onClick={this.addFibonacciTotalComponent.bind(this)}>here to load</a>.</li>
+      </ul>
+      {this.state.fibonacciTotalComponent}
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
@@ -77,6 +86,14 @@ class Component extends React.Component {
       config={this.props.config} number={10} />;
     this.setState({
       fibonacciComponent: component
+    });
+  }
+
+  addFibonacciTotalComponent() {
+    var component = <FibonacciTotal reduxStore={this.props.reduxStore}
+      config={this.props.config} number={10} />;
+    this.setState({
+      fibonacciTotalComponent: component
     });
   }
 

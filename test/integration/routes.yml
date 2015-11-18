@@ -34,6 +34,12 @@ CLIENT_SEGMENT_DEPENDENCIES:
     - [method, GET]
     - [path, /data/redux/dependencies/client]
 
+CLIENT_INSTANT_SEGMENT_DEPENDENCIES:
+  page: ClientInstantSegmentDependencies
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/dependencies/client-instant]
+
 USER_JSON:
   page: UserJson
   nodes:

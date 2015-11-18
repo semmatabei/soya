@@ -1,0 +1,12 @@
+.container {
+  width: 400px;
+  padding: 10px 13px;
+  border: 1px solid #ccc;
+  margin: 15px 0;
+}
+
+.container h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: normal;
+}
