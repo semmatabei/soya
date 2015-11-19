@@ -1,5 +1,5 @@
 import React from 'react';
-import Cookie from 'soya/lib/page/Cookie';
+import Cookie from 'soya/lib/http/Cookie';
 import {prop} from 'soya/lib/helper';
 import {Provider} from 'react-redux';
 import Page from 'soya/lib/page/Page';

@@ -26,18 +26,4 @@ export default class Compiler {
   run(entryPoints, updateCompileResultCallback) {
     updateCompileResultCallback(new CompileResult());
   }
-
-  /**
-   * Assemble the HTML string for server side rendering. Compiler must also
-   * set up a client runtime so that behavior events are wired properly.
-   *
-   * @param {string} componentName
-   * @param {Object} pageDependencies
-   * @param {RenderResult} renderResult
-   * @param {boolean} isSecure
-   * @return {string}
-   */
-  assembleHtml(componentName, pageDependencies, renderResult, isSecure) {
-    return '';
-  }
 }

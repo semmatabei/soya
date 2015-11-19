@@ -1,6 +1,6 @@
 import React from 'react';
 
-import UserSegment from '../../../segments/user/UserSegment.js';
+import UserSegment from '../../../segments/UserSegment.js';
 import DataComponent from 'soya/lib/data/redux/DataComponent.js';
 import { SERVER } from 'soya/lib/data/RenderType.js';
 

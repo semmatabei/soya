@@ -1,4 +1,4 @@
-import Cookie from './Cookie.js';
+import Cookie from '../http/Cookie.js';
 import Bucket from '../Bucket';
 
 var STATUS_MESSAGES = {

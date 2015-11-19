@@ -8,8 +8,6 @@ import UserProfile from '../../../components/contextual/UserProfile/UserProfile.
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 // TODO: Figure out how to do promise polyfill.
-////import { Promise } from 'es6-promise';
-
 import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {

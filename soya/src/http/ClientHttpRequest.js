@@ -1,4 +1,6 @@
 /**
+ * TODO: A better abstraction for HttpRequest.
+ *
  * @CLIENT
  */
 export default class ClientHttpRequest {

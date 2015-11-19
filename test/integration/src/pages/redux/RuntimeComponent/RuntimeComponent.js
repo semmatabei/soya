@@ -5,12 +5,10 @@ import ReactRenderer from 'soya/lib/page/react/ReactRenderer.js'
 import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
 import register from 'soya/lib/client/Register';
 import UserProfile from '../../../components/contextual/UserProfile/UserProfile.js';
-import UserSegment from '../../../segments/user/UserSegment.js';
+import UserSegment from '../../../segments/UserSegment.js';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 // TODO: Figure out how to do promise polyfill.
-////import { Promise } from 'es6-promise';
-
 import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {

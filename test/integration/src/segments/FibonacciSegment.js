@@ -4,7 +4,6 @@ import QueryDependencies from 'soya/lib/data/redux/QueryDependencies';
 
 // TODO: Figure out how to do polyfill.
 // TODO: Figure out how to load client-side libraries like jQuery!
-//import { Promise } from 'es6-promise';
 import request from 'superagent';
 
 import AdditionSegment from './AdditionSegment.js';
