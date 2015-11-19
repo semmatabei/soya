@@ -16,6 +16,19 @@ export default class LifetimeSessionSegment extends MapSegment {
 
   _generateThunkFunction(thunk) {
     var queryId = thunk.queryId;
+    var lifetimeCookie = this._cookieReader.read('context');
+    var sessionCookie = this._cookieReader.read('session');
+    if (lifetimeCookie != null && sessionCookie != null) {
+      // Just re-use what we already have in cookie.
+      thunk.func = function(dispatch) {
+        dispatch(this._createSyncLoadActionObject(queryId, {
+          lifetime: lifetimeCookie,
+          session: sessionCookie
+        }));
+      };
+      return;
+    }
+
     thunk.func = (dispatch) => {
       var result = new Promise((resolve, reject) => {
         request.get('http://localhost:8000/api/context').end((err, res) => {

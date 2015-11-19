@@ -64,7 +64,7 @@ class ServerSegmentDependencies extends Page {
   }
 
   createStore(initialState) {
-    var reduxStore = new ReduxStore(Promise, initialState, this.config);
+    var reduxStore = new ReduxStore(Promise, initialState, this.config, this.cookieReader);
     return reduxStore;
   }
 

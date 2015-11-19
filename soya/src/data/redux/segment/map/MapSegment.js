@@ -38,13 +38,20 @@ export default class MapSegment extends Segment {
   _cleanActionType;
 
   /**
-   * @param config
-   * @param provider
-   * @param PromiseImpl
+   * @type {CookieReader}
    */
-  constructor(config, provider, PromiseImpl) {
-    super(config, provider, PromiseImpl);
+  _cookieReader;
+
+  /**
+   * @param {Object} config
+   * @param {Provider} provider
+   * @param {CookieReader} cookieReader
+   * @param {Promise} PromiseImpl
+   */
+  constructor(config, cookieReader, PromiseImpl) {
+    super(config, cookieReader, PromiseImpl);
     Promise = PromiseImpl;
+    this._cookieReader = cookieReader;
 
     // Since segment name is guaranteed never to clash by ReduxStore, we can
     // safely use segment name as action type.

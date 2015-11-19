@@ -176,6 +176,11 @@ export default class ReduxStore extends Store {
   _config;
 
   /**
+   * @type {CookieReader}
+   */
+  _cookieReader;
+
+  /**
    * @type {boolean}
    */
   __isReduxStore;
@@ -189,8 +194,9 @@ export default class ReduxStore extends Store {
    * @param {Function} PromiseImpl
    * @param {any} initialState
    * @param {Object} config
+   * @param {CookieReader} cookieReader
    */
-  constructor(PromiseImpl, initialState, config) {
+  constructor(PromiseImpl, initialState, config, cookieReader) {
     super();
     this.__isReduxStore = true;
     this._allowRegisterSegment = false;
@@ -207,6 +213,7 @@ export default class ReduxStore extends Store {
     this._hydrationOptions = {};
     this._actionCreators = {};
     this._allowOverwriteSegment = {};
+    this._cookieReader = cookieReader;
     Promise = PromiseImpl;
   }
 
@@ -542,7 +549,7 @@ export default class ReduxStore extends Store {
   _initSegment(SegmentClass) {
     var id = SegmentClass.id();
     // TODO: Fix! This is ugly - Promise only exists to ensure ReduxStore and its Segments utilize the same Promise implementation.
-    var segment = new SegmentClass(this._config, this._provider, Promise);
+    var segment = new SegmentClass(this._config, this._cookieReader, Promise);
     this._segments[id] = segment;
     this._segmentClasses[id] = SegmentClass;
     this._reducers[id] = segment._getReducer();

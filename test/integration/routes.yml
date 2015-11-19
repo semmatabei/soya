@@ -40,6 +40,12 @@ CLIENT_INSTANT_SEGMENT_DEPENDENCIES:
     - [method, GET]
     - [path, /data/redux/dependencies/client-instant]
 
+SEGMENT_COOKIE:
+  page: SegmentCookie
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/segment-cookie]
+
 USER_JSON:
   page: UserJson
   nodes:
@@ -51,6 +57,12 @@ CONTEXT_JSON:
   nodes:
     - [method, GET]
     - [path, /api/context]
+
+BOOKING_JSON:
+  page: BookingJson
+  nodes:
+    - [method, GET]
+    - [path, /api/booking/:id]
 
 ADDITION_JSON:
   page: AdditionJson

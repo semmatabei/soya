@@ -15,12 +15,4 @@ export default class HttpRequest {
   getDomain() {
 
   }
-
-  /**
-   * @param {string} name
-   * @return {string}
-   */
-  readCookie(name) {
-
-  }
 }

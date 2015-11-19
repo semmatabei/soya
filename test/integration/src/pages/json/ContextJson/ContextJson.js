@@ -11,12 +11,12 @@ class ContextJson extends Page {
   render(httpRequest, routeArgs, store, callback) {
     var jsonRenderer = new JsonRenderer({
       context: 'abcdefghijklmnopqrstuvwxyz',
-      session: '1234567890'
+      session: new Date().toGMTString()
     });
     var renderResult = new RenderResult(jsonRenderer);
 
     // Randomly decide when to return a response.
-    setTimeout(callback.bind({}, renderResult), this.getRandomInt(10, 1500));
+    setTimeout(callback.bind({}, renderResult), this.getRandomInt(10, 1000));
   }
 
   getRandomInt(min, max) {

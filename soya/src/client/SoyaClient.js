@@ -4,6 +4,7 @@ import DomainNode from '../router/DomainNode.js';
 import MethodNode from '../router/MethodNode.js';
 import PathNode from '../router/PathNode.js';
 import ClientHttpRequest from '../http/ClientHttpRequest.js';
+import ClientCookieReader from '../http/ClientCookieReader.js';
 import Provider from '../Provider.js';
 import { CLIENT } from '../data/RenderType.js';
 
@@ -59,10 +60,16 @@ export default class SoyaClient {
   _storeCache;
 
   /**
+   * @type {ClientCookieReader}
+   */
+  _cookieReader;
+
+  /**
    * @param {Object} clientConfig
    */
   constructor(clientConfig) {
     this._clientConfig = clientConfig;
+    this._cookieReader = new ClientCookieReader();
     var nodeFactory = new NodeFactory();
     nodeFactory.registerNodeType(DomainNode);
     nodeFactory.registerNodeType(MethodNode);
@@ -144,7 +151,7 @@ export default class SoyaClient {
   _render(pageClass, pageArgs) {
     // Create new page instance - dependencies should be fetched and cached
     // by Provider.
-    var page = new pageClass(this._provider);
+    var page = new pageClass(this._provider, this._cookieReader);
     var storeNamespace = '__default';
     if (typeof pageClass.getStoreNamespace == 'function') {
       storeNamespace = pageClass.getStoreNamespace();

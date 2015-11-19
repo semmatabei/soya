@@ -30,6 +30,11 @@ export default class Page {
   router;
 
   /**
+   * @type {CookieReader}
+   */
+  cookieReader;
+
+  /**
    * This method is run in both server and client side. This method should
    * instantiate all dependencies using the given config object and static
    * factories. The logic that it does should be the same since dependency
@@ -41,10 +46,12 @@ export default class Page {
    * are reusable in all requests.
    *
    * @param {Provider} provider
+   * @param {CookieReader} cookieReader
    */
-  constructor(provider) {
+  constructor(provider, cookieReader) {
     this.config = provider.getConfig();
     this.router = provider.getRouter();
+    this.cookieReader = cookieReader;
   }
 
   /**

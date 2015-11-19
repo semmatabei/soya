@@ -4,6 +4,8 @@ import Router from './router/Router';
 import EntryPoint from './EntryPoint';
 import ServerHttpRequest from './http/ServerHttpRequest';
 import Provider from './Provider.js';
+import CookieReader from './http/CookieReader.js';
+import ServerCookieReader from './http/ServerCookieReader.js';
 import { SERVER } from './data/RenderType';
 
 var path = require('path');
@@ -166,6 +168,7 @@ export default class Application {
     this._pageClasses = {};
     this._provider = new Provider(serverConfig, reverseRouter, true);
 
+    var cookieReader = new CookieReader();
     var i, pageCmpt, page, pageComponents = componentRegister.getPages();
     var routeRequirements, j, routeId;
     for (i in pageComponents) {
@@ -182,7 +185,7 @@ export default class Application {
         // potential problems with each page. This allows us to detect factory
         // naming clash early on while also allowing the start-up process to
         // populate Provider with ready to use dependencies.
-        page = new pageCmpt.clazz(this._provider);
+        page = new pageCmpt.clazz(this._provider, cookieReader);
       } catch (e) {
         throw e;
       }
@@ -276,7 +279,8 @@ export default class Application {
 
     // Because we tried to instantiate all pages at start-up we can be sure
     // that pageClass exists.
-    var page = new pageClass(this._provider);
+    var cookieReader = new ServerCookieReader(request);
+    var page = new pageClass(this._provider, cookieReader);
     var store = page.createStore(null);
     if (store) {
       store._setRenderType(SERVER);
