@@ -15,6 +15,7 @@
 
 :local(.container) {
   overflow: auto;
+  margin: 15px 0;
 }
 
 :local(.imageCaption) {

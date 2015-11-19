@@ -44,3 +44,7 @@ ul li {
   list-style-type: disc;
   margin-left: 40px;
 }
+
+strong {
+  font-weight: bold;
+}

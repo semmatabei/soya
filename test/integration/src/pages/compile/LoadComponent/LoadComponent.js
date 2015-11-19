@@ -17,8 +17,15 @@ var url = require('./mountains.jpg');
 class Component extends React.Component {
   render() {
     return <div>
-      <h1>Another Page</h1>
-      <p>This is another page, reusing the same React component without needing to know its dependencies:</p>
+      <h1>Load Component</h1>
+      <h3>Load Component With CSS</h3>
+      <ul>
+        <li>User can load <code>PhotoCaption</code> component, without needing to inspect its dependencies.</li>
+        <li><strong>TODO:</strong> Test that behavior specified in loaded component still works.</li>
+        <li><strong>TODO:</strong> Test Compilation?</li>
+        <li>CSS is applied to this page.</li>
+      </ul>
+      <h3>Mountains</h3>
       <PhotoCaption url={url} caption={"Photo by Brandon Lam"} width={300} />
     </div>;
   }
