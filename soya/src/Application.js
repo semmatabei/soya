@@ -12,14 +12,6 @@ var path = require('path');
 var http = require('http');
 var domain = require('domain');
 
-var DEFAULT_FRAMEWORK_CONFIG = {
-  port: 8000,
-  minifyJs: false,
-  clientReplace: {},
-  clientResolve: [],
-  absoluteComponentsDir: []
-};
-
 /**
  * Orchestrates all the things that makes the application server run:
  *
@@ -157,7 +149,7 @@ export default class Application {
     this._serverCreated = false;
     this._componentRegister = componentRegister;
     this._compiler = compiler;
-    this._frameworkConfig = Object.assign({}, DEFAULT_FRAMEWORK_CONFIG, frameworkConfig);
+    this._frameworkConfig = frameworkConfig;
     this._serverConfig = serverConfig;
     this._clientConfig = clientConfig;
     this._router = router;

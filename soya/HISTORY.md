@@ -1,5 +1,9 @@
 # Version 0.0.x
 
+## 0.0.27
+
+-
+
 ## 0.0.26
 
 - Segment instantiation is now done by ReduxStore.
@@ -35,6 +39,7 @@
 - Cookies now set with universal CookieJar instance, whose lifecycle is
   maintained by the framework.
 - Segments can now store and access cookies universally via CookieJar.
+- Made CSS modules configurable.
 
 ## 0.0.23
 

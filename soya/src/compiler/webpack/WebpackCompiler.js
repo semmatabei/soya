@@ -2,6 +2,7 @@ import Compiler from '../Compiler';
 import CompileResult from '../CompileResult';
 import EntryPoint from '../../EntryPoint';
 import WebpackAssetServer from './WebpackAssetServer';
+import { DEFAULT_FRAMEWORK_CONFIG } from '../../defaultFrameworkConfig.js';
 
 var path = require('path');
 var fs = require('fs');
@@ -109,6 +110,7 @@ export default class WebpackCompiler extends Compiler {
    * @returns {Object}
    */
   static createServerBuildConfig(webpack, frameworkConfig) {
+    frameworkConfig = Object.assign({}, DEFAULT_FRAMEWORK_CONFIG, frameworkConfig);
     var nodeModules = {};
     var absProjectDir = frameworkConfig.absoluteProjectDir;
     var absEntryPointFile = path.join(frameworkConfig.absoluteProjectDir, 'server.js');
@@ -125,6 +127,7 @@ export default class WebpackCompiler extends Compiler {
       __PROJECT_DIRNAME__: JSON.stringify(absProjectDir)
     });
 
+    var cssLoaderStr = frameworkConfig.cssModules ? 'css-loader/locals?modules' : 'css-loader';
     return {
       entry: absEntryPointFile,
       target: 'node',
@@ -142,7 +145,7 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(frameworkConfig),
-          { test: /\.css$/, loader: "css-loader/locals?modules" }
+          { test: /\.css$/, loader: cssLoaderStr }
         ]
       },
       plugins: [
@@ -247,6 +250,7 @@ export default class WebpackCompiler extends Compiler {
    */
   run(entryPoints, updateCompileResultCallback) {
     var i, j, entryPoint, entryPointList = [];
+    var cssLoaderStr = this._frameworkConfig.cssModules ? 'style-loader!css-loader?modules' : 'style-loader!css-loader';
     var configuration = {
       entry: {},
       output: {
@@ -258,14 +262,12 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
-          { test: /\.css$/, loader: "style-loader!css-loader?modules" }
+          { test: /\.css$/, loader: cssLoaderStr }
         ]
       },
       resolve: { alias: {} },
       plugins: [ new this._webpack.optimize.OccurenceOrderPlugin() ]
     };
-
-
 
     for (i in this._clientReplace) {
       if (!this._clientReplace.hasOwnProperty(i)) continue;

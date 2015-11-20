@@ -1,7 +1,6 @@
 import React from 'react';
 
 import ReduxStore from './ReduxStore.js';
-import ActionCreator from './ActionCreator.js';
 import { isEqualShallow } from './helper.js';
 
 /**
@@ -11,7 +10,7 @@ import { isEqualShallow } from './helper.js';
  *
  * 1) DataComponent may register Segments that it needs from ReduxStore.
  * 2) DataComponent may manually query pieces of Segments it has registered
- *    using each Segment's ActionCreator.
+ *    using each Segment's action creator object or ReduxStore.
  * 3) DataComponent may subscribe to a query. This automatically sets the
  *    query result to its React state. Each change in the query result will
  *    also trigger a setState() call to the subscribing DataComponent.
@@ -27,7 +26,7 @@ import { isEqualShallow } from './helper.js';
  */
 export default class DataComponent extends React.Component {
   /**
-   * @type {{[key: string]: ActionCreator}}
+   * @type {{[key: string]: Object}}
    */
   __soyaActions;
 
@@ -105,23 +104,23 @@ export default class DataComponent extends React.Component {
   }
 
   /**
-   * @param {string} segmentName
+   * @param {string} segmentId
    * @param {any} query
    * @param {string} stateName
    * @param {?Object} hydrationOption
    */
-  subscribe(segmentName, query, stateName, hydrationOption) {
+  subscribe(segmentId, query, stateName, hydrationOption) {
     // Unsubscribe if already subscribed.
     this.unsubscribe(stateName);
 
-    console.log('[DATA] Subscribe', this, segmentName);
+    console.log('[DATA] Subscribe', this, segmentId);
     var callback = (newState) => {
       this.setState({[stateName]: newState});
     };
 
     var storeRef = this.getReduxStore().subscribe(
-      segmentName, query, callback, this, hydrationOption);
-    this.unsubscribe[segmentName] = storeRef.unsubscribe;
+      segmentId, query, callback, this, hydrationOption);
+    this.unsubscribe[segmentId] = storeRef.unsubscribe;
     this.setState({
      [stateName]: storeRef.getState()
     });
@@ -141,14 +140,14 @@ export default class DataComponent extends React.Component {
   /**
    * Returns action creator of an already registered segment.
    *
-   * @param {string} segmentName
-   * @return {ActionCreator}
+   * @param {string} segmentId
+   * @return {Object}
    */
-  getActionCreator(segmentName) {
-    if (this.__soyaActions[segmentName] instanceof ActionCreator) {
-      throw new Error('Unable to get action creator for segment \'' + segmentName + '\', segment is not registered.');
+  getActionCreator(segmentId) {
+    if (this.__soyaActions.hasOwnProperty(segmentId)) {
+      throw new Error('Unable to get action creator for segment \'' + segmentId + '\', segment is not registered.');
     }
-    return this.__soyaActions[segmentName];
+    return this.__soyaActions[segmentId];
   }
 
   /**

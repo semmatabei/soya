@@ -14,6 +14,7 @@ import NodeFactory from '../router/NodeFactory.js';
 import ComponentRegister from '../ComponentRegister.js';
 import ComponentFinder from '../ComponentFinder.js';
 import WebpackCompiler from '../compiler/webpack/WebpackCompiler.js';
+import { DEFAULT_FRAMEWORK_CONFIG } from '../defaultFrameworkConfig.js';
 import Application from '../Application.js';
 
 // These dependencies can all be overwritten by user.
@@ -29,6 +30,7 @@ export default function server(config) {
   var frameworkConfig = config.frameworkConfig;
   var serverConfig = config.serverConfig;
   var clientConfig = config.clientConfig;
+  frameworkConfig = Object.assign({}, DEFAULT_FRAMEWORK_CONFIG, frameworkConfig);
 
   var createLogger = defaultCreateLogger;
   var createErrorHandler = defaultCreateErrorHandler;
