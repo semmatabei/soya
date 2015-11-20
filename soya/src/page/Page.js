@@ -30,9 +30,14 @@ export default class Page {
   router;
 
   /**
-   * @type {CookieReader}
+   * @type {boolean}
    */
-  cookieReader;
+  inServer;
+
+  /**
+   * @type {CookieJar}
+   */
+  cookieJar;
 
   /**
    * This method is run in both server and client side. This method should
@@ -46,12 +51,14 @@ export default class Page {
    * are reusable in all requests.
    *
    * @param {Provider} provider
-   * @param {CookieReader} cookieReader
+   * @param {CookieJar} cookieJar
+   * @param {boolean} isServerInstance
    */
-  constructor(provider, cookieReader) {
+  constructor(provider, cookieJar, isServerInstance) {
     this.config = provider.getConfig();
     this.router = provider.getRouter();
-    this.cookieReader = cookieReader;
+    this.cookieJar = cookieJar;
+    this.inServer = isServerInstance;
   }
 
   /**

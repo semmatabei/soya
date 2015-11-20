@@ -4,8 +4,8 @@ import Router from './router/Router';
 import EntryPoint from './EntryPoint';
 import ServerHttpRequest from './http/ServerHttpRequest';
 import Provider from './Provider.js';
-import CookieReader from './http/CookieReader.js';
-import ServerCookieReader from './http/ServerCookieReader.js';
+import CookieJar from './http/CookieJar.js';
+import ServerCookieJar from './http/ServerCookieJar.js';
 import { SERVER } from './data/RenderType';
 
 var path = require('path');
@@ -168,7 +168,7 @@ export default class Application {
     this._pageClasses = {};
     this._provider = new Provider(serverConfig, reverseRouter, true);
 
-    var cookieReader = new CookieReader();
+    var cookieJar = new CookieJar();
     var i, pageCmpt, page, pageComponents = componentRegister.getPages();
     var routeRequirements, j, routeId;
     for (i in pageComponents) {
@@ -185,7 +185,7 @@ export default class Application {
         // potential problems with each page. This allows us to detect factory
         // naming clash early on while also allowing the start-up process to
         // populate Provider with ready to use dependencies.
-        page = new pageCmpt.clazz(this._provider, cookieReader);
+        page = new pageCmpt.clazz(this._provider, cookieJar, true);
       } catch (e) {
         throw e;
       }
@@ -279,8 +279,8 @@ export default class Application {
 
     // Because we tried to instantiate all pages at start-up we can be sure
     // that pageClass exists.
-    var cookieReader = new ServerCookieReader(request);
-    var page = new pageClass(this._provider, cookieReader);
+    var cookieJar = new ServerCookieJar(request);
+    var page = new pageClass(this._provider, cookieJar, true);
     var store = page.createStore(null);
     if (store) {
       store._setRenderType(SERVER);
@@ -288,7 +288,7 @@ export default class Application {
 
     this._logger.debug('Rendering page: ' + routeResult.pageName + '.', null);
     page.render(httpRequest, routeResult.routeArgs, store,
-      this._handleRenderResult.bind(this, routeResult, request, httpRequest, response, store));
+      this._handleRenderResult.bind(this, routeResult, request, httpRequest, response, store, cookieJar));
   }
 
   /**
@@ -297,9 +297,10 @@ export default class Application {
    * @param {ServerHttpRequest} httpRequest
    * @param {httpServerResponse} response
    * @param {void | Store} store
+   * @param {ServerCookieJar} cookieJar
    * @param {RenderResult} renderResult
    */
-  _handleRenderResult(routeResult, request, httpRequest, response, store, renderResult) {
+  _handleRenderResult(routeResult, request, httpRequest, response, store, cookieJar, renderResult) {
     var pageDep = this._compileResult.pages[routeResult.pageName];
     if (!pageDep) {
       throw new Error('Unable to render page server side, dependencies unknown for entry point: ' + routeResult.componentName);
@@ -358,12 +359,10 @@ export default class Application {
       }
 
       // Set result cookies.
-      var values = [];
-      for (key in renderResult.cookies) {
-        if (!renderResult.cookies.hasOwnProperty(key)) continue;
-        values.push(renderResult.cookies[key].toHeaderString());
+      var cookieValues = cookieJar.generateHeaderValues();
+      if (cookieValues.length > 0) {
+        response.setHeader('Set-Cookie', cookieValues);
       }
-      response.setHeader('Set-Cookie', values);
 
       // Set result content.
       response.end(htmlResult);

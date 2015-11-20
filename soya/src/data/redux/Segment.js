@@ -22,10 +22,10 @@ export default class Segment {
   /**
    * @param {Object} config
    * @param {Provider} provider
-   * @param {CookieReader} cookieReader
+   * @param {CookieJar} cookieJar
    * @param {Promise} PromiseImpl
    */
-  constructor(config, cookieReader, PromiseImpl) {
+  constructor(config, cookieJar, PromiseImpl) {
     // No-op. This constructor is only here to be interface.
   }
 

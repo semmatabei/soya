@@ -46,6 +46,18 @@ SEGMENT_COOKIE:
     - [method, GET]
     - [path, /data/redux/segment-cookie]
 
+COOKIE_SET:
+  page: CookieSet
+  nodes:
+    - [method, GET]
+    - [path, /http/cookie/set]
+
+COOKIE_REMOVE:
+  page: CookieRemove
+  nodes:
+    - [method, GET]
+    - [path, /http/cookie/remove]
+
 USER_JSON:
   page: UserJson
   nodes:

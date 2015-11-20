@@ -82,11 +82,6 @@ export default class RenderResult {
   contentRenderer;
 
   /**
-   * @type {[key: string]: Cookie}
-   */
-  cookies;
-
-  /**
    * @type {Bucket}
    */
   httpHeaders;
@@ -110,7 +105,6 @@ export default class RenderResult {
   constructor(contentRenderer) {
     this.contentRenderer = contentRenderer;
     this.httpHeaders = new Bucket();
-    this.cookies = {};
     this.httpStatusCode = 200;
     this.httpStatusMessage = STATUS_MESSAGES[this.httpStatusCode];
   }
@@ -127,26 +121,5 @@ export default class RenderResult {
     if (!statusMessage) statusMessage = STATUS_MESSAGES[statusCode];
     if (!statusMessage) statusMessage = '';
     this.httpStatusMessage = statusMessage;
-  }
-
-  /**
-   * Add a set cookie header to the response.
-   *
-   * @param {Cookie} cookie
-   */
-  setCookie(cookie) {
-    if (!(cookie instanceof Cookie)) {
-      throw new Error('Expected cookie, this given instead: ' + cookie);
-    }
-    this.cookies[cookie.name] = cookie;
-  }
-
-  /**
-   * @param {string} cookieName
-   * @param {string} domain
-   * @param {?string} path
-   */
-  removeCookie(cookieName, domain, path) {
-    this.cookies[cookieName] = Cookie.createRemoval(cookieName, domain, path);
   }
 }

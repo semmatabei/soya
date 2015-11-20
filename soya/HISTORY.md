@@ -31,6 +31,9 @@
   - Recursive QueryDependencies tested to be working.
   - Function based QueryDependencies tested to be working.
   - Recursive SegmentDependencies tested to be working.
+- Render context (inServer) is passed to Page.
+- Cookies now set with universal CookieJar instance, whose lifecycle is
+  maintained by the framework.
 
 ## 0.0.23
 

@@ -78,7 +78,7 @@ class RuntimeComponent extends Page {
   }
 
   createStore(initialState) {
-    var reduxStore = new ReduxStore(Promise, initialState, this.config, this.cookieReader);
+    var reduxStore = new ReduxStore(Promise, initialState, this.config, this.cookieJar);
     return reduxStore;
   }
 

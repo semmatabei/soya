@@ -16,6 +16,11 @@ class Component extends React.Component {
       <ul>
         <li><a href={this.props.router.reverseRoute('LOAD_COMPONENT')}>Load Component</a></li>
       </ul>
+      <h2>HTTP</h2>
+      <p>Support for HTTP features like cookies, headers, upload, request methods, etc.</p>
+      <ul>
+        <li><a href={this.props.router.reverseRoute('COOKIE_SET')}>Server-Side Cookie</a></li>
+      </ul>
       <h2>Redux</h2>
       <p>Integration with Redux alongside data-fetching capabilities. Enables the <code>&lt;Context/&gt;</code> part of user interface components.</p>
       <ul>
@@ -43,7 +48,8 @@ class TestList extends Page {
       'CLIENT_SEGMENT_DEPENDENCIES',
       'CLIENT_INSTANT_SEGMENT_DEPENDENCIES',
       'SEGMENT_COOKIE',
-      'LOAD_COMPONENT'
+      'LOAD_COMPONENT',
+      'COOKIE_SET'
     ];
   }
 

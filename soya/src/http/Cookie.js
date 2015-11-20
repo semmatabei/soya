@@ -40,13 +40,13 @@ export default class Cookie {
    * @param {string} name
    * @param {string} value
    * @param {number} expireInDays
-   * @param {string} domain
+   * @param {?string} domain
    * @param {?boolean} secure
    * @param {?string} path
    */
-  static createExpireInDays(name, value, domain, expireInDays, secure, path) {
+  static createExpireInDays(name, value, expireInDays, domain, secure, path) {
     var msecToAdd = expireInDays * 24 * 60 * 60 * 1000;
-    return Cookie.createExpireInMsec(name, value, domain, msecToAdd, secure, path);
+    return Cookie.createExpireInMsec(name, value, msecToAdd, domain, secure, path);
   }
 
   /**
@@ -60,12 +60,12 @@ export default class Cookie {
    *
    * @param {string} name
    * @param {string} value
-   * @param {string} domain
+   * @param {?string} domain
    * @param {?boolean} secure
    * @param {?string} path
    */
   static createSession(name, value, domain, secure, path) {
-    return new Cookie(name, value, domain, null, secure, path);
+    return new Cookie(name, value, null, domain, secure, path);
   }
 
   /**
@@ -74,35 +74,35 @@ export default class Cookie {
    * @param {string} name
    * @param {string} value
    * @param {number} expireInMsec
-   * @param {string} domain
+   * @param {?string} domain
    * @param {?boolean} secure
    * @param {?string} path
    */
-  static createExpireInMsec(name, value, domain, expireInMsec, secure, path) {
+  static createExpireInMsec(name, value, expireInMsec, domain, secure, path) {
     var expire = Date.now() + expireInMsec;
-    return new Cookie(name, value, domain, expire, secure, path);
+    return new Cookie(name, value, expire, domain, secure, path);
   }
 
   /**
    * @param {string} cookieName
-   * @param {string} domain
+   * @param {?string} domain
    * @param {?string} path
    * @returns {Cookie}
    */
   static createRemoval(cookieName, domain, path) {
     if (!path) path = '/';
-    return new Cookie(cookieName, '', domain, -1, path);
+    return new Cookie(cookieName, '', -1, domain, path);
   }
 
   /**
    * @param {string} name
    * @param {string} value
-   * @param {string} domain
    * @param {?number} expire
+   * @param {?string} domain
    * @param {?boolean} secure
    * @param {?string} path
    */
-  constructor(name, value, domain, expire, secure, path) {
+  constructor(name, value, expire, domain, secure, path) {
     this.name = name;
     this.value = value;
     this.expire = expire;
@@ -128,6 +128,25 @@ export default class Cookie {
 
     // TODO: We should escape some characters when printing these.
     cookie = `${this.name}=${this.value};Path=${this.path}${domainString}${expireString}${secureString}`;
+    return cookie;
+  }
+
+  /**
+   * @return {string}
+   */
+  toDocumentString() {
+    var expireString = '', secureString = '', domainString = '', cookie;
+    if (this.expire) {
+      expireString = '; expires=' + new Date(this.expire).toGMTString();
+    }
+    if (this.secure) {
+      secureString = ';secure';
+    }
+    if (this.domain) {
+      domainString = `; domain=${this.domain}`
+    }
+
+    cookie = `${this.name}=${this.value}${expireString}; path=${this.path}${domainString}${secureString}`;
     return cookie;
   }
 }
