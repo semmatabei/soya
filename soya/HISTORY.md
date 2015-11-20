@@ -34,6 +34,7 @@
 - Render context (inServer) is passed to Page.
 - Cookies now set with universal CookieJar instance, whose lifecycle is
   maintained by the framework.
+- Segments can now store and access cookies universally via CookieJar.
 
 ## 0.0.23
 

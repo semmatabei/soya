@@ -19,7 +19,7 @@ class Component extends React.Component {
       <h2>HTTP</h2>
       <p>Support for HTTP features like cookies, headers, upload, request methods, etc.</p>
       <ul>
-        <li><a href={this.props.router.reverseRoute('COOKIE_SET')}>Server-Side Cookie</a></li>
+        <li><a href={this.props.router.reverseRoute('COOKIE_SET')}>Cookies</a></li>
       </ul>
       <h2>Redux</h2>
       <p>Integration with Redux alongside data-fetching capabilities. Enables the <code>&lt;Context/&gt;</code> part of user interface components.</p>
@@ -30,6 +30,7 @@ class Component extends React.Component {
         <li><a href={this.props.router.reverseRoute('CLIENT_SEGMENT_DEPENDENCIES')}>Segment Dependencies (Client-Side)</a>.</li>
         <li><a href={this.props.router.reverseRoute('CLIENT_INSTANT_SEGMENT_DEPENDENCIES')}>Segment Dependencies (Client-Side, Instant Load)</a></li>
         <li><a href={this.props.router.reverseRoute('SEGMENT_COOKIE')}>Segment Cookie</a></li>
+        <li><a href={this.props.router.reverseRoute('SEGMENT_COOKIE_CLIENT')}>Segment Cookie (Client Side)</a></li>
       </ul>
     </div>;
   }
@@ -48,6 +49,7 @@ class TestList extends Page {
       'CLIENT_SEGMENT_DEPENDENCIES',
       'CLIENT_INSTANT_SEGMENT_DEPENDENCIES',
       'SEGMENT_COOKIE',
+      'SEGMENT_COOKIE_CLIENT',
       'LOAD_COMPONENT',
       'COOKIE_SET'
     ];

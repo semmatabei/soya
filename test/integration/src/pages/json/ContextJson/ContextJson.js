@@ -10,13 +10,21 @@ class ContextJson extends Page {
 
   render(httpRequest, routeArgs, store, callback) {
     var jsonRenderer = new JsonRenderer({
-      context: 'abcdefghijklmnopqrstuvwxyz',
+      lifetime: this.getRandomString(10),
       session: new Date().toGMTString()
     });
     var renderResult = new RenderResult(jsonRenderer);
 
     // Randomly decide when to return a response.
     setTimeout(callback.bind({}, renderResult), this.getRandomInt(10, 1000));
+  }
+
+  getRandomString(length) {
+    var i, str = '';
+    for (i = 0; i < length; i++) {
+      str += String.fromCharCode(this.getRandomInt(65, 122));
+    }
+    return str;
   }
 
   getRandomInt(min, max) {

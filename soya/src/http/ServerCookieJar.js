@@ -98,7 +98,7 @@ export default class ServerCookieJar extends CookieJar {
       }
       // Since request cookies don't change, we can cache it.
       var equalityIndex = cookieSegment.indexOf('=');
-      var cookieName = cookieSegment.substring(0, equalityIndex-1);
+      var cookieName = cookieSegment.substring(0, equalityIndex);
       var cookieVal = cookieSegment.substring(equalityIndex+1, cookieSegment.length);
       this._cookies[cookieName] = cookieVal;
     }

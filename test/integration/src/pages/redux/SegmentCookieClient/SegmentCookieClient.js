@@ -21,15 +21,14 @@ class Component extends React.Component {
 
   render() {
     return <div>
-      <h1>Segment Cookie</h1>
+      <h1>Segment Cookie Client</h1>
       <ul>
-        <li>Lifetime and session context should be fetched and response should include <code>Set-Cookie</code> header.</li>
-        <li>If lifetime and session cookie is already present at request header, response should not have <code>Set-Cookie</code> header.</li>
+        <li>When rendering new booking box, lifetime and session context will be fetched, and cookie will be set.</li>
+        <li>If this page already have cookies, it will use cookies directly.</li>
         <li>Subsequent render of new booking box should not trigger new fetching of context (should reuse cookies/state).</li>
         <li><a href="javascript:void(0)" onClick={this.addBookingBox.bind(this)}>Click here</a> to fetch new booking box.</li>
         <li><a href="javascript:void(0)" onClick={this.addErrorBookingBox.bind(this)}>Click here</a> to fetch an error booking box.</li>
       </ul>
-      <BookingBox reduxStore={this.props.reduxStore} config={this.props.config} bookingId={29000} />
       {this.state.clientBookingBox}
       {this.state.clientErrorBookingBox}
       <DebugPanel top right bottom>
@@ -53,9 +52,9 @@ class Component extends React.Component {
   }
 }
 
-class SegmentCookie extends Page {
+class SegmentCookieClient extends Page {
   static get pageName() {
-    return 'SegmentCookie';
+    return 'SegmentCookieClient';
   }
 
   createStore(initialState) {
@@ -75,5 +74,5 @@ class SegmentCookie extends Page {
   }
 }
 
-register(SegmentCookie);
-export default SegmentCookie;
+register(SegmentCookieClient);
+export default SegmentCookieClient;

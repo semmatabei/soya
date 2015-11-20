@@ -46,6 +46,12 @@ SEGMENT_COOKIE:
     - [method, GET]
     - [path, /data/redux/segment-cookie]
 
+SEGMENT_COOKIE_CLIENT:
+  page: SegmentCookieClient
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/segment-cookie-client]
+
 COOKIE_SET:
   page: CookieSet
   nodes:

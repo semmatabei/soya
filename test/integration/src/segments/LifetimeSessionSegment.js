@@ -11,7 +11,7 @@ var LIFETIME_COOKIE_NAME = 'lifetime';
 
 export default class LifetimeSessionSegment extends MapSegment {
   static id() {
-    return 'user';
+    return 'context';
   }
 
   _generateQueryId(query) {
@@ -24,11 +24,12 @@ export default class LifetimeSessionSegment extends MapSegment {
     var sessionCookie = this._cookieJar.read(SESSION_COOKIE_NAME);
     if (lifetimeCookie != null && sessionCookie != null) {
       // Just re-use what we already have in cookie.
-      thunk.func = function(dispatch) {
+      thunk.func = (dispatch) => {
         dispatch(this._createSyncLoadActionObject(queryId, {
           lifetime: lifetimeCookie,
           session: sessionCookie
         }));
+        return Promise.resolve(null);
       };
       return;
     }
