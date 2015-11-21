@@ -15,6 +15,7 @@ class Component extends React.Component {
       <p>Web assets compilation and page generation. Enables user to code in terms of distinct components, without worrying about dependencies and performance optimizations.</p>
       <ul>
         <li><a href={this.props.router.reverseRoute('LOAD_COMPONENT')}>Load Component</a></li>
+        <li>(TODO) <a href="">Client File Switching</a>.</li>
       </ul>
       <h2>HTTP</h2>
       <p>Support for HTTP features like cookies, headers, upload, request methods, etc.</p>
