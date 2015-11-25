@@ -51,25 +51,12 @@ export default class Segment {
   }
 
   /**
-   * Creates a load action that is ready to be dispatched. Method should also
-   * read options (if given). Options may affect the behavior of the load
-   * action.
+   * Returns true
    *
-   * For example, if the option says "cache" - this may mean additional
-   * calls for createLoadAction will return the same generated action until
-   * the cache has expired.
-   *
-   * Another example, the option may tell the action creator to "keep-fresh",
-   * which makes this action creator creates polling or web-socket connection
-   * that frequently updates the value with a new one from the server.
-   *
-   * @param {any} query
-   * @param {?Object} options
-   * @param {boolean} forceLoad
-   * @return {Object | Function}
+   * @return {boolean}
    */
-  createLoadAction(query, options, forceLoad) {
-    throw new Error('Method not implemented!');
+  static shouldHydrate() {
+    return true;
   }
 
   /**
@@ -99,7 +86,7 @@ export default class Segment {
    *
    * @param {any} query
    * @param {string} queryId
-   * @return {Object | Thunk}
+   * @return {void | Object | Thunk}
    */
   _createLoadAction(query, queryId) {
 

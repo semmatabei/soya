@@ -1,11 +1,10 @@
 /**
- * Represents a piece of the segment state.
+ * Represents a segment piece that was fetched asynchronously.
  *
  * @CLIENT_SERVER
  */
-export default class SegmentPiece {
+export default class AsyncSegmentPiece {
   /**
-   * The real data, null when never fetched.
    * @type {void | any}
    */
   data;
@@ -20,4 +19,10 @@ export default class SegmentPiece {
    * @type {boolean}
    */
   loaded;
+
+  /**
+   * Last updated timestamp.
+   * @type {number}
+   */
+  timestamp;
 }

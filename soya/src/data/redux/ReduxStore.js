@@ -3,7 +3,7 @@
 import Store from '../Store.js';
 import { SERVER, CLIENT } from '../RenderType.js';
 import PromiseUtil from './PromiseUtil.js';
-import SegmentPiece from './SegmentPiece.js';
+import SegmentPiece from './AsyncSegmentPiece.js';
 import DataComponent from './DataComponent.js';
 import Thunk from './Thunk.js';
 import QueryDependencies from './QueryDependencies.js';
@@ -686,7 +686,7 @@ export default class ReduxStore extends Store {
   query(segmentId, query, forceLoad, ignoreAtServer) {
     var segment = this._segments[segmentId];
     if (!segment) {
-      throw new Error('Cannot subscribe, Segment is not registered: ' + segmentId + '.');
+      throw new Error('Cannot query, Segment is not registered: ' + segmentId + '.');
     }
 
     var queryId = segment._generateQueryId(query);
@@ -774,6 +774,12 @@ export default class ReduxStore extends Store {
    * @return {Promise}
    */
   dispatch(action) {
+    // No need to do anything if the action is null/undefined. This is a pattern
+    // used when Segments don't need to do init or load actions.
+    if (action == null) {
+      return Promise.resolve(null);
+    }
+
     var result;
     if (action instanceof Thunk) {
       // We initialize the query just in case the user calls dispatch directly
