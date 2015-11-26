@@ -99,6 +99,14 @@ export default class MapSegment extends Segment {
   }
 
   /**
+   * @param {any} piece
+   * @return {string}
+   */
+  _isLoaded(piece) {
+    return piece.loaded;
+  }
+
+  /**
    * @param {any} query
    * @param {string} queryId
    * @return {Object | Thunk}

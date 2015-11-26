@@ -21,7 +21,6 @@
 export default class Segment {
   /**
    * @param {Object} config
-   * @param {Provider} provider
    * @param {CookieJar} cookieJar
    * @param {Promise} PromiseImpl
    */
@@ -57,6 +56,28 @@ export default class Segment {
    */
   static shouldHydrate() {
     return true;
+  }
+
+  /**
+   * Returns true if the given piece is already loaded. Segments that do not
+   * load anything should always return true.
+   *
+   * @param {any} piece
+   * @return {boolean}
+   */
+  _isLoaded(piece) {
+
+  }
+
+  /**
+   * The generated query ID needs to be string since it'll be used by ReduxStore
+   * to store query-related data.
+   *
+   * @param {any} query
+   * @return {string}
+   */
+  _generateQueryId(query) {
+
   }
 
   /**
@@ -97,7 +118,7 @@ export default class Segment {
    *
    * @param {any} state
    * @param {string} queryId
-   * @return {{data: ?any; errors: ?any}}
+   * @return {any}
    */
   _getPieceObject(state, queryId) {
 
@@ -122,7 +143,7 @@ export default class Segment {
    * @param prevSegmentState
    * @param segmentState
    * @param queryId
-   * @return {?{data: ?any; errors: ?any}}
+   * @return {any}
    */
   _comparePiece(prevSegmentState, segmentState, queryId) {
 

@@ -410,10 +410,16 @@ export default class ReduxStore extends Store {
    * @return {Promise}
    */
   hydrate() {
-    var action, segmentId, queryId, queries, hydrationOption;
+    var action, segment, segmentClass, segmentId, queryId, queries, hydrationOption;
     var hydrationPromises = [], promise, query;
     for (segmentId in this._hydrationOptions) {
       if (!this._hydrationOptions.hasOwnProperty(segmentId)) continue;
+      segmentClass = this._segmentClasses[segmentId];
+      if (!segmentClass.shouldHydrate()) {
+        // No need to hydrate local segments.
+        continue;
+      }
+      segment = this._segments[segmentId];
       queries = this._hydrationOptions[segmentId];
       for (queryId in queries) {
         if (!queries.hasOwnProperty(queryId)) continue;
@@ -422,7 +428,7 @@ export default class ReduxStore extends Store {
 
         // Don't need to do anything if it's already loaded.
         var segmentPiece = this._getSegmentPiece(segmentId, queryId);
-        if (segmentPiece.loaded) continue;
+        if (segment._isLoaded(segmentPiece)) continue;
 
         var shouldLoad = (
           this._renderType == CLIENT ||
@@ -430,7 +436,7 @@ export default class ReduxStore extends Store {
         );
 
         if (shouldLoad) {
-          action = this._segments[segmentId]._createLoadAction(query, queryId);
+          action = segment._createLoadAction(query, queryId);
           promise = this.dispatch(action);
           hydrationPromises.push(promise);
         }
@@ -715,10 +721,11 @@ export default class ReduxStore extends Store {
     // Up until this point, segment piece will never be empty.
     // If already loaded, return immediately.
     segmentPiece = this._getSegmentPiece(segmentId, queryId);
-    if (segmentPiece.loaded && !forceLoad) {
+    if (segment._isLoaded(segmentPiece) && !forceLoad) {
       return Promise.resolve(segmentPiece);
     }
 
+    // TODO: We should be able to reuse this get segment piece function.
     var getSegmentPiece = () => {
       return this._getSegmentPiece(segmentId, queryId);
     };
@@ -730,6 +737,11 @@ export default class ReduxStore extends Store {
 
     // Right now either segment isn't loaded yet or this is a force load.
     var loadAction = segment._createLoadAction(query, queryId);
+    if (loadAction == null) {
+      // If load action is null, then this segment doesn't need to do load
+      // actions. We return immediately with previously fetched segment piece.
+      return Promise.resolve(segmentPiece);
+    }
     return this.dispatch(loadAction).then(getSegmentPiece);
   }
 
