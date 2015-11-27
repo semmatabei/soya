@@ -15,7 +15,8 @@ class Component extends React.Component {
       <h1>Local Segment</h1>
       <h3>Modal Window</h3>
       <ul>
-        <li><code>&lt;ModalWindow&gt;</code> component listens</li>
+        <li>Default value for modal window segment.</li>
+        <li><code>&lt;asdfasd&gt;</code> component listens</li>
       </ul>
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
@@ -24,9 +25,9 @@ class Component extends React.Component {
   }
 }
 
-class LocalSegment extends Page {
+class TestLocalSegment extends Page {
   static get pageName() {
-    return 'LocalSegment';
+    return 'TestLocalSegment';
   }
 
   createStore(initialState) {
@@ -46,5 +47,5 @@ class LocalSegment extends Page {
   }
 }
 
-register(LocalSegment);
-export default LocalSegment;
+register(TestLocalSegment);
+export default TestLocalSegment;

@@ -32,7 +32,7 @@ class Component extends React.Component {
         <li><a href={this.props.router.reverseRoute('CLIENT_INSTANT_SEGMENT_DEPENDENCIES')}>Segment Dependencies (Client-Side, Instant Load)</a></li>
         <li><a href={this.props.router.reverseRoute('SEGMENT_COOKIE')}>Segment Cookie</a></li>
         <li><a href={this.props.router.reverseRoute('SEGMENT_COOKIE_CLIENT')}>Segment Cookie (Client Side)</a></li>
-        <li><a href={this.props.router.reverseRoute('LOCAL_SEGMENT')}>Local Segment</a></li>
+        <li><a href={this.props.router.reverseRoute('TEST_LOCAL_SEGMENT')}>Local Segment</a></li>
       </ul>
     </div>;
   }
@@ -53,7 +53,7 @@ class TestList extends Page {
       'SEGMENT_COOKIE',
       'SEGMENT_COOKIE_CLIENT',
       'LOAD_COMPONENT',
-      'LOCAL_SEGMENT',
+      'TEST_LOCAL_SEGMENT',
       'COOKIE_SET'
     ];
   }

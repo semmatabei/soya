@@ -7,7 +7,7 @@ import update from 'react-addons-update';
  */
 export default class ModalSegment extends LocalSegment {
   _addActionType;
-  _updateActionType;
+  _setDataActionType;
   _removeActionType;
   _removeAllActionType;
 
@@ -16,16 +16,18 @@ export default class ModalSegment extends LocalSegment {
   }
 
   static createInitialData() {
-    return {
-      modals: []
-    };
+    return [];
+  }
+
+  static atLeastOneVisibleModal(state) {
+    return state.length > 0;
   }
 
   constructor(config, cookieJar, PromiseImpl) {
     super(config, cookieJar, PromiseImpl);
     var id = ModalSegment.id();
     this._addActionType = ActionNameUtil.generate(id, 'ADD');
-    this._updateActionType = ActionNameUtil.generate(id, 'UPDATE');
+    this._setDataActionType = ActionNameUtil.generate(id, 'SET_DATA');
     this._removeActionType = ActionNameUtil.generate(id, 'REMOVE');
     this._removeAllActionType = ActionNameUtil.generate(id, 'REMOVE_ALL');
   }
@@ -43,7 +45,7 @@ export default class ModalSegment extends LocalSegment {
       },
       update(modalId, commands) {
         return {
-          type: self._updateActionType,
+          type: self._setDataActionType,
           modalId: modalId,
           commands: commands
         }
@@ -70,8 +72,8 @@ export default class ModalSegment extends LocalSegment {
         case self._addActionType:
           return self._addModal(state, action);
           break;
-        case self._updateActionType:
-          return self._updateModal(state, action);
+        case self._setDataActionType:
+          return self._setModalData(state, action);
           break;
         case self._removeActionType:
           return self._removeModal(state, action);
@@ -86,27 +88,27 @@ export default class ModalSegment extends LocalSegment {
 
   _addModal(state, action) {
     state = this._removeModal(state, action);
-    return update(state, {modals: { $push: [{
+    return update(state, { $push: [{
       modalId: action.modalId,
       modalType: action.modalType,
       data: action.data
-    }]}});
+    }]});
   }
 
-  _updateModal(state, action) {
+  _setModalData(state, action) {
     var index = this._find(state, action.modalId);
     if (index <= -1) {
       return state;
     }
-    return update(state, {modals: { [index]: { data: { $set:
+    return update(state, { [index]: { data: { $set:
       action.data
-    }}}});
+    }}});
   }
 
   _removeModal(state, action) {
     var index = this._find(state, action.modalId);
     if (index > -1) {
-      state = update(state, {modals: { $splice: [[index, 1]] }});
+      state = update(state, { $splice: [[index, 1]] });
     }
     return state;
   }
@@ -120,8 +122,8 @@ export default class ModalSegment extends LocalSegment {
     // Assuming that in a normal application, your modal window count won't
     // be more than 10, we need no indexes.
     var i, modal;
-    for (i = 0; i < state.modals.length; i++) {
-      modal = state.modals[i];
+    for (i = 0; i < state.length; i++) {
+      modal = state[i];
       if (modal.modalId == modalId) {
         return i;
       }
