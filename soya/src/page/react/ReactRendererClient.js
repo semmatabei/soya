@@ -1,5 +1,5 @@
 import ContentRendererClient from '../ContentRendererClient';
-import React from 'react';
+import ReactDOM from 'react-dom';
 
 /**
  * TODO: Upgrade to react 0.14.0!
@@ -40,9 +40,9 @@ export default class ReactRendererClient extends ContentRendererClient {
     }
 
     var domElement = document.getElementById('__body');
-    window.reactElement = React.render(this.body, domElement);
+    window.reactElement = ReactDOM.render(this.body, domElement);
     return function() {
-      React.unmountComponentAtNode(domElement);
+      ReactDOM.unmountComponentAtNode(domElement);
     };
   }
 }

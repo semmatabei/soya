@@ -1,4 +1,4 @@
-import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 import ContentRenderer from '../ContentRenderer';
 
 /**
@@ -59,7 +59,7 @@ export default class ReactRenderer extends ContentRenderer {
 
     result += '</head>';
     result += '<body><div id="__body">';
-    if (this.body) result += React.renderToString(this.body);
+    if (this.body) result += ReactDOMServer.renderToString(this.body);
     result += '</div>';
 
     for (i = 0; i < pageDependencies.jsDependencies.length; i++) {

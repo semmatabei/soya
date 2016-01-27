@@ -6,6 +6,9 @@ import update from 'react-addons-update';
 var Promise;
 
 /**
+ * You can query LocalSegment by specifying keys separated by dots. Examples:
+ * "key", "key.subKey", etc.
+ *
  * @CLIENT_SERVER
  */
 export default class LocalSegment extends Segment {
