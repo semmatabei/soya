@@ -5,6 +5,7 @@ import ReactRenderer from 'soya/lib/page/react/ReactRenderer.js';
 import register from 'soya/lib/client/Register';
 import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
+import smokesignals from 'soya/lib/event/smokesignals.js';
 
 import ModalSegment from '../../../segments/ModalSegment.js';
 import ModalLayer from '../../../components/contextual/ModalLayer/ModalLayer.js';
@@ -13,22 +14,35 @@ import ConfirmModal from '../../../components/common/ConfirmModal/ConfirmModal.j
 // TODO: Figure out how to do promise polyfill.
 import style from '../../../shared/sitewide.css';
 
+var INCREMENT_MODAL_ID = 'handsome';
+
 class Component extends React.Component {
   componentWillMount() {
+    this.modalEmitter = {};
+    smokesignals.convert(this.modalEmitter);
+    this.setState({
+      number: 0
+    });
     this.modalActions = this.props.reduxStore.register(ModalSegment);
+    this.modalEmitter.on(ConfirmModal.getConfirmEvent(INCREMENT_MODAL_ID), () => {
+      this.setState({
+        number: this.state.number + 1
+      })
+    });
   }
 
   render() {
     return <div>
       <h1>Local Segment</h1>
       <h3>Modal Window</h3>
+      <h3>Number of times you lied: {this.state.number}</h3>
       <ul>
         <li>Default value for modal window segment.</li>
-        <li><code>&lt;ModalLayer&gt;</code> component listens to the local segment and re-renders appropriately.</li>
+        <li><code>ModalLayer</code> component listens to the local segment and re-renders appropriately.</li>
         <li><a href={'javascript:void(0)'} onClick={this.addConfirmModal.bind(this)}>Click this</a> to add a confirmation modal window to the redux state.</li>
       </ul>
       <ModalLayer reduxStore={this.props.reduxStore} config={this.props.config}>
-        <ConfirmModal/>
+        <ConfirmModal emitter={this.modalEmitter} />
       </ModalLayer>
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
@@ -37,10 +51,14 @@ class Component extends React.Component {
   }
 
   addConfirmModal() {
-    var addModalAction = this.modalActions.add(ConfirmModal.modalType, 'handsome', {
+    var addModalAction = this.modalActions.add(ConfirmModal.modalType, INCREMENT_MODAL_ID, {
       text: 'Are you handsome?'
     });
     this.props.reduxStore.dispatch(addModalAction);
+  }
+
+  addMultipleConfirmModal() {
+
   }
 }
 

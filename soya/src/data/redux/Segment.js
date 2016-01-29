@@ -50,7 +50,8 @@ export default class Segment {
   }
 
   /**
-   * Returns true
+   * Returns true if this segment requires hydration. Locally stored segments
+   * will probably not require any hydration.
    *
    * @return {boolean}
    */

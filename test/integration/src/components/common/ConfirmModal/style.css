@@ -1,8 +1,25 @@
-.modal {
-  width: 300px;
-  background: #fff;
-  padding: 15px;
-  position: fixed;
-  top: 0;
-  left: 0;
+.okButton, .cancelButton {
+  padding: 10px;
+  margin-right: 5px;
+  display: block;
+  float: left;
+  cursor: pointer;
+}
+
+.okButton {
+  background: green;
+  color: #fff;
+}
+
+.okButton:hover {
+  background: darkgreen;
+}
+
+.cancelButton {
+  background: grey;
+  color: #fff;
+}
+
+.cancelButton:hover {
+  background: dimgrey;
 }

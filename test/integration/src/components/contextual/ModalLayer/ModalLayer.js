@@ -17,6 +17,17 @@ export default class ModalLayer extends DataComponent {
     this.subscribe(ModalSegment.id(), '', 'modals');
   }
 
+  clearModal(modalId) {
+    var modalActions = this.getActionCreator(ModalSegment.id());
+    var action = modalActions.remove(modalId);
+    this.getReduxStore().dispatch(action);
+  }
+
+  shouldSubscriptionsUpdate(nextProps) {
+    // No matter what the props, we only subscribe to ModalSegment, nothing more.
+    return false;
+  }
+
   render() {
     var modalWindowTypes = {}, modalWindows = [], modalElement, i;
     var childrenElements = React.Children.toArray(this.props.children);
@@ -44,12 +55,12 @@ export default class ModalLayer extends DataComponent {
       modalWindows.push(React.cloneElement(modalElement, {
         id: id,
         key: id,
-        data: data
+        data: data,
+        removeSelf: this.clearModal.bind(this, id)
       }));
     }
 
     if (modalWindows.length <= 0) {
-      console.log('KJHLHLKJ:LKJ');
       return null;
     }
 

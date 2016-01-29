@@ -16,6 +16,7 @@
     "es6-promise": "^3.0.2",
     "extract-text-webpack-plugin": "^0.8.2",
     "file-loader": "^0.8.4",
+    "pubsub-js": "^1.5.3",
     "react": "^0.14.6",
     "react-addons-update": "^0.14.6",
     "react-dom": "^0.14.6",

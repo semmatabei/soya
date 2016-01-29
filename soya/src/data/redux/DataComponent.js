@@ -144,7 +144,7 @@ export default class DataComponent extends React.Component {
    * @return {Object}
    */
   getActionCreator(segmentId) {
-    if (this.__soyaActions.hasOwnProperty(segmentId)) {
+    if (!this.__soyaActions.hasOwnProperty(segmentId)) {
       throw new Error('Unable to get action creator for segment \'' + segmentId + '\', segment is not registered.');
     }
     return this.__soyaActions[segmentId];

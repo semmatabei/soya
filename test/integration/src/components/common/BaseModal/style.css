@@ -1,0 +1,14 @@
+.modal {
+  width: 300px;
+  background: #fff;
+  padding: 15px;
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  margin-left: -150px;
+}
+
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 3px;
+}

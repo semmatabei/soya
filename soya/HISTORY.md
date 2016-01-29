@@ -2,7 +2,18 @@
 
 ## 0.0.27
 
--
+- LocalSegment implementation for browser-only redux store state:
+  - Checking whether a piece is loaded or not is now relegated to each Segment
+    implementation. This means there are no longer contract between ReduxStore
+    and Segment implementation on how the segment piece should be structured.
+  - Segment implementation now has shouldHydrate() method. If it returns false,
+    ReduxStore will not try to hydrate its queries.
+  - If Segment.createLoadAction() returns null, it just returns the previous
+    segment piece and doesn't do dispatch.
+  - Uses react immutability helper.
+- Decided to include smokesignals as default event emitter library. Other
+  libraries uses singleton, which makes hot-reload and history navigation a
+  pain to code (you have to manually destroy subscription at component unmount).
 
 ## 0.0.26
 
