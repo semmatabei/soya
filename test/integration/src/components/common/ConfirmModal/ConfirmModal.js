@@ -29,7 +29,7 @@ export default class ConfirmModal extends React.Component {
   }
 
   render() {
-    return <BaseModal>
+    return <BaseModal level={this.props.level}>
       <h3>Confirm</h3>
       <p>{this.props.data.text}</p>
       <a className={style.okButton} onClick={this.handleOk.bind(this)}>OK</a>

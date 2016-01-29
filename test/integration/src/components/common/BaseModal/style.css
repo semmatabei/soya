@@ -6,6 +6,7 @@
   top: 100px;
   left: 50%;
   margin-left: -150px;
+  box-shadow: 10px 10px 74px -10px rgba(0,0,0,0.6);
 }
 
 .modal h3 {

@@ -15,6 +15,8 @@ import ConfirmModal from '../../../components/common/ConfirmModal/ConfirmModal.j
 import style from '../../../shared/sitewide.css';
 
 var INCREMENT_MODAL_ID = 'handsome';
+var MULTIPLE_MODAL_ID = 'multiple';
+var MODAL_LAUNCHING_MODAL_ID = 'launch';
 
 class Component extends React.Component {
   componentWillMount() {
@@ -27,8 +29,18 @@ class Component extends React.Component {
     this.modalEmitter.on(ConfirmModal.getConfirmEvent(INCREMENT_MODAL_ID), () => {
       this.setState({
         number: this.state.number + 1
-      })
+      });
     });
+    this.modalEmitter.on(ConfirmModal.getConfirmEvent(MODAL_LAUNCHING_MODAL_ID), this.addConfirmModal.bind(this));
+    var i, createRemovalFunc = (n) => {
+      return () => {
+        var removeAction = this.modalActions.remove(MULTIPLE_MODAL_ID + n);
+        this.props.reduxStore.dispatch(removeAction);
+      };
+    };
+    for (i = 1; i < 6; i++) {
+      this.modalEmitter.on(ConfirmModal.getConfirmEvent(MULTIPLE_MODAL_ID + i), createRemovalFunc(i));
+    }
   }
 
   render() {
@@ -40,6 +52,8 @@ class Component extends React.Component {
         <li>Default value for modal window segment.</li>
         <li><code>ModalLayer</code> component listens to the local segment and re-renders appropriately.</li>
         <li><a href={'javascript:void(0)'} onClick={this.addConfirmModal.bind(this)}>Click this</a> to add a confirmation modal window to the redux state.</li>
+        <li><a href={'javascript:void(0)'} onClick={this.addMultipleConfirmModal.bind(this)}>Click this</a> to add multiple confirmation modal window.</li>
+        <li><a href={'javascript:void(0)'} onClick={this.addModalLaunchingModal.bind(this)}>Click this</a> to add modal window that launches another modal window.</li>
       </ul>
       <ModalLayer reduxStore={this.props.reduxStore} config={this.props.config}>
         <ConfirmModal emitter={this.modalEmitter} />
@@ -58,7 +72,20 @@ class Component extends React.Component {
   }
 
   addMultipleConfirmModal() {
+    var i, addModalAction;
+    for (i = 1; i < 6; i++) {
+      addModalAction = this.modalActions.add(ConfirmModal.modalType, MULTIPLE_MODAL_ID + i, {
+        text: 'Test multiple modal window ' + i + '.'
+      });
+      this.props.reduxStore.dispatch(addModalAction);
+    }
+  }
 
+  addModalLaunchingModal() {
+    var addModalAction = this.modalActions.add(ConfirmModal.modalType, MODAL_LAUNCHING_MODAL_ID, {
+      text: 'Launch new modal window?'
+    });
+    this.props.reduxStore.dispatch(addModalAction);
   }
 }
 

@@ -11,6 +11,8 @@
   - If Segment.createLoadAction() returns null, it just returns the previous
     segment piece and doesn't do dispatch.
   - Uses react immutability helper.
+  - https://bitbucket.org/bentomas/smokesignals.js
+  - Create test case: modal windows.
 - Decided to include smokesignals as default event emitter library. Other
   libraries uses singleton, which makes hot-reload and history navigation a
   pain to code (you have to manually destroy subscription at component unmount).

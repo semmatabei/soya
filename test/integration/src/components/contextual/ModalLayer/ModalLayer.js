@@ -43,8 +43,6 @@ export default class ModalLayer extends DataComponent {
     var modal, type, id, data;
     for (i = 0; i < this.state.modals.length; i++) {
       modal = this.state.modals[i];
-      console.log(modal);
-
       type = modal.modalType;
       id = modal.modalId;
       data = modal.data;
@@ -52,10 +50,12 @@ export default class ModalLayer extends DataComponent {
       if (modalElement == null) {
         throw new Error('Modal window type is unknown: \'' + type + '\'.');
       }
+      modalWindows.push(<div className={style.modalOverlayTransparent}></div>);
       modalWindows.push(React.cloneElement(modalElement, {
         id: id,
         key: id,
         data: data,
+        level: i,
         removeSelf: this.clearModal.bind(this, id)
       }));
     }
@@ -65,7 +65,7 @@ export default class ModalLayer extends DataComponent {
     }
 
     return <div>
-      <div className={style.modalOverlay}></div>
+      <div className={style.modalOverlayBlack}></div>
       <div className="modalLayer">{modalWindows}</div>
     </div>;
   }
