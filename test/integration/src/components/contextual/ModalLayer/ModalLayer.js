@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import DataComponent from 'soya/lib/data/redux/DataComponent.js';
+import DataComponent from 'soya/lib/data/redux/DataComponent';
+import { isEqualShallow, isReactChildrenEqual } from 'soya/lib/data/redux/helper';
 
 import ModalSegment from '../../../segments/ModalSegment.js';
 import style from './style.css';
@@ -24,8 +25,14 @@ export default class ModalLayer extends DataComponent {
   }
 
   shouldSubscriptionsUpdate(nextProps) {
-    // No matter what the props, we only subscribe to ModalSegment, nothing more.
-    return false;
+    // For the props, we need to check children differently.
+    return !isEqualShallow(nextProps, this.props, {children: isReactChildrenEqual});
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    var shouldUpdate = !isEqualShallow(nextState, this.state);
+    // For the props, we need to check children differently.
+    return shouldUpdate || !isEqualShallow(nextProps, this.props, {children: isReactChildrenEqual});
   }
 
   render() {
@@ -50,7 +57,7 @@ export default class ModalLayer extends DataComponent {
       if (modalElement == null) {
         throw new Error('Modal window type is unknown: \'' + type + '\'.');
       }
-      modalWindows.push(<div className={style.modalOverlayTransparent}></div>);
+      modalWindows.push(<div key={id + "overlay"} className={style.modalOverlayTransparent}></div>);
       modalWindows.push(React.cloneElement(modalElement, {
         id: id,
         key: id,

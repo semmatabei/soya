@@ -1,5 +1,5 @@
-import LocalSegment from 'soya/lib/data/redux/segment/local/LocalSegment.js';
-import ActionNameUtil from 'soya/lib/data/redux/segment/ActionNameUtil.js';
+import LocalSegment from 'soya/lib/data/redux/segment/local/LocalSegment';
+import ActionNameUtil from 'soya/lib/data/redux/segment/ActionNameUtil';
 import update from 'react-addons-update';
 
 /**
@@ -17,10 +17,6 @@ export default class ModalSegment extends LocalSegment {
 
   static createInitialData() {
     return [];
-  }
-
-  static atLeastOneVisibleModal(state) {
-    return state.length > 0;
   }
 
   constructor(config, cookieJar, PromiseImpl) {

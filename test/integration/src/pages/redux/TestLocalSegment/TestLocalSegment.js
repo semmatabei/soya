@@ -7,6 +7,7 @@ import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 import smokesignals from 'soya/lib/event/smokesignals.js';
 
+import LyingSegment from '../../../segments/LyingSegment.js';
 import ModalSegment from '../../../segments/ModalSegment.js';
 import ModalLayer from '../../../components/contextual/ModalLayer/ModalLayer.js';
 import ConfirmModal from '../../../components/common/ConfirmModal/ConfirmModal.js';
@@ -20,16 +21,24 @@ var MODAL_LAUNCHING_MODAL_ID = 'launch';
 
 class Component extends React.Component {
   componentWillMount() {
+    this.lyingActions = this.props.reduxStore.register(LyingSegment);
     this.modalEmitter = {};
     smokesignals.convert(this.modalEmitter);
+
     this.setState({
       number: 0
     });
+
+    // Subscribe to lying segment.
+    this.props.reduxStore.subscribe(LyingSegment.id(), '', (newState) => {
+      this.setState({
+        number: newState
+      });
+    }, this);
+
     this.modalActions = this.props.reduxStore.register(ModalSegment);
     this.modalEmitter.on(ConfirmModal.getConfirmEvent(INCREMENT_MODAL_ID), () => {
-      this.setState({
-        number: this.state.number + 1
-      });
+      this.props.reduxStore.dispatch(this.lyingActions.increment());
     });
     this.modalEmitter.on(ConfirmModal.getConfirmEvent(MODAL_LAUNCHING_MODAL_ID), this.addConfirmModal.bind(this));
     var i, createRemovalFunc = (n) => {

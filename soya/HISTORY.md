@@ -16,6 +16,9 @@
 - Decided to include smokesignals as default event emitter library. Other
   libraries uses singleton, which makes hot-reload and history navigation a
   pain to code (you have to manually destroy subscription at component unmount).
+- Added isReactChildrenEqual() to redux helpers, compares type and props of
+  children.
+- Added _replaceState() method to redux store, for testing and reproducing bugs.
 
 ## 0.0.26
 

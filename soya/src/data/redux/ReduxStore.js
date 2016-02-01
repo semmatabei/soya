@@ -24,6 +24,7 @@ type StoreReference = {
 */
 
 const SUBSCRIBER_ID = '__soyaReduxStoreSubscriberId';
+const REPLACE_STATE = '__soyaReplaceState';
 
 /**
  * Creates and wraps redux store. Responsibilities:
@@ -262,6 +263,11 @@ export default class ReduxStore extends Store {
    */
   _rootReducer(state, action) {
     if (state == null) state = {};
+    if (action.type === REPLACE_STATE) {
+      // Replace state directly.
+      return action.state;
+    }
+
     var reducer, segmentName, segment, segmentState, nextSegmentState;
     var nextState = {}, isChanged = false;
     for (segmentName in this._reducers) {
@@ -836,5 +842,22 @@ export default class ReduxStore extends Store {
    */
   _getState() {
     return this._store.getState();
+  }
+
+  /**
+   * Can be used to instantly reproducing extracted state. Useful for generating
+   * test cases or reproducing customer bugs.
+   *
+   * IMPORTANT: Calling this method may cause mismatch between redux store and
+   * registered segments. You should only call this when you know what you're
+   * doing.
+   *
+   * @param {any} newState
+   */
+  _replaceState(newState) {
+    this._store.dispatch({
+      type: REPLACE_STATE,
+      state: newState
+    });
   }
 }
