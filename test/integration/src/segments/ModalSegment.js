@@ -10,6 +10,7 @@ export default class ModalSegment extends LocalSegment {
   _setDataActionType;
   _removeActionType;
   _removeAllActionType;
+  _actionCreator;
 
   static id() {
     return 'modal';
@@ -26,11 +27,9 @@ export default class ModalSegment extends LocalSegment {
     this._setDataActionType = ActionNameUtil.generate(id, 'SET_DATA');
     this._removeActionType = ActionNameUtil.generate(id, 'REMOVE');
     this._removeAllActionType = ActionNameUtil.generate(id, 'REMOVE_ALL');
-  }
 
-  _getActionCreator() {
     var self = this;
-    return {
+    this._actionCreator = {
       add(modalType, modalId, data) {
         return {
           type: self._addActionType,
@@ -57,7 +56,11 @@ export default class ModalSegment extends LocalSegment {
           type: self._removeAllActionType
         };
       }
-    }
+    };
+  }
+
+  _getActionCreator() {
+    return this._actionCreator;
   }
 
   _getReducer() {

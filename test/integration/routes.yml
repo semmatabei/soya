@@ -58,6 +58,12 @@ TEST_LOCAL_SEGMENT:
     - [method, GET]
     - [path, /data/redux/local]
 
+SIMPLE_FORM:
+  page: SimpleForm
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/simple-form]
+
 COOKIE_SET:
   page: CookieSet
   nodes:

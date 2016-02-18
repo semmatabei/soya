@@ -34,6 +34,10 @@ class Component extends React.Component {
         <li><a href={this.props.router.reverseRoute('SEGMENT_COOKIE_CLIENT')}>Segment Cookie (Client Side)</a></li>
         <li><a href={this.props.router.reverseRoute('TEST_LOCAL_SEGMENT')}>Local Segment</a></li>
       </ul>
+      <h3>Form With Redux</h3>
+      <ul>
+        <li><a href={this.props.router.reverseRoute('SIMPLE_FORM')}>Simple Form Test</a></li>
+      </ul>
     </div>;
   }
 }
@@ -54,6 +58,7 @@ class TestList extends Page {
       'SEGMENT_COOKIE_CLIENT',
       'LOAD_COMPONENT',
       'TEST_LOCAL_SEGMENT',
+      'SIMPLE_FORM',
       'COOKIE_SET'
     ];
   }
