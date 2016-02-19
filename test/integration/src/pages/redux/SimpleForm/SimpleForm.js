@@ -8,24 +8,22 @@ import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 import smokesignals from 'soya/lib/event/smokesignals';
 
 import FormSegment from 'soya/lib/data/redux/form/FormSegment';
+import TextInput from '../../../components/common/TextInput/TextInput';
+import NameInput from '../../../components/contextual/NameInput/NameInput';
 
 // TODO: Figure out how to do promise polyfill.
 import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {
   componentWillMount() {
-    this.setState({value: ''});
     this._formActions = this.props.reduxStore.register(FormSegment);
-  }
-
-  handleChange(event) {
-    this.setState({value: event.target.value});
   }
 
   render() {
     return <div>
       <h1>Simple Form</h1>
-      <input type="text" value={this.state.value} onChange={this.handleChange.bind(this)} />
+      <TextInput label="First Name" />
+      <NameInput label="Last Name" />
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>

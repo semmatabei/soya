@@ -1,17 +1,17 @@
 import React from 'react';
 
 import FibonacciSegment from '../../../segments/FibonacciSegment.js';
-import DataComponent from 'soya/lib/data/redux/DataComponent.js';
-import { SERVER } from 'soya/lib/data/RenderType.js';
+import convert from 'soya/lib/data/redux/convert';
+import { SERVER } from 'soya/lib/data/RenderType';
 
 import style from './style.css';
 
-export default class FibonacciSequence extends DataComponent {
+class FibonacciSequence {
   static getSegmentDependencies() {
     return [FibonacciSegment];
   }
 
-  subscribeQueries(nextProps) {
+  static subscribeQueries(nextProps, subscribe) {
     var hydrationOption = null;
     if (nextProps.loadAtClient) {
       hydrationOption = {
@@ -23,13 +23,12 @@ export default class FibonacciSequence extends DataComponent {
       number: nextProps.number
     };
 
-    this.subscribe(FibonacciSegment.id(), query, 'fib',
-      hydrationOption);
+    subscribe(FibonacciSegment.id(), query, 'fib', hydrationOption);
   }
 
   render() {
     var title = `Fibonacci Sequence (${this.props.number})`;
-    if (!this.state.fib.loaded) {
+    if (!this.props.result.fib.loaded) {
       return <div className={style.container}>
         <h3>{title}</h3>
         <p>Loading...</p>
@@ -37,7 +36,9 @@ export default class FibonacciSequence extends DataComponent {
     }
     return <div className={style.container}>
       <h3>{title}</h3>
-      <p>{this.state.fib.data}</p>
+      <p>{this.props.result.fib.data}</p>
     </div>
   }
 }
+
+export default convert(FibonacciSequence);

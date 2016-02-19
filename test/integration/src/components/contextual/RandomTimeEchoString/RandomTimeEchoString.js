@@ -1,17 +1,17 @@
 import React from 'react';
 
 import ConcatRandomTimeEchoSegment from '../../../segments/ConcatRandomTimeEchoSegment.js';
-import DataComponent from 'soya/lib/data/redux/DataComponent.js';
-import { SERVER } from 'soya/lib/data/RenderType.js';
+import convert from 'soya/lib/data/redux/convert';
+import { SERVER } from 'soya/lib/data/RenderType';
 
 import style from './style.css';
 
-export default class RandomTimeEchoString extends DataComponent {
+class RandomTimeEchoString {
   static getSegmentDependencies() {
     return [ConcatRandomTimeEchoSegment];
   }
 
-  subscribeQueries(nextProps) {
+  static subscribeQueries(nextProps, subscribe) {
     var hydrationOption = null;
     if (nextProps.loadAtClient) {
       hydrationOption = {
@@ -26,7 +26,7 @@ export default class RandomTimeEchoString extends DataComponent {
       isReplaceParallel: nextProps.isReplaceParallel
     };
 
-    this.subscribe(ConcatRandomTimeEchoSegment.id(), query, 'concatVal',
+    subscribe(ConcatRandomTimeEchoSegment.id(), query, 'concatVal',
       hydrationOption);
   }
 
@@ -34,7 +34,7 @@ export default class RandomTimeEchoString extends DataComponent {
     var title = 'String: \'' + this.props.value + '\'';
     title += this.props.isParallel ? ', Parallel' : ', Serial' ;
 
-    if (!this.state.concatVal.loaded) {
+    if (!this.props.result.concatVal.loaded) {
       return <div className={style.container}>
         <h3>{title}</h3>
         <p>Loading...</p>
@@ -43,7 +43,9 @@ export default class RandomTimeEchoString extends DataComponent {
 
     return <div className={style.container}>
       <h3>{title}</h3>
-      <p>Result: {this.state.concatVal.data}</p>
+      <p>Result: {this.props.result.concatVal.data}</p>
     </div>
   }
 }
+
+export default convert(RandomTimeEchoString);

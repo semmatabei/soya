@@ -1,17 +1,17 @@
 import React from 'react';
 
 import BookingSegment from '../../../segments/BookingSegment.js';
-import DataComponent from 'soya/lib/data/redux/DataComponent.js';
-import { SERVER } from 'soya/lib/data/RenderType.js';
+import convert from 'soya/lib/data/redux/convert';
+import { SERVER } from 'soya/lib/data/RenderType';
 
 import style from './style.css';
 
-export default class BookingBox extends DataComponent {
+class BookingBox {
   static getSegmentDependencies() {
     return [BookingSegment];
   }
 
-  subscribeQueries(nextProps) {
+  static subscribeQueries(nextProps, subscribe) {
     var hydrationOption = null;
     if (nextProps.loadAtClient) {
       hydrationOption = {
@@ -23,16 +23,15 @@ export default class BookingBox extends DataComponent {
       bookingId: nextProps.bookingId
     };
 
-    this.subscribe(BookingSegment.id(), query, 'booking',
-      hydrationOption);
+    subscribe(BookingSegment.id(), query, 'booking', hydrationOption);
   }
 
   render() {
     var title = `Booking Detail (${this.props.bookingId})`;
-    if (!this.state.booking.loaded) {
+    if (!this.props.result.booking.loaded) {
       var loading;
-      if (this.state.booking.errors) {
-        loading = <p>Error: {this.state.booking.errors[0]}</p>;
+      if (this.props.result.booking.errors) {
+        loading = <p>Error: {this.props.result.booking.errors[0]}</p>;
       } else {
         loading = <p>Loading...</p>;
       }
@@ -45,10 +44,12 @@ export default class BookingBox extends DataComponent {
     return <div className={style.container}>
       <h3>{title}</h3>
       <ul>
-        <li>Type: {this.state.booking.data.type}</li>
-        <li>Status: {this.state.booking.data.status}</li>
-        <li>Last Updated: {new Date(this.state.booking.data.timestamp).toGMTString()}</li>
+        <li>Type: {this.props.result.booking.data.type}</li>
+        <li>Status: {this.props.result.booking.data.status}</li>
+        <li>Last Updated: {new Date(this.props.result.booking.data.timestamp).toGMTString()}</li>
       </ul>
     </div>
   }
 }
+
+export default convert(BookingBox);

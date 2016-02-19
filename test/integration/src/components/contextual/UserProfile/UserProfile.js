@@ -1,18 +1,15 @@
 import React from 'react';
 
 import UserSegment from '../../../segments/UserSegment.js';
-import DataComponent from 'soya/lib/data/redux/DataComponent.js';
-import { SERVER } from 'soya/lib/data/RenderType.js';
+import convert from 'soya/lib/data/redux/convert';
+import { SERVER } from 'soya/lib/data/RenderType';
 
-export default class UserProfile extends DataComponent {
+class UserProfile extends React.Component {
   static getSegmentDependencies(config) {
     return [UserSegment];
   }
 
-  /**
-   * @param nextProps
-   */
-  subscribeQueries(nextProps) {
+  static subscribeQueries(nextProps, subscribe) {
     var hydrationOption = null;
     if (nextProps.loadAtClient) {
       hydrationOption = {
@@ -20,13 +17,12 @@ export default class UserProfile extends DataComponent {
       };
     }
 
-    this.subscribe(
-      UserSegment.id(), { username: nextProps.username }, 'user',
+    subscribe(UserSegment.id(), { username: nextProps.username }, 'user',
       hydrationOption);
   }
 
   render() {
-    if (!this.state.user.loaded) {
+    if (!this.props.result.user.loaded) {
       return <div>
         User data is loading....
       </div>
@@ -34,11 +30,13 @@ export default class UserProfile extends DataComponent {
 
     return <div>
       <ul>
-        <li>User name: {this.state.user.data.username}</li>
-        <li>First name: {this.state.user.data.firstName}</li>
-        <li>Last name: {this.state.user.data.lastName}</li>
-        <li>Email: {this.state.user.data.email}</li>
+        <li>User name: {this.props.result.user.data.username}</li>
+        <li>First name: {this.props.result.user.data.firstName}</li>
+        <li>Last name: {this.props.result.user.data.lastName}</li>
+        <li>Email: {this.props.result.user.data.email}</li>
       </ul>
     </div>
   }
 }
+
+export default convert(UserProfile);

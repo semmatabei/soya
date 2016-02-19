@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import DataComponent from 'soya/lib/data/redux/DataComponent';
+
+import convert from 'soya/lib/data/redux/convert';
 import { isEqualShallow, isReactChildrenEqual } from 'soya/lib/data/redux/helper';
 
 import ModalSegment from '../../../segments/ModalSegment.js';
@@ -9,30 +10,30 @@ import style from './style.css';
 /**
  * @CLIENT_SERVER
  */
-export default class ModalLayer extends DataComponent {
+class ModalLayer {
   static getSegmentDependencies() {
     return [ModalSegment];
   }
 
-  subscribeQueries(nextProps) {
-    this.subscribe(ModalSegment.id(), '', 'modals');
+  static subscribeQueries(nextProps, subscribe) {
+    subscribe(ModalSegment.id(), '', 'modals');
+  }
+
+  static shouldWrapperComponentUpdate(prevProps, nextProps, prevState, nextState) {
+    var shouldUpdate = !isEqualShallow(nextState, prevState);
+    // For the props, we need to check children differently.
+    return shouldUpdate || !isEqualShallow(nextProps, prevProps, {children: isReactChildrenEqual});
+  }
+
+  static shouldSubscriptionsUpdate(prevProps, nextProps) {
+    // For the props, we need to check children differently.
+    return !isEqualShallow(nextProps, prevProps, {children: isReactChildrenEqual});
   }
 
   clearModal(modalId) {
-    var modalActions = this.getActionCreator(ModalSegment.id());
+    var modalActions = this.props.getActionCreator(ModalSegment.id());
     var action = modalActions.remove(modalId);
-    this.getReduxStore().dispatch(action);
-  }
-
-  shouldSubscriptionsUpdate(nextProps) {
-    // For the props, we need to check children differently.
-    return !isEqualShallow(nextProps, this.props, {children: isReactChildrenEqual});
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    var shouldUpdate = !isEqualShallow(nextState, this.state);
-    // For the props, we need to check children differently.
-    return shouldUpdate || !isEqualShallow(nextProps, this.props, {children: isReactChildrenEqual});
+    this.props.getReduxStore().dispatch(action);
   }
 
   render() {
@@ -48,8 +49,8 @@ export default class ModalLayer extends DataComponent {
     }
 
     var modal, type, id, data;
-    for (i = 0; i < this.state.modals.length; i++) {
-      modal = this.state.modals[i];
+    for (i = 0; i < this.props.result.modals.length; i++) {
+      modal = this.props.result.modals[i];
       type = modal.modalType;
       id = modal.modalId;
       data = modal.data;
@@ -77,3 +78,5 @@ export default class ModalLayer extends DataComponent {
     </div>;
   }
 }
+
+export default convert(ModalLayer);

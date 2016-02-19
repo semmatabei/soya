@@ -19,6 +19,7 @@
 - Added isReactChildrenEqual() to redux helpers, compares type and props of
   children.
 - Added _replaceState() method to redux store, for testing and reproducing bugs.
+- DataComponent now created with wrapper component instead of class inheritance.
 
 ## 0.0.26
 
