@@ -1,7 +1,7 @@
 import React from 'react';
 
 import ConcatRandomTimeEchoSegment from '../../../segments/ConcatRandomTimeEchoSegment.js';
-import convert from 'soya/lib/data/redux/convert';
+import connect from 'soya/lib/data/redux/connect';
 import { SERVER } from 'soya/lib/data/RenderType';
 
 import style from './style.css';
@@ -48,4 +48,4 @@ class RandomTimeEchoString {
   }
 }
 
-export default convert(RandomTimeEchoString);
+export default connect(RandomTimeEchoString);

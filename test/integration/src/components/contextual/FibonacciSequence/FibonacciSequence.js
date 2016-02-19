@@ -1,7 +1,7 @@
 import React from 'react';
 
 import FibonacciSegment from '../../../segments/FibonacciSegment.js';
-import convert from 'soya/lib/data/redux/convert';
+import connect from 'soya/lib/data/redux/connect';
 import { SERVER } from 'soya/lib/data/RenderType';
 
 import style from './style.css';
@@ -41,4 +41,4 @@ class FibonacciSequence {
   }
 }
 
-export default convert(FibonacciSequence);
+export default connect(FibonacciSequence);

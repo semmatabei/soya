@@ -1,13 +1,21 @@
 import React from 'react';
+import update from 'react-addons-update';
 
-import DataComponent from '../DataComponent.js';
+import connect from '../connect.js';
 import FormSegment from './FormSegment.js';
 
 /**
  * @CLIENT_SERVER
  */
 export default class FieldConverter {
+  /**
+   * @type {ReduxStore}
+   */
   _reduxStore;
+
+  /**
+   * @type {string}
+   */
   _formId;
 
   constructor(formId, reduxStore) {
@@ -16,26 +24,48 @@ export default class FieldConverter {
   }
 
   convert(InputComponent) {
-    var type = InputComponent.queryType ? 'field' : InputComponent.queryType();
+    var type = typeof InputComponent.getQueryType == 'function' ? 'field' : InputComponent.getQueryType();
+    var validators = typeof InputComponent.getOnChangeValidators == 'function' ? [] : InputComponent.getOnChangeValidators();
     var self = this;
+
     // Recognizes the following props:
     // - changeHandlers
     // - changeValidators
-    return class Component extends DataComponent {
+    class Component extends React.Component {
+      __handleChange;
+
       static getSegmentDependencies() {
         return [FormSegment];
       }
 
-      subscribeQueries(nextProps) {
+      static subscribeQueries(nextProps, subscribe) {
         var name = nextProps.name;
-        this.subscribe(FormSegment.id(), {formId: self._formId, type: type, fieldName: name});
+        subscribe(FormSegment.id(), {formId: self._formId, type: type, fieldName: name}, value);
+      }
+
+      constructor(props, context) {
+        super(props, context);
+        this.__handleChange = this.handleChange.bind(this);
       }
 
       render() {
-        var preppedProps = {};
-        console.log(self._reduxStore);
-        return <InputComponent {...preppedProps} />;
+        // Pass appropriate props to the InputComponent.
+        var key, props = {};
+        for (key in this.props) {
+          if (!this.props.hasOwnProperty(key)) continue;
+          if (key == 'result' || key == 'onChangeHandlers' || key == 'changeValidators') continue;
+          props[key] = this.props[key];
+        }
+        props.value = this.props.result.value;
+        props.handleChange = this.__handleChange;
+        return <InputComponent key="main" {...props} />;
+      }
+
+      handleChange(value) {
+        console.log('HANDLE CHANGE', value);
       }
     }
+
+    return connect(Component);
   }
 }

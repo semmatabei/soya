@@ -1,7 +1,7 @@
 import React from 'react';
 
 import BookingSegment from '../../../segments/BookingSegment.js';
-import convert from 'soya/lib/data/redux/convert';
+import connect from 'soya/lib/data/redux/connect';
 import { SERVER } from 'soya/lib/data/RenderType';
 
 import style from './style.css';
@@ -52,4 +52,4 @@ class BookingBox {
   }
 }
 
-export default convert(BookingBox);
+export default connect(BookingBox);

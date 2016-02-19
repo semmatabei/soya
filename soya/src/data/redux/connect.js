@@ -77,7 +77,7 @@ var defaultSubscribeQueries = function(nextProps, subscribe) {
  * @param {React.Component} ReactComponent
  * @return {React.Component}
  */
-export default function convert(ReactComponent) {
+export default function connect(ReactComponent) {
   var getSegmentDependencies = ReactComponent.getSegmentDependencies;
   var subscribeQueries = ReactComponent.subscribeQueries;
   var shouldSubscriptionsUpdate = ReactComponent.shouldSubscriptionUpdate;
@@ -139,10 +139,10 @@ export default function convert(ReactComponent) {
       var reduxStore = this.getReduxStore();
       var config = this.getConfig();
       if (!reduxStore || !reduxStore.__isReduxStore) {
-        throw new Error('ReduxStore is not properly wired to this data component: ' + this.constructor + '.');
+        throw new Error('ReduxStore is not properly wired to this data component: ' + ReactComponent + '.');
       }
       if (!config || typeof config != 'object') {
-        throw new Error('Config object is not properly wired to this data component: ' + this.constructor + '.');
+        throw new Error('Config object is not properly wired to this data component: ' + ReactComponent + '.');
       }
     }
 

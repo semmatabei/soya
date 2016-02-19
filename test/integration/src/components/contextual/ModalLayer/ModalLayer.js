@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import convert from 'soya/lib/data/redux/convert';
+import connect from 'soya/lib/data/redux/connect';
 import { isEqualShallow, isReactChildrenEqual } from 'soya/lib/data/redux/helper';
 
 import ModalSegment from '../../../segments/ModalSegment.js';
@@ -79,4 +79,4 @@ class ModalLayer {
   }
 }
 
-export default convert(ModalLayer);
+export default connect(ModalLayer);

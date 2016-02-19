@@ -4,7 +4,7 @@ import TextInput from '../../common/TextInput/TextInput.js';
 import { isName } from '../../../validator/string.js';
 
 export default class NameInput extends React.Component {
-  static getChangeValidators() {
+  static getOnChangeValidators() {
     return [isName];
   }
 

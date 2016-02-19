@@ -1,7 +1,7 @@
 import React from 'react';
 
 import UserSegment from '../../../segments/UserSegment.js';
-import convert from 'soya/lib/data/redux/convert';
+import connect from 'soya/lib/data/redux/connect';
 import { SERVER } from 'soya/lib/data/RenderType';
 
 class UserProfile extends React.Component {
@@ -39,4 +39,4 @@ class UserProfile extends React.Component {
   }
 }
 
-export default convert(UserProfile);
+export default connect(UserProfile);

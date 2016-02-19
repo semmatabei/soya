@@ -10,20 +10,25 @@ import smokesignals from 'soya/lib/event/smokesignals';
 import FormSegment from 'soya/lib/data/redux/form/FormSegment';
 import TextInput from '../../../components/common/TextInput/TextInput';
 import NameInput from '../../../components/contextual/NameInput/NameInput';
+import TextField from '../../../components/common/TextInput/TextField';
 
 // TODO: Figure out how to do promise polyfill.
 import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {
   componentWillMount() {
-    this._formActions = this.props.reduxStore.register(FormSegment);
+
   }
 
   render() {
     return <div>
       <h1>Simple Form</h1>
-      <TextInput label="First Name" />
+      <h3>Two Way Data-Binding</h3>
+      <ul>
+        <li></li>
+      </ul>
       <NameInput label="Last Name" />
+      <TextField formId="contact" name="phoneNumber" reduxStore={this.props.reduxStore} config={this.props.config} label="Phone Number" />
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>

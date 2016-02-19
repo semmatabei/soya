@@ -1,7 +1,7 @@
 import React from 'react';
 
 import FibonacciTotalSegment from '../../../segments/FibonacciTotalSegment.js';
-import convert from 'soya/lib/data/redux/convert';
+import connect from 'soya/lib/data/redux/connect';
 import { SERVER } from 'soya/lib/data/RenderType';
 
 import style from './style.css';
@@ -38,4 +38,4 @@ class FibonacciTotal {
   }
 }
 
-export default convert(FibonacciTotal);
+export default connect(FibonacciTotal);
