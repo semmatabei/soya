@@ -20,6 +20,8 @@
   children.
 - Added _replaceState() method to redux store, for testing and reproducing bugs.
 - DataComponent now created with wrapper component instead of class inheritance.
+- Form with redux:
+  - Added generic FormSegment to contain data for our forms.
 
 ## 0.0.26
 

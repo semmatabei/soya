@@ -10,3 +10,8 @@
 .textInput input {
   padding: 5px;
 }
+
+.textInput span {
+  display: block;
+  color: red;
+}

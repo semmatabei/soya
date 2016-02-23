@@ -7,6 +7,10 @@ import { SERVER } from 'soya/lib/data/RenderType';
 import style from './style.css';
 
 class FibonacciTotal {
+  static connectId() {
+    return 'FibonacciTotal';
+  }
+
   static getSegmentDependencies() {
     return [FibonacciTotalSegment];
   }

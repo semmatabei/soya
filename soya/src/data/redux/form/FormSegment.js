@@ -27,6 +27,7 @@ import update from 'react-addons-update';
 export default class FormSegment extends LocalSegment {
   _setValueActionType;
   _setValuesActionType;
+  _mergeFieldsActionType;
   _setErrorMessagesActionType;
   _addErrorMessagesActionType;
   _clearFormActionType;
@@ -48,6 +49,7 @@ export default class FormSegment extends LocalSegment {
     this._queryIdCache = {};
     this._setValueActionType = ActionNameUtil.generate(id, 'SET_VALUE');
     this._setValuesActionType = ActionNameUtil.generate(id, 'SET_VALUES');
+    this._mergeFieldsActionType = ActionNameUtil.generate(id, 'MERGE_FIELDS');
     this._setErrorMessagesActionType = ActionNameUtil.generate(id, 'SET_ERRORS');
     this._addErrorMessagesActionType = ActionNameUtil.generate(id, 'ADD_ERRORS');
     this._clearFormActionType = ActionNameUtil.generate(id, 'CLEAR_FORM');
@@ -59,6 +61,13 @@ export default class FormSegment extends LocalSegment {
     };
 
     this._actionCreator = {
+      mergeFields: (formId, fields) => {
+        return {
+          type: this._mergeFieldsActionType,
+          formId: formId,
+          fields: fields
+        };
+      },
       setValue: (formId, fieldName, value) => {
         return {
           type: this._setValueActionType,
@@ -113,23 +122,6 @@ export default class FormSegment extends LocalSegment {
     return queryId;
   }
 
-  _comparePiece(prevSegmentState, segmentState, queryId) {
-    // If state is equal, nothing has changed, since our reducer always
-    // re-creates the object.
-    if (this._isStateEqual(prevSegmentState, segmentState)) {
-      return null;
-    }
-
-    // Otherwise, we do shallow comparison to make sure no unnecessary re-render
-    // is triggered.
-    var prevSegmentPiece = this._getPieceObject(prevSegmentState, queryId);
-    var segmentPiece = this._getPieceObject(segmentState, queryId);
-    if (isEqualShallow(prevSegmentPiece, segmentPiece, this._pieceCustomEqualComparators)) {
-      return null;
-    }
-    return segmentPiece;
-  }
-
   /**
    * Possible queries:
    *
@@ -137,9 +129,7 @@ export default class FormSegment extends LocalSegment {
    *   {formId: 'formId', type: '*'} --> get all values as map, but without the error messages.
    *   {formId: 'formId', type: '**'} --> get all values as map with error messages.
    *   {formId: 'formId', type: 'hasErrors'} --> returns true if has errors, false otherwise.
-   *   {formId: 'formId', type: 'field', fieldName: 'fieldName'} --> get value of fieldName, along with errors.
-   *   {formId: 'formId', type: 'field*', fieldName: 'fieldName'} --> get value of fieldName, along with errors and touched.
-   *   {formId: 'formId', type: 'field**', fieldName: 'fieldName'} --> get full value of field.
+   *   {formId: 'formId', type: 'field', fieldName: 'fieldName'} --> get all values of field.
    * </pre>
    */
   _getPieceObject(state, queryId) {
@@ -155,25 +145,7 @@ export default class FormSegment extends LocalSegment {
         return this._hasErrors(state, query.formId);
         break;
       case 'field':
-        return this._getField(state, query.formId, query.fieldName, {
-          value: null,
-          errorMessages: []
-        });
-        break;
-      case 'field*':
-        return this._getField(state, query.formId, query.fieldName, {
-          value: null,
-          errorMessages: [],
-          touched: false
-        });
-        break;
-      case 'field**':
-        return this._getField(state, query.formId, query.fieldName, {
-          value: null,
-          errorMessages: [],
-          touched: false,
-          isValidating: false
-        });
+        return this._getField(state, query.formId, query.fieldName);
         break;
       default:
         throw new Error('Unable to translate query: ' + queryId);
@@ -199,18 +171,11 @@ export default class FormSegment extends LocalSegment {
     return false;
   }
 
-  _getField(state, formId, fieldName, result) {
-    var form = state[formId];
-    if (form == null) form = {};
-    var key, field = form[fieldName];
-    if (field == null) {
-      return result;
+  _getField(state, formId, fieldName) {
+    if (state[formId] == null || state[formId][fieldName] == null) {
+      return null;
     }
-    for (key in result) {
-      if (!result.hasOwnProperty(key)) continue;
-      result[key] = field[key];
-    }
-    return result;
+    return state[formId][fieldName];
   }
 
   _getActionCreator() {
@@ -233,6 +198,9 @@ export default class FormSegment extends LocalSegment {
         case this._addErrorMessagesActionType:
           return this._addErrorMessages(state, action);
           break;
+        case this._mergeFieldsActionType:
+          return this._mergeFields(state, action);
+          break;
         case this._clearFormActionType:
           return this._clearForm(state, action);
           break;
@@ -243,6 +211,11 @@ export default class FormSegment extends LocalSegment {
 
   _setValue(state, action) {
     state = this._ensureFormExistence(state, action);
+    state = this._ensureFieldExistence(state, action);
+    if (state[action.formId][action.fieldName].value === action.value) {
+      // If we are setting the same value, no need to update the state.
+      return state;
+    }
     return update(state, {
       [action.formId]: {
         [action.fieldName]: {
@@ -264,6 +237,24 @@ export default class FormSegment extends LocalSegment {
       if (!action.map.hasOwnProperty(fieldName)) continue;
       state = this._setValue(state, this._actionCreator.setValue(
         action.formId, fieldName, action.map[fieldName]));
+    }
+    return state;
+  }
+
+  _mergeFields(state, action) {
+    state = this._ensureFormExistence(state, action);
+    var fieldName, tempAction = {formId: action.formId};
+    for (fieldName in action.fields) {
+      if (!action.fields.hasOwnProperty(fieldName)) continue;
+      tempAction.fieldName = fieldName;
+      state = this._ensureFieldExistence(state, tempAction);
+      state = update(state, {
+        [action.formId]: {
+          [fieldName]: {
+            $merge: action.fields[fieldName]
+          }
+        }
+      });
     }
     return state;
   }

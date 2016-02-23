@@ -7,6 +7,10 @@ import { SERVER } from 'soya/lib/data/RenderType';
 import style from './style.css';
 
 class RandomTimeEchoString {
+  static connectId() {
+    return 'RandomTimeEchoString';
+  }
+
   static getSegmentDependencies() {
     return [ConcatRandomTimeEchoSegment];
   }

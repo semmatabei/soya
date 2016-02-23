@@ -47,6 +47,9 @@ export default class ComponentRegister {
    * @param {any} clazz
    */
   regPage(name, absDir, clazz) {
+    if (typeof clazz != 'function') {
+      throw new Error('Unable to load page, not a function: ' + absDir);
+    }
     if (typeof clazz.prototype.render != 'function') {
       throw new Error('Page class doesn\'t implement render(): \'' + absDir + '\'.');
     }
@@ -100,9 +103,6 @@ export default class ComponentRegister {
   _regComponent(vendor, name, absDir, clazz) {
     if (!this._components.hasOwnProperty(vendor)) {
       this._components[vendor] = {};
-    }
-    if (typeof clazz != 'function') {
-      throw new Error('Unable to load component: ' + absDir);
     }
     this._components[vendor][name] = new Component(name, absDir, clazz);
   }

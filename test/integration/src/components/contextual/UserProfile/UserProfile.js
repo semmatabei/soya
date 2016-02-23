@@ -5,6 +5,10 @@ import connect from 'soya/lib/data/redux/connect';
 import { SERVER } from 'soya/lib/data/RenderType';
 
 class UserProfile extends React.Component {
+  static connectId() {
+    return 'UserProfile';
+  }
+
   static getSegmentDependencies(config) {
     return [UserSegment];
   }

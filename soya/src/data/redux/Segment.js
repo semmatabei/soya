@@ -139,12 +139,12 @@ export default class Segment {
 
   /**
    * Compares pieces of two state. If they are equal return null, otherwise
-   * return piece of the current segment state.
+   * return an array containing the current segment piece.
    *
    * @param prevSegmentState
    * @param segmentState
    * @param queryId
-   * @return {any}
+   * @return {?Array<any>}
    */
   _comparePiece(prevSegmentState, segmentState, queryId) {
 

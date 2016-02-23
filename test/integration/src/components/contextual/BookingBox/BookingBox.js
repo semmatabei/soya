@@ -7,6 +7,10 @@ import { SERVER } from 'soya/lib/data/RenderType';
 import style from './style.css';
 
 class BookingBox {
+  static connectId() {
+    return 'BookingBox';
+  }
+
   static getSegmentDependencies() {
     return [BookingSegment];
   }

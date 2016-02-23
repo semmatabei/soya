@@ -11,6 +11,10 @@ import style from './style.css';
  * @CLIENT_SERVER
  */
 class ModalLayer {
+  static connectId() {
+    return 'ModalLayer';
+  }
+
   static getSegmentDependencies() {
     return [ModalSegment];
   }

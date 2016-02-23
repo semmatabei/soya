@@ -180,7 +180,7 @@ export default class LocalSegment extends Segment {
       return null;
     }
 
-    return segmentPiece;
+    return [segmentPiece];
   }
 
   /**

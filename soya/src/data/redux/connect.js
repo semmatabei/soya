@@ -58,7 +58,6 @@ var defaultGetSegmentDependencies = function() {
  */
 var defaultShouldSubcriptionsUpdate = function(prevProps, nextProps) {
   var shouldUpdateSubscription = !isEqualShallow(prevProps, nextProps);
-  console.log('[SUB] Should update subscriptions', shouldUpdateSubscription);
   return shouldUpdateSubscription;
 };
 
@@ -74,10 +73,14 @@ var defaultSubscribeQueries = function(nextProps, subscribe) {
 };
 
 /**
+ * TODO: Logger at client! Remove if debug is set to false!
+ *
  * @param {React.Component} ReactComponent
+ * @param {string} name
  * @return {React.Component}
  */
 export default function connect(ReactComponent) {
+  var connectId = ReactComponent.connectId ? ReactComponent.connectId() : ReactComponent;
   var getSegmentDependencies = ReactComponent.getSegmentDependencies;
   var subscribeQueries = ReactComponent.subscribeQueries;
   var shouldSubscriptionsUpdate = ReactComponent.shouldSubscriptionUpdate;
@@ -176,7 +179,7 @@ export default function connect(ReactComponent) {
       // Unsubscribe if already subscribed.
       this.unsubscribe(stateName);
 
-      console.log('[SUB] Subscribe', this, segmentId);
+      console.log('[SUB] Subscribe', connectId, segmentId);
       var callback = (newState) => {
         this.setState({[stateName]: newState});
       };
@@ -194,7 +197,7 @@ export default function connect(ReactComponent) {
      */
     unsubscribe(stateName) {
       if (this.__soyaUnsubscribe[stateName]) {
-        console.log('[SUB] Un-subscribe', this, stateName);
+        console.log('[SUB] Un-subscribe', connectId, stateName);
         this.__soyaUnsubscribe[stateName]();
         delete this.__soyaUnsubscribe[stateName];
       }
@@ -233,9 +236,9 @@ export default function connect(ReactComponent) {
     /**
      * This implementation assumes:
      *
-     * 1) All subscriber components render only using props and states (i.e. they
-     *    are pure render components). Child classes can override this method
-     *    if they are not.
+     * 1) All subscriber components render only using props and states (i.e.
+     *    they are pure render components). Child classes can override this
+     *    method if they are not.
      * 2) All wrapper component owner send their props as immutable objects
      *    (i.e. if the prop changes, they recreate the whole object).
      *
@@ -250,20 +253,21 @@ export default function connect(ReactComponent) {
     shouldComponentUpdate(nextProps, nextState) {
       if (shouldWrapperComponentUpdate) return shouldWrapperComponentUpdate(this.props, nextProps, this.state, nextState);
       var shouldUpdate = !isEqualShallow(this.props, nextProps) || !isEqualShallow(this.state, nextState);
-      console.log('[SUB] Should update?', this, shouldUpdate);
+      console.log('[SUB] Should update?', connectId, shouldUpdate);
       return shouldUpdate;
     }
 
     componentWillUpdate(nextProps, nextState) {
-      console.log('[SUB] Will update', this, nextProps, nextState);
+      console.log('[SUB] Will update', connectId, nextProps, nextState);
     }
 
     /**
      * @param {Object} nextProps
      */
     componentWillReceiveProps(nextProps) {
-      // TODO: Logger at client! Remove if debug is set to false!
-      if (shouldSubscriptionsUpdate(this.props, nextProps)) {
+      var shouldUpdateSubscriptions = shouldSubscriptionsUpdate(this.props, nextProps);
+      console.log('[SUB] Should subscriptions update', connectId, shouldUpdateSubscriptions);
+      if (shouldUpdateSubscriptions) {
         // If query subscriptions update, we need to remove past subscriptions.
         // Otherwise this component may unnecessarily re-render each time the
         // already unrelated segment piece changes. Since this is costly, this
@@ -277,7 +281,7 @@ export default function connect(ReactComponent) {
      * Registers the store. Run at both client and server side when rendering.
      */
     componentWillMount() {
-      console.log('[SUB] Mounting', this, this.props);
+      console.log('[SUB] Mounting', connectId, this.props);
       var i, segmentClasses = getSegmentDependencies();
       for (i = 0; i < segmentClasses.length; i++) {
         this._register(segmentClasses[i]);
@@ -289,7 +293,7 @@ export default function connect(ReactComponent) {
      * Unsubscribe all segments.
      */
     componentWillUnmount() {
-      console.log('[SUB] Unmounting', this);
+      console.log('[SUB] Unmounting', connectId);
       this.getReduxStore().unsubscribe(this);
     }
   }

@@ -212,7 +212,7 @@ export default class MapSegment extends Segment {
     }
 
     // Otherwise, state has changed, return piece object.
-    return this._getPieceObject(segmentState, queryId);
+    return [this._getPieceObject(segmentState, queryId)];
   }
 
   /**

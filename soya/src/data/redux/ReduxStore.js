@@ -326,7 +326,7 @@ export default class ReduxStore extends Store {
           // Segment piece has changed, call all registered subscribers.
           for (subscriberId in querySubscribers) {
             if (!querySubscribers.hasOwnProperty(subscriberId)) continue;
-            querySubscribers[subscriberId](segmentPiece);
+            querySubscribers[subscriberId](segmentPiece[0]);
           }
         }
       }

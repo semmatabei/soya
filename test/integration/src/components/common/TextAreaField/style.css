@@ -1,0 +1,13 @@
+.textAreaInput {
+  margin: 10px 0;
+}
+
+.textAreaInput label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.textAreaInput textarea {
+  width: 400px;
+  height: 150px;
+}
