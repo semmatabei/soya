@@ -20,8 +20,11 @@
   children.
 - Added _replaceState() method to redux store, for testing and reproducing bugs.
 - DataComponent now created with wrapper component instead of class inheritance.
+  - Added static connectId() method to make log reading easier.
 - Form with redux:
   - Added generic FormSegment to contain data for our forms.
+  - Added Field wrapper that wraps an input element to a specific field in a
+    form.
 
 ## 0.0.26
 

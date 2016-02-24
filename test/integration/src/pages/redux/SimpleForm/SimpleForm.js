@@ -29,7 +29,7 @@ class Component extends React.Component {
         <li>Two way data binding. Data from each field should bind to redux state, and vice-versa.</li>
         <li><a href="javascript:void(0)" onClick={this.replaceValues.bind(this)}>Click here</a> to set values to the redux store, form inputs should also update.</li>
         <li><a href="javascript:void(0)" onClick={this.clearValues.bind(this)}>Click here</a> to clear values in redux store, form inputs should also update.</li>
-        <li>Validation </li>
+        <li>Validation should also work for each field.</li>
       </ul>
       <ContactForm formId={FORM_ID} formName="Contact Us" reduxStore={this.props.reduxStore} config={this.props.config} />
       <DebugPanel top right bottom>
@@ -43,6 +43,12 @@ class Component extends React.Component {
       name: 'Rick Christie',
       phoneNumber: '123 456 789',
       message: 'Bring me back that Meteora LP that you borrowed!',
+      relationship: 'girlfriend',
+      call: ['evening', 'night'],
+      target: {
+        sms: true,
+        email: true
+      },
       type: 'borrowing'
     }));
   }

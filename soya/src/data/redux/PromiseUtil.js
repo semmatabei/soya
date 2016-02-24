@@ -4,30 +4,32 @@
  * @CLIENT_SERVER
  */
 export default {
-  /**
-   * Runs all given promises serially.
-   *
-   * @param {Function} Promise
-   * @param {Array<Promise>} promises
-   */
-  allSerial(Promise, promises) {
-    var accumulator = [], i, promise;
-    var ready = Promise.resolve(null);
-    var createPromiseReturnFunc = function(promise) {
-      return promise;
-    };
-
-    for (i = 0; i < promises.length; i++) {
-      promise = promises[i];
-      ready = ready.then(
-        createPromiseReturnFunc(promise)
-      ).then(function(value) {
-        accumulator.push(value);
-      });
-    }
-
-    return ready.then(function() { return accumulator; });
-  },
+  ///**
+  // * Runs all given promises serially.
+  // *
+  // * TODO: This is a defective function. Since the promise instances are already created, by the time they reach this function they may have already run.
+  // *
+  // * @param {Function} Promise
+  // * @param {Array<Promise>} promises
+  // */
+  //allSerial(Promise, promises) {
+  //  var accumulator = [], i, promise;
+  //  var ready = Promise.resolve(null);
+  //  var createPromiseReturnFunc = function(promise) {
+  //    return promise;
+  //  };
+  //
+  //  for (i = 0; i < promises.length; i++) {
+  //    promise = promises[i];
+  //    ready = ready.then(
+  //      createPromiseReturnFunc(promise)
+  //    ).then(function(value) {
+  //      accumulator.push(value);
+  //    });
+  //  }
+  //
+  //  return ready.then(function() { return accumulator; });
+  //},
 
   /**
    * Runs all promises inside the array in parallel. Will reject if any of

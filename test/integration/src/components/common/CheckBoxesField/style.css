@@ -1,0 +1,15 @@
+.checkBoxes {
+
+}
+
+.checkBoxes label {
+  display: block;
+}
+
+.checkBoxes span {
+  color: red;
+}
+
+.checkBoxes div label {
+  display: inline;
+}

@@ -1,0 +1,11 @@
+.selectBox {
+  margin: 10px 0;
+}
+
+.selectBox label {
+  display: block;
+}
+
+.selectBox span {
+  color: red;
+}

@@ -7,6 +7,11 @@
   margin-bottom: 5px;
 }
 
+.textAreaInput span {
+  display: block;
+  color: red;
+}
+
 .textAreaInput textarea {
   width: 400px;
   height: 150px;

@@ -13,6 +13,7 @@ export class TextAreaInput extends React.Component {
     return <div className={style.textAreaInput}>
       <label>{this.props.label}</label>
       <textarea value={value} onChange={(event) => this.props.handleChange(event.target.value, event)} />
+      {this.props.errorMessages.length > 0 ? <span>{this.props.errorMessages[0]}</span> : null}
     </div>;
   }
 }

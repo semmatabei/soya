@@ -30,6 +30,7 @@ export default class FormSegment extends LocalSegment {
   _mergeFieldsActionType;
   _setErrorMessagesActionType;
   _addErrorMessagesActionType;
+  _setIsValidatingActionType;
   _clearFormActionType;
   _actionCreator;
   _queryIdCache;
@@ -50,6 +51,7 @@ export default class FormSegment extends LocalSegment {
     this._setValueActionType = ActionNameUtil.generate(id, 'SET_VALUE');
     this._setValuesActionType = ActionNameUtil.generate(id, 'SET_VALUES');
     this._mergeFieldsActionType = ActionNameUtil.generate(id, 'MERGE_FIELDS');
+    this._setIsValidatingActionType = ActionNameUtil.generate(id, 'SET_IS_VALIDATING');
     this._setErrorMessagesActionType = ActionNameUtil.generate(id, 'SET_ERRORS');
     this._addErrorMessagesActionType = ActionNameUtil.generate(id, 'ADD_ERRORS');
     this._clearFormActionType = ActionNameUtil.generate(id, 'CLEAR_FORM');
@@ -61,6 +63,13 @@ export default class FormSegment extends LocalSegment {
     };
 
     this._actionCreator = {
+      setIsValidating: (formId, map) => {
+        return {
+          type: this._setIsValidatingActionType,
+          formId: formId,
+          map: map
+        };
+      },
       mergeFields: (formId, fields) => {
         return {
           type: this._mergeFieldsActionType,
@@ -186,6 +195,9 @@ export default class FormSegment extends LocalSegment {
     return (state, action) => {
       if (state == null) return FormSegment.createInitialData();
       switch (action.type) {
+        case this._setIsValidatingActionType:
+          return this._setIsValidating(state, action);
+          break;
         case this._setValueActionType:
           return this._setValue(state, action);
           break;
@@ -207,6 +219,25 @@ export default class FormSegment extends LocalSegment {
       }
       return state;
     }
+  }
+
+  _setIsValidating(state, action) {
+    state = this._ensureFormExistence(state, action);
+    var fieldName;
+    for (fieldName in action.map) {
+      if (!action.map.hasOwnProperty(fieldName)) continue;
+      state = this._ensureFieldExistence(
+        state, {formId: action.formId, fieldName: fieldName});
+      update(state, {
+        [action.formId]: {
+          [action.fieldName]: {
+            isValidating: {$set: action.isValidating},
+            touched: {$set: true}
+          }
+        }
+      });
+    }
+    return state;
   }
 
   _setValue(state, action) {

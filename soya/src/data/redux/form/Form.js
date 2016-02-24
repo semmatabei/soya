@@ -1,4 +1,5 @@
 import FormSegment from './FormSegment.js';
+import PromiseUtil from '../PromiseUtil.js';
 
 /**
  * Represents a form. Instance of this class may be passed to each Field
@@ -37,21 +38,35 @@ export default class Form {
     this._formId = formId;
     this._handleSubmit = handleSubmit;
     this._reduxStore = reduxStore;
+    this._fields = {};
   }
 
   /**
-   * @param {string} fieldId
-   * @param {Function} validateSync
-   * @param {Function} validateAsync
+   * @returns {string}
    */
-  regField(fieldId, validateSync, validateAsync) {
-    this._fields[fieldId] = {
-      validateSync: validateSync,
-      validateAsync: validateAsync
-    };
+  getFormId() {
+    return this._formId;
+  }
+
+  /**
+   * @param {string} fieldName
+   * @param {Function} validateAll
+   */
+  regField(fieldName, validateAll) {
+    this._fields[fieldName] = { validateAll: validateAll };
   }
 
   submit() {
+    var fieldName, promises = [];
+    for (fieldName in this._fields) {
+      if (!this._fields.hasOwnProperty(fieldName)) continue;
+      promises.push(this._fields[fieldName].validateAll());
+    }
+    var finalPromise = PromiseUtil.allParallel(Promise, promises);
+    finalPromise.then(function() {
+
+    });
+
     console.log(this);
     // First run each field's validators, sync or async.
 

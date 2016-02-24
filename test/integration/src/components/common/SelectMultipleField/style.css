@@ -1,0 +1,12 @@
+.selectMultipleBox {
+  margin: 10px 0;
+}
+
+.selectMultipleBox label {
+  display: block;
+}
+
+.selectMultipleBox span {
+  color: red;
+  display: block;
+}
