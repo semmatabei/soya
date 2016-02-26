@@ -11,6 +11,7 @@ import SelectBoxField from '../../common/SelectBoxField/SelectBoxField';
 import SelectMultipleField from '../../common/SelectMultipleField/SelectMultipleField';
 import RadioButtonsField from '../../common/RadioButtonsField/RadioButtonsField';
 import CheckBoxesField from '../../common/CheckBoxesField/CheckBoxesField';
+import AirportField from '../../contextual/AirportField/AirportField';
 
 const TYPE = [
   { value: 'greetings', label: 'Say Hi' },
@@ -55,6 +56,9 @@ export default class ContactForm extends React.Component {
       <TextField form={this._form} name="nickname" label="Nick Name"
                  changeValidators={[optional, name, maxLength.bind(null, 5)]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />
+      <AirportField form={this._form} name="from" label="Base City"
+                    changeValidators={[required]}
+                    reduxStore={this.props.reduxStore} config={this.props.config} />
       <TextField form={this._form} name="phoneNumber" label="Phone Number"
                  changeValidators={[required, phone]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />

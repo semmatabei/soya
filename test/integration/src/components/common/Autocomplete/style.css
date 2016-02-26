@@ -1,0 +1,40 @@
+.inputContainer label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.inputContainer span {
+  display: block;
+  color: red;
+}
+
+.input {
+  padding: 5px;
+}
+
+.results {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #999;
+  max-height: 500px;
+  width: 250px;
+  overflow-y: scroll;
+  position: absolute;
+  background: #ffffff;
+}
+
+.results li {
+  padding: 10px;
+  border-bottom: 1px solid #999;
+  list-style-type: none;
+  margin: 0;
+}
+
+.selected {
+  background: #ccc;
+}
+
+.results li {
+  cursor: pointer;
+}

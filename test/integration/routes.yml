@@ -94,6 +94,12 @@ BOOKING_JSON:
     - [method, GET]
     - [path, /api/booking/:id]
 
+AIRPORT_JSON:
+  page: AirportJson
+  nodes:
+    - [method, GET]
+    - [path, /api/airport/list]
+
 ADDITION_JSON:
   page: AdditionJson
   nodes:

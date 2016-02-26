@@ -24,5 +24,5 @@ export function optional(value) {
 }
 
 export function minSelected(minLength, lengthContainer) {
-  return lengthContainer.length < minLength ? 'You must choose at least ' + minLength + ' option(s).' : true;
+  return lengthContainer == null || lengthContainer.length < minLength ? 'You must choose at least ' + minLength + ' option(s).' : true;
 }

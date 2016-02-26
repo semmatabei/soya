@@ -57,6 +57,10 @@ export default class Form {
   }
 
   submit() {
+
+
+    console.log(this);
+
     var fieldName, promises = [];
     for (fieldName in this._fields) {
       if (!this._fields.hasOwnProperty(fieldName)) continue;
