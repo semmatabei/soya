@@ -21,6 +21,7 @@ import connect from '../connect.js';
  * 3) changeHandlers (array of functions, optional)
  * 4) changeValidators (array of functions, optional)
  * 5) asyncValidators (array of functions, optional)
+ * 6) submitValidators (array of functions, optional)
  *
  * Any other props will be passed on to the wrapped input component untouched.
  *
@@ -29,13 +30,17 @@ import connect from '../connect.js';
  */
 export default function createField(InputComponent) {
   var type = typeof InputComponent.getQueryType == 'function' ? InputComponent.getQueryType() : 'field';
-  var inputChangeValidators = typeof InputComponent.getChangeValidators == 'function' ? InputComponent.getChangeValidators() : [];
-  var inputAsyncValidators = typeof InputComponent.getAsyncValidators == 'function' ? InputComponent.getAsyncValidators() : [];
 
   // TODO: Move these methods into separate functions above, so that they are reused instead of always recreated.
   class Component extends React.Component {
     __handleChange;
-    __runAsyncValidation;
+    __handleAsyncValidation;
+    __inputChangeValidators;
+    __inputAsyncValidators;
+    __submitValidators;
+    __registerChangeValidators;
+    __registerAsyncValidators;
+    __registerSubmitValidators;
 
     static connectId() {
       return InputComponent.connectId ? InputComponent.connectId() : 'Field Component';
@@ -55,13 +60,19 @@ export default function createField(InputComponent) {
 
     constructor(props, context) {
       super(props, context);
+      this.__inputChangeValidators = [];
+      this.__inputAsyncValidators = [];
+      this.__submitValidators = [];
       this.__handleChange = this.handleChange.bind(this);
-      this.__runAsyncValidation = this.runAsyncValidation.bind(this);
+      this.__handleAsyncValidation = this.handleAsyncValidation.bind(this);
+      this.__registerAsyncValidators = this.registerAsyncValidators.bind(this);
+      this.__registerChangeValidators = this.registerChangeValidators.bind(this);
+      this.__registerSubmitValidators = this.registerSubmitValidators.bind(this);
     }
 
     componentWillMount() {
       this.props.form.regField(
-        this.props.name, this.validateAll.bind(this));
+        this.props.name, this.handleValidateAll.bind(this));
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -92,13 +103,40 @@ export default function createField(InputComponent) {
       }
 
       props.handleChange = this.__handleChange;
-      props.runAsyncValidation = this.__runAsyncValidation;
+      props.handleAsyncValidation = this.__handleAsyncValidation;
+      props.registerChangeValidators = this.__registerChangeValidators;
+      props.registerAsyncValidators = this.__registerAsyncValidators;
+      props.registerSubmitValidators = this.__registerSubmitValidators;
 
       // For performance optimizations, InputComponent may implement
       // shouldComponentUpdate that checks for changes in props.
       return <InputComponent key="main" {...props} />;
     }
 
+    /**
+     * @param {Array<Function>} funcArray
+     */
+    registerChangeValidators(funcArray) {
+      this.__inputChangeValidators = this.__inputChangeValidators.concat(funcArray);
+    }
+
+    /**
+     * @param {Array<Function>} funcArray
+     */
+    registerAsyncValidators(funcArray) {
+      this.__inputAsyncValidators = this.__inputAsyncValidators.concat(funcArray);
+    }
+
+    /**
+     * @param {Array<Function>} funcArray
+     */
+    registerSubmitValidators(funcArray) {
+      this.__submitValidators = this.__submitValidators.concat(funcArray);
+    }
+
+    /**
+     * @param {?} value
+     */
     handleChange(value) {
       var i, errorMessages = this.validateSync(value);
       var actions = this.props.getActionCreator(FormSegment.id());
@@ -133,7 +171,7 @@ export default function createField(InputComponent) {
      *
      * @returns {Promise}
      */
-    validateAll() {
+    handleValidateAll() {
       var value = this.props.result.field ? this.props.result.field.value : null;
       var errorMessages = this.validateSync(value);
       if (errorMessages.length > 0) {
@@ -147,7 +185,121 @@ export default function createField(InputComponent) {
         ));
         return Promise.resolve(false);
       }
-      return this.runAsyncValidation();
+
+      var asyncPromise, submitPromise;
+      var hasAsyncValidation = this.hasAsyncValidation();
+      var hasSubmitValidation = this.hasSubmitValidation();
+
+      if (!hasAsyncValidation && !hasSubmitValidation) {
+        return Promise.resolve(true);
+      }
+
+
+
+      if (!hasAsyncValidation) {
+        asyncPromise = Promise.resolve(true);
+      } else {
+        asyncPromise = this.validateAsync();
+      }
+
+      if (!hasSubmitValidation) {
+        submitPromise = Promise.resolve(true);
+      } else {
+        submitPromise = this.validateSubmit();
+      }
+
+      return PromiseUtil.allParallel(Promise, [asyncPromise, submitPromise]).then(
+        function(results) {
+          var i, result = true;
+          for (i = 0; i < results.length; i++) {
+            result = result && results[i];
+          }
+          return result;
+        },
+        function(error) {
+          console.log('Unable to run submit validation.', error);
+          return false;
+        }
+      );
+    }
+
+    /**
+     * This handler doesn't update value - we assume that handleChange
+     * is already run and thus value in FormSegment is already updated. It's
+     * a trigger for asynchronous validation. We assume that:
+     *
+     * - Asynchronous validation must trigger on a less often triggered event,
+     *   like onBlur or a predetermined timeout.
+     * - The input component will read isValidating value and appropriately
+     *   disables the input when the asynchronous validation is running to
+     *   prevent lagging async validation to happen.
+     *
+     * Returns a promise that resolves to true if the value passes validation,
+     * or false if not.
+     *
+     * @return {?Promise}
+     */
+    handleAsyncValidation() {
+      var value = this.props.result.field ? this.props.result.field.value : null;
+      var errorMessages = this.validateSync(value);
+      if (errorMessages.length > 0) {
+        // No need to continue if sync validation has failed.
+        return Promise.resolve(false);
+      }
+
+      // No need to run if we have no async validation.
+      var hasAsyncValidation = this.hasAsyncValidation();
+      if (!hasAsyncValidation) {
+        return Promise.resolve(true);
+      }
+
+      this.lock();
+      var promise = this.validateAsync(value);
+      promise.then(this.unlock.bind(this)).catch(this.unlock.bind(this));
+      return promise;
+    }
+
+    /**
+     * Returns a promise that resolves to true if value passes validation, or
+     * false if not.
+     *
+     * @param {?} value
+     * @returns {Promise}
+     */
+    validateAsync(value) {
+      var i, promises = [];
+      for (i = 0; i < this.__inputAsyncValidators.length; i++) {
+        promises.push(this.__inputAsyncValidators[i](value));
+      }
+      if (this.props.asyncValidators) {
+        for (i = 0; i < this.props.asyncValidators; i++) {
+          promises.push(this.props.asyncValidators[i](value));
+        }
+      }
+
+      var parallelPromise = PromiseUtil.allParallel(Promise, promises);
+      var finalPromise = new Promise(function(resolve, reject) {
+        parallelPromise.then(
+          (result) => {
+            var i, errorMessages = [];
+            for (i = 0; i < result.length; i++) {
+              if (typeof result[i] == 'string') errorMessages.push(result[i]);
+            }
+            this.props.reduxStore.dispatch(actions.mergeFields(
+              this.props.form._formId, {
+                [this.props.name]: {
+                  isValidating: false,
+                  errorMessages: errorMessages
+                }
+              }
+            ));
+            resolve(errorMessages.length <= 0);
+          },
+          (error) => {
+            reject(error);
+          });
+      });
+      return finalPromise;
     }
 
     /**
@@ -167,93 +319,55 @@ export default function createField(InputComponent) {
           if (!this.pushErrorMessage(result, errorMessages)) return errorMessages;
         }
       }
-      for (i = 0; i < inputChangeValidators.length; i++) {
-        result = inputChangeValidators[i](value);
+      for (i = 0; i < this.__inputChangeValidators.length; i++) {
+        result = this.__inputChangeValidators[i](value);
         if (!this.pushErrorMessage(result, errorMessages)) return errorMessages;
       }
       return errorMessages;
     }
 
-    /**
-     * This handler doesn't update value - we assume that handleChange
-     * is already run and thus value in FormSegment is already updated. It's
-     * a trigger for asynchronous validation. We assume that:
-     *
-     * - Asynchronous validation must trigger on a less often triggered event,
-     *   like onBlur or a predetermined timeout.
-     * - The input component will read isValidating value and appropriately
-     *   disables the input when the asynchronous validation is running to
-     *   prevent lagging async validation to happen.
-     *
-     * Returns a promise that resolves to true if the value passes validation,
-     * or false if not.
-     *
-     * @return {?Promise}
-     */
-    runAsyncValidation() {
-      var value = this.props.result.field ? this.props.result.field.value : null;
-      var errorMessages = this.validateSync(value);
-      if (errorMessages.length > 0) {
-        // No need to continue if sync validation has failed.
-        return Promise.resolve(false);
-      }
+    validateSubmit(value) {
 
-      // No need to run if we have no async validation.
-      var hasAsyncValidation = (
-        inputAsyncValidators.length > 0 ||
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    hasAsyncValidation() {
+      return (
+        this.__inputAsyncValidators.length > 0 ||
         (this.props.asyncValidators && this.props.asyncValidators.length > 0)
       );
-      if (!hasAsyncValidation) {
-        return Promise.resolve(true);
-      }
+    }
 
-      // Lock the form.
+    /**
+     * @return {boolean}
+     */
+    hasSubmitValidation() {
+      return (
+        this.__submitValidators.length > 0 ||
+        (this.props.submitValidators && this.props.submitValidators.length > 0)
+      );
+    }
+
+    /**
+     * Locks this field by setting its isValidating flag to true.
+     */
+    lock() {
       var actions = this.props.getActionCreator(FormSegment.id());
       this.props.reduxStore.dispatch(actions.setIsValidating(
         this.props.form._formId, { [this.props.name] : true }
       ));
+    }
 
-      var i, promises = [];
-      for (i = 0; i < inputAsyncValidators.length; i++) {
-        promises.push(inputAsyncValidators[i](value));
-      }
-      if (this.props.asyncValidators) {
-        for (i = 0; i < this.props.asyncValidators; i++) {
-          promises.push(this.props.asyncValidators[i](value));
-        }
-      }
-
-      // Unlock the form.
-      var unlockForm = () => {
-        this.props.reduxStore.dispatch(actions.setIsValidating(
-          this.props.form._formId, { [this.props.name]: false }
-        ));
-      };
-      var parallelPromise = PromiseUtil.allParallel(Promise, promises);
-      var finalPromise = new Promise(function(resolve, reject) {
-        parallelPromise.then(
-          (result) => {
-            var i, errorMessages = [];
-            for (i = 0; i < result.length; i++) {
-              if (typeof result[i] == 'string') errorMessages.push(result[i]);
-            }
-            this.props.reduxStore.dispatch(actions.mergeFields(
-              this.props.form._formId, {
-                [this.props.name]: {
-                  isValidating: false,
-                  errorMessages: errorMessages
-                }
-              }
-            ));
-            unlockForm();
-            resolve(errorMessages.length <= 0);
-          },
-          (error) => {
-            unlockForm();
-            reject(error);
-          });
-      });
-      return finalPromise;
+    /**
+     * Unlock this field by setting its isValidating flag to false.
+     */
+    unlock() {
+      var actions = this.props.getActionCreator(FormSegment.id());
+      this.props.reduxStore.dispatch(actions.setIsValidating(
+        this.props.form._formId, { [this.props.name]: false }
+      ));
     }
 
     /**

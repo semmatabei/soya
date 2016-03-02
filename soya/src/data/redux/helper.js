@@ -1,6 +1,18 @@
 import React from 'react';
 
 /**
+ * @param {Array<boolean>} booleanArray
+ * @returns {boolean}
+ */
+export function mergeValidationResult(booleanArray) {
+  var i, result = true;
+  for (i = 0; i < booleanArray.length; i++) {
+    result = result && booleanArray[i];
+  }
+  return result;
+}
+
+/**
  * Returns false if there are differences. Only does reference equality. Useful
  * only for objects that are deemed immutable.
  *

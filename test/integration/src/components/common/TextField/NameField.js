@@ -9,8 +9,8 @@ export default class NameInput extends React.Component {
     return 'NameField';
   }
 
-  static getChangeValidators() {
-    return [name];
+  componentWillMount() {
+    this.props.registerChangeValidators(name);
   }
 
   render() {

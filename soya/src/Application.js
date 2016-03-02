@@ -137,6 +137,9 @@ export default class Application {
     // Change react renderer to client version.
     this._addReplace(frameworkConfig, 'soya/lib/page/react/ReactRenderer', 'soya/lib/page/react/ReactRendererClient');
 
+    // Allow users to run code blocks on server or client.
+    this._addReplace(frameworkConfig, 'soya/lib/scope', 'soya/lib/scope-client');
+
     // Replace custom node registration function for client.
     if (frameworkConfig.routerNodeRegistrationAbsolutePath) {
       if (typeof frameworkConfig.routerNodeRegistrationFunction != 'function') {

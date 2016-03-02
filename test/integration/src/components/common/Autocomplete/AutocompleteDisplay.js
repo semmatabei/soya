@@ -1,4 +1,5 @@
 import React from 'react';
+import at from 'soya/lib/scope';
 
 import style from './style.css';
 
@@ -11,8 +12,7 @@ export default class AutocompleteDisplay extends React.Component {
 
   componentWillMount() {
     this.onDocClick = this.handleDocClick.bind(this);
-    document.addEventListener('click', this.onDocClick);
-    this.hasSelected = false;
+    if (at.client) document.addEventListener('click', this.onDocClick);
     this.setState({
       results: [],
       selectedIndex: 0
@@ -20,7 +20,7 @@ export default class AutocompleteDisplay extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click', this.onDocClick);
+    if (at.client) document.removeEventListener('click', this.onDocClick);
   }
 
   render() {

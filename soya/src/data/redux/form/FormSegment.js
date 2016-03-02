@@ -10,11 +10,14 @@ import update from 'react-addons-update';
  * <pre>
  *   {
  *     formId: {
- *       fieldName: {
- *         touched: true,
- *         errorMessages: [],
- *         value: ?,
- *         isValidating: false
+ *       fields: {
+ *         fieldName: {
+ *           touched: true,
+ *           errorMessages: [],
+ *           value: ?,
+ *           isValidating: false
+ *         },
+ *         ...
  *       },
  *       ...
  *     },
@@ -164,27 +167,31 @@ export default class FormSegment extends LocalSegment {
 
   _getAllValues(state, formId) {
     var fieldName, result = {};
-    for (fieldName in state[formId]) {
-      if (!state[formId].hasOwnProperty(fieldName)) continue;
-      result[fieldName] = state[formId][fieldName].value;
+    if (state[formId] == null || state[formId].fields == null) return result;
+    for (fieldName in state[formId].fields) {
+      if (!state[formId].fields.hasOwnProperty(fieldName)) continue;
+      result[fieldName] = state[formId].fields[fieldName].value;
     }
     return result;
   }
 
   _hasErrors(state, formId) {
     var fieldName;
-    for (fieldName in state[formId]) {
-      if (!state[formId].hasOwnProperty(fieldName)) continue;
-      if (state[formId][fieldName].errorMessages.length > 0) return true;
+    if (state[formId] == null || state[formId].fields == null) return false;
+    for (fieldName in state[formId].fields) {
+      if (!state[formId].fields.hasOwnProperty(fieldName)) continue;
+      if (state[formId].fields[fieldName].errorMessages.length > 0) return true;
     }
     return false;
   }
 
   _getField(state, formId, fieldName) {
-    if (state[formId] == null || state[formId][fieldName] == null) {
+    if (state[formId] == null ||
+        state[formId].fields == null ||
+        state[formId].fields[fieldName] == null) {
       return null;
     }
-    return state[formId][fieldName];
+    return state[formId].fields[fieldName];
   }
 
   _getActionCreator() {
@@ -230,9 +237,11 @@ export default class FormSegment extends LocalSegment {
         state, {formId: action.formId, fieldName: fieldName});
       update(state, {
         [action.formId]: {
-          [action.fieldName]: {
-            isValidating: {$set: action.isValidating},
-            touched: {$set: true}
+          fields: {
+            [action.fieldName]: {
+              isValidating: {$set: action.isValidating},
+              touched: {$set: true}
+            }
           }
         }
       });
@@ -243,18 +252,20 @@ export default class FormSegment extends LocalSegment {
   _setValue(state, action) {
     state = this._ensureFormExistence(state, action);
     state = this._ensureFieldExistence(state, action);
-    if (state[action.formId][action.fieldName].value === action.value) {
+    if (state[action.formId]['fields'][action.fieldName].value === action.value) {
       // If we are setting the same value, no need to update the state.
       return state;
     }
     return update(state, {
       [action.formId]: {
-        [action.fieldName]: {
-          $set: {
-            value: action.value,
-            touched: true,
-            errorMessages: [],
-            isValidating: false
+        fields: {
+          [action.fieldName]: {
+            $set: {
+              value: action.value,
+              touched: true,
+              errorMessages: [],
+              isValidating: false
+            }
           }
         }
       }
@@ -281,8 +292,10 @@ export default class FormSegment extends LocalSegment {
       state = this._ensureFieldExistence(state, tempAction);
       state = update(state, {
         [action.formId]: {
-          [fieldName]: {
-            $merge: action.fields[fieldName]
+          fields: {
+            [fieldName]: {
+              $merge: action.fields[fieldName]
+            }
           }
         }
       });
@@ -295,9 +308,11 @@ export default class FormSegment extends LocalSegment {
     state = this._ensureFieldExistence(state, action);
     return update(state, {
       [action.formId]: {
-        [action.fieldName]: {$merge: {
-          errorMessages: action.errorMessages
-        }}
+        fields: {
+          [action.fieldName]: {$merge: {
+            errorMessages: action.errorMessages
+          }}
+        }
       }
     });
   }
@@ -307,8 +322,10 @@ export default class FormSegment extends LocalSegment {
     state = this._ensureFieldExistence(state, action);
     return update(state, {
       [action.formId]: {
-        [action.fieldName]: {
-          errorMessages: {$push: action.errorMessages}
+        fields: {
+          [action.fieldName]: {
+            errorMessages: {$push: action.errorMessages}
+          }
         }
       }
     });
@@ -317,7 +334,10 @@ export default class FormSegment extends LocalSegment {
   _clearForm(state, action) {
     return update(state, {
       [action.formId]: {
-        $set: {}
+        $set: {
+          fields: {},
+          isEnabled: true
+        }
       }
     })
   }
@@ -325,7 +345,10 @@ export default class FormSegment extends LocalSegment {
   _ensureFormExistence(state, action) {
     var form = state[action.formId];
     if (form == null) {
-      state = update(state, {[action.formId]: {$set: {}}});
+      state = update(state, {[action.formId]: {$set: {
+        fields: {},
+        isEnabled: true
+      }}});
     }
     return state;
   }
@@ -335,12 +358,14 @@ export default class FormSegment extends LocalSegment {
     if (field == null) {
       state = update(state, {
         [action.formId]: {
-          [action.fieldName]: { $set: {
-            value: null,
-            touched: false,
-            errorMessages: [],
-            isValidating: false
-          }}
+          fields: {
+            [action.fieldName]: { $set: {
+              value: null,
+              touched: false,
+              errorMessages: [],
+              isValidating: false
+            }}
+          }
         }
       });
     }

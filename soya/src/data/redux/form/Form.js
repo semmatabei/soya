@@ -57,18 +57,16 @@ export default class Form {
   }
 
   submit() {
-
-
-    console.log(this);
-
     var fieldName, promises = [];
     for (fieldName in this._fields) {
       if (!this._fields.hasOwnProperty(fieldName)) continue;
       promises.push(this._fields[fieldName].validateAll());
     }
     var finalPromise = PromiseUtil.allParallel(Promise, promises);
-    finalPromise.then(function() {
+    finalPromise.then(function(isPassValidation) {
 
+
+      console.log('IS PASS VALIDATION', isPassValidation);
     });
 
     console.log(this);
