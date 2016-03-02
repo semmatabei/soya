@@ -23,6 +23,7 @@ class AirportInputBase extends React.Component {
 
   componentWillMount() {
     this.generateItemList(this.props);
+    this.props.registerSubmitValidators([this.validateSubmit.bind(this)]);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -30,7 +31,7 @@ class AirportInputBase extends React.Component {
   }
 
   generateItemList(props) {
-    var itemList = [], valueList = {};
+    var itemList = [], valueMap = {};
     if (props.result.airports.loaded) {
       if (props.result.airports.loaded) {
         var key, airport;
@@ -43,14 +44,21 @@ class AirportInputBase extends React.Component {
             searchStr: `${airport.name} ${airport.location} ${airport.code}`,
             value: `${airport.location} (${airport.code})`
           });
-          valueList[`${airport.location} (${airport.code})`] = null;
+          valueMap[`${airport.location} (${airport.code})`] = null;
         }
       }
     }
     this.setState({
       itemList: itemList,
-      valueList: valueList
+      valueList: valueMap
     });
+  }
+
+  validateSubmit(value) {
+    if (!this.state.valueList.hasOwnProperty(value)) {
+      return 'Value is not on the list';
+    }
+    return true;
   }
 
   render() {

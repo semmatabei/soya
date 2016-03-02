@@ -45,7 +45,7 @@ export default class AutocompleteDisplay extends React.Component {
         <input className={style.input} type="text" value={this.props.value}
           placeholder={this.props.placeholder}
           onKeyDown={this.handleListNav.bind(this)}
-          onChange={this.handleType.bind(this)}
+          onChange={this.handleChange.bind(this)}
           ref={(ref) => this.input = ref}/>
         {resultView}
         {this.props.errorMessages.length > 0 ? <span>{this.props.errorMessages[0]}</span> : null}
@@ -65,27 +65,54 @@ export default class AutocompleteDisplay extends React.Component {
   handleListNav(event) {
     if (event.key == 'Tab') {
       this.closeResults();
+    } else if (event.key == 'ArrowDown') {
+      this.changeSelectedIndex(1);
+      event.preventDefault();
+    } else if (event.key == 'ArrowUp') {
+      this.changeSelectedIndex(-1);
+      event.preventDefault();
+    } else if (event.key == 'Enter') {
+      var value = '';
+      if (this.state.results[this.state.selectedIndex]) {
+        value = this.state.results[this.state.selectedIndex].value;
+      }
+      this.props.handleChange(value);
+      this.setState({
+        results: [],
+        selectedIndex: 0
+      });
     }
+  }
+
+  changeSelectedIndex(change) {
+    var finalIndex = this.state.selectedIndex + change;
+    if (finalIndex > this.state.results.length) finalIndex = this.state.results.length - 1;
+    if (finalIndex < 0) finalIndex = 0;
+    this.setState({
+      selectedIndex: finalIndex
+    });
   }
 
   handleDocClick(event) {
     var i, isClickingInput = false, node = event.target;
-    for (i = 0; i < 5; i++) {
-      if (node.parentNode == this.container) {
+    for (i = 0; i <= 5; i++) {
+      if (node == null) return;
+      if (node == this.container) {
         isClickingInput = true;
         break;
       }
       node = node.parentNode;
     }
 
-    if (!isClickingInput) {
+    if (!isClickingInput && this.state.results.length > 0) {
       this.closeResults();
     }
   }
 
   closeResults() {
     this.setState({
-      results: []
+      results: [],
+      selectedIndex: 0
     });
     var value = this.props.value;
     if (value == null) value = '';
@@ -94,14 +121,15 @@ export default class AutocompleteDisplay extends React.Component {
     }
   }
 
-  handleType(event) {
+  handleChange(event) {
     var value = this.input.value;
     this.props.handleChange(value);
 
     // Update autocomplete box.
     if (value == '') {
       this.setState({
-        results: []
+        results: [],
+        selectedIndex: 0
       });
       return;
     }
@@ -120,7 +148,8 @@ export default class AutocompleteDisplay extends React.Component {
   select(item) {
     this.props.handleChange(item.value);
     this.setState({
-      results: []
+      results: [],
+      selectedIndex: 0
     });
   }
 }

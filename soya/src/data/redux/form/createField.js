@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { isEqualShallow } from '../helper.js';
+import { isEqualShallow, mergeValidationResult } from '../helper.js';
 import PromiseUtil from '../PromiseUtil.js';
 import FormSegment from './FormSegment.js';
 import connect from '../connect.js';
@@ -189,32 +189,25 @@ export default function createField(InputComponent) {
       var asyncPromise, submitPromise;
       var hasAsyncValidation = this.hasAsyncValidation();
       var hasSubmitValidation = this.hasSubmitValidation();
-
       if (!hasAsyncValidation && !hasSubmitValidation) {
         return Promise.resolve(true);
       }
 
-
-
       if (!hasAsyncValidation) {
         asyncPromise = Promise.resolve(true);
       } else {
-        asyncPromise = this.validateAsync();
+        asyncPromise = this.validateAsync(value);
       }
 
       if (!hasSubmitValidation) {
         submitPromise = Promise.resolve(true);
       } else {
-        submitPromise = this.validateSubmit();
+        submitPromise = this.validateSubmit(value);
       }
 
       return PromiseUtil.allParallel(Promise, [asyncPromise, submitPromise]).then(
         function(results) {
-          var i, result = true;
-          for (i = 0; i < results.length; i++) {
-            result = result && results[i];
-          }
-          return result;
+          return mergeValidationResult(results);
         },
         function(error) {
           console.log('Unable to run submit validation.', error);
@@ -260,49 +253,6 @@ export default function createField(InputComponent) {
     }
 
     /**
-     * Returns a promise that resolves to true if value passes validation, or
-     * false if not.
-     *
-     * @param {?} value
-     * @returns {Promise}
-     */
-    validateAsync(value) {
-      var i, promises = [];
-      for (i = 0; i < this.__inputAsyncValidators.length; i++) {
-        promises.push(this.__inputAsyncValidators[i](value));
-      }
-      if (this.props.asyncValidators) {
-        for (i = 0; i < this.props.asyncValidators; i++) {
-          promises.push(this.props.asyncValidators[i](value));
-        }
-      }
-
-      var parallelPromise = PromiseUtil.allParallel(Promise, promises);
-      var finalPromise = new Promise(function(resolve, reject) {
-        parallelPromise.then(
-          (result) => {
-            var i, errorMessages = [];
-            for (i = 0; i < result.length; i++) {
-              if (typeof result[i] == 'string') errorMessages.push(result[i]);
-            }
-            this.props.reduxStore.dispatch(actions.mergeFields(
-              this.props.form._formId, {
-                [this.props.name]: {
-                  isValidating: false,
-                  errorMessages: errorMessages
-                }
-              }
-            ));
-            resolve(errorMessages.length <= 0);
-          },
-          (error) => {
-            reject(error);
-          });
-      });
-      return finalPromise;
-    }
-
-    /**
      * Runs input and props sync validators on the value and returns the error
      * messages.
      *
@@ -326,8 +276,70 @@ export default function createField(InputComponent) {
       return errorMessages;
     }
 
-    validateSubmit(value) {
+    /**
+     * Returns a promise that resolves to true if value passes validation, or
+     * false if not.
+     *
+     * @param {?} value
+     * @returns {Promise}
+     */
+    validateAsync(value) {
+      var i, promises = [];
+      for (i = 0; i < this.__inputAsyncValidators.length; i++) {
+        promises.push(this.__inputAsyncValidators[i](value));
+      }
+      if (this.props.asyncValidators) {
+        for (i = 0; i < this.props.asyncValidators; i++) {
+          promises.push(this.props.asyncValidators[i](value));
+        }
+      }
+      return this._createValidatorPromise(promises);
+    }
 
+    /**
+     * @param {?} value
+     * @return {Promise}
+     */
+    validateSubmit(value) {
+      var i, promises = [];
+      for (i = 0; i < this.__submitValidators.length; i++) {
+        promises.push(Promise.resolve(this.__submitValidators[i](value)));
+      }
+      if (this.props.submitValidators) {
+        for (i = 0; i < this.props.submitValidators.length; i++) {
+          promises.push(Promise.resolve(this.props.submitValidators[i](value)));
+        }
+      }
+      return this._createValidatorPromise(promises);
+    }
+
+    /**
+     * @param {Array<Promise>} promises
+     * @returns {Promise}
+     * @private
+     */
+    _createValidatorPromise(promises) {
+      var parallelPromise = PromiseUtil.allParallel(Promise, promises);
+      var finalPromise = new Promise((resolve, reject) => {
+        parallelPromise.then(
+          (result) => {
+            var i, errorMessages = [];
+            var actions = this.props.getActionCreator(FormSegment.id());
+            for (i = 0; i < result.length; i++) {
+              if (typeof result[i] == 'string') errorMessages.push(result[i]);
+            }
+            this.props.reduxStore.dispatch(actions.addErrorMesages(
+              this.props.form._formId,
+              this.props.name,
+              errorMessages
+            ));
+            resolve(errorMessages.length <= 0);
+          },
+          (error) => {
+            reject(error);
+          });
+      });
+      return finalPromise;
     }
 
     /**

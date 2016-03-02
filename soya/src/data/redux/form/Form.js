@@ -64,8 +64,6 @@ export default class Form {
     }
     var finalPromise = PromiseUtil.allParallel(Promise, promises);
     finalPromise.then(function(isPassValidation) {
-
-
       console.log('IS PASS VALIDATION', isPassValidation);
     });
 

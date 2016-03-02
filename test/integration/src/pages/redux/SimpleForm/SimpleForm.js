@@ -30,7 +30,9 @@ class Component extends React.Component {
         <li><a href="javascript:void(0)" onClick={this.replaceValues.bind(this)}>Click here</a> to set values to the redux store, form inputs should also update.</li>
         <li><a href="javascript:void(0)" onClick={this.clearValues.bind(this)}>Click here</a> to clear values in redux store, form inputs should also update.</li>
         <li>Sync validation should also work for each field, required/optional validation also works.</li>
-        <li>Async validation should also work for phone number field.</li>
+        <li>Per-field submit validation should work on <i>Base City</i> (set values first, then click submit button).</li>
+        <li>[TODO] Async validation should also work for phone number field.</li>
+        <li>[TODO] On submission, all sync, async and submit validation should be run.</li>
       </ul>
       <ContactForm formId={FORM_ID} formName="Contact Us" reduxStore={this.props.reduxStore} config={this.props.config} />
       <DebugPanel top right bottom>
@@ -46,6 +48,7 @@ class Component extends React.Component {
       message: 'Bring me back that Meteora LP that you borrowed!',
       relationship: 'girlfriend',
       call: ['evening', 'night'],
+      from: 'Jayakarta (CGK)',
       target: {
         sms: true,
         email: true

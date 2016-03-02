@@ -354,7 +354,7 @@ export default class FormSegment extends LocalSegment {
   }
 
   _ensureFieldExistence(state, action) {
-    var field = state[action.formId][action.fieldName];
+    var field = state[action.formId].fields[action.fieldName];
     if (field == null) {
       state = update(state, {
         [action.formId]: {
