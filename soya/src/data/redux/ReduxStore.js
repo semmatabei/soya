@@ -513,15 +513,24 @@ export default class ReduxStore extends Store {
     var registeredSegment = this._segments[id];
     var RegisteredSegmentClass = this._segmentClasses[id];
 
-    if (!this._allowRegisterSegment) {
-      var isNewSegment = !registeredSegment || SegmentClass !== RegisteredSegmentClass;
-      if (isNewSegment) {
-        // We only throw error if it's an attempt to register a new Segment.
-        throw new Error('Segment registration is only allowed at render process!');
+    if (this._segmentClasses.hasOwnProperty(id)) {
+      if (RegisteredSegmentClass === SegmentClass) {
+        // Segment already registered.
+        return registeredSegment._getActionCreator();
+      }  else {
+        throw new Error('Segment name clash: ' + id + '.', RegisteredSegmentClass, SegmentClass);
       }
-      // Otherwise, it's a no-op.
-      return registeredSegment._getActionCreator();
     }
+
+    //if (!this._allowRegisterSegment) {
+    //  var isNewSegment = !registeredSegment || SegmentClass !== RegisteredSegmentClass;
+    //  if (isNewSegment) {
+    //    // We only throw error if it's an attempt to register a new Segment.
+    //    throw new Error('Segment registration is only allowed at render process!');
+    //  }
+    //  // Otherwise, it's a no-op.
+    //  return registeredSegment._getActionCreator();
+    //}
 
     // Register segment.
     if (!registeredSegment) {
