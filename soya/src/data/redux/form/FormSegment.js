@@ -34,6 +34,7 @@ export default class FormSegment extends LocalSegment {
   _setErrorMessagesActionType;
   _addErrorMessagesActionType;
   _setIsValidatingActionType;
+  _setFormEnabledStateActionType;
   _clearFormActionType;
   _actionCreator;
   _queryIdCache;
@@ -47,6 +48,13 @@ export default class FormSegment extends LocalSegment {
     return {};
   }
 
+  /**
+   * TODO: Remove the need for PromiseImpl.
+   *
+   * @param {Object} config
+   * @param {CookieJar} cookieJar
+   * @param {Promise} PromiseImpl
+   */
   constructor(config, cookieJar, PromiseImpl) {
     super(config, cookieJar, PromiseImpl);
     var id = FormSegment.id();
@@ -57,6 +65,7 @@ export default class FormSegment extends LocalSegment {
     this._setIsValidatingActionType = ActionNameUtil.generate(id, 'SET_IS_VALIDATING');
     this._setErrorMessagesActionType = ActionNameUtil.generate(id, 'SET_ERRORS');
     this._addErrorMessagesActionType = ActionNameUtil.generate(id, 'ADD_ERRORS');
+    this._setFormEnabledStateActionType = ActionNameUtil.generate(id, 'SET_ENABLED_STATE');
     this._clearFormActionType = ActionNameUtil.generate(id, 'CLEAR_FORM');
 
     this._pieceCustomEqualComparators = {
@@ -66,6 +75,13 @@ export default class FormSegment extends LocalSegment {
     };
 
     this._actionCreator = {
+      setFormEnabledState: (formId, isEnabled) => {
+        return {
+          type: this._setFormEnabledStateActionType,
+          formId: formId,
+          isEnabled: isEnabled
+        };
+      },
       setIsValidating: (formId, map) => {
         return {
           type: this._setIsValidatingActionType,
@@ -202,6 +218,9 @@ export default class FormSegment extends LocalSegment {
     return (state, action) => {
       if (state == null) return FormSegment.createInitialData();
       switch (action.type) {
+        case this._setFormEnabledStateActionType:
+          return this._setFormEnabledState(state, action);
+          break;
         case this._setIsValidatingActionType:
           return this._setIsValidating(state, action);
           break;
@@ -226,6 +245,16 @@ export default class FormSegment extends LocalSegment {
       }
       return state;
     }
+  }
+
+  _setFormEnabledState(state, action) {
+    state = this._ensureFormExistence(state, action);
+    state = update(state, {
+      [action.formId]: {
+        isEnabled: {$set: false}
+      }
+    });
+    return state;
   }
 
   _setIsValidating(state, action) {

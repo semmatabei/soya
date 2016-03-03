@@ -289,7 +289,7 @@ export default function createField(InputComponent) {
         promises.push(this.__inputAsyncValidators[i](value));
       }
       if (this.props.asyncValidators) {
-        for (i = 0; i < this.props.asyncValidators; i++) {
+        for (i = 0; i < this.props.asyncValidators.length; i++) {
           promises.push(this.props.asyncValidators[i](value));
         }
       }

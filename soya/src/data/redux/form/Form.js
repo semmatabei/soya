@@ -1,5 +1,6 @@
 import FormSegment from './FormSegment.js';
 import PromiseUtil from '../PromiseUtil.js';
+import { mergeValidationResult } from '../helper.js';
 
 /**
  * Represents a form. Instance of this class may be passed to each Field
@@ -30,11 +31,17 @@ export default class Form {
   _fields;
 
   /**
+   * @type {Object<Function>}
+   */
+  _actionCreator;
+
+  /**
    * @param {ReduxStore} reduxStore
    * @param {string} formId
    * @param {Function} handleSubmit
    */
   constructor(reduxStore, formId, handleSubmit) {
+    this._actionCreator = reduxStore.register(FormSegment);
     this._formId = formId;
     this._handleSubmit = handleSubmit;
     this._reduxStore = reduxStore;
@@ -56,17 +63,48 @@ export default class Form {
     this._fields[fieldName] = { validateAll: validateAll };
   }
 
-  submit() {
+  /**
+   * Disables the form by setting isEnabled to false.
+   */
+  disable() {
+    this._reduxStore.dispatch(this._actionCreator.setFormEnabledState(
+      this._formId, false
+    ));
+  }
+
+  /**
+   * Enables the form by setting isEnabled to true.
+   */
+  enable() {
+    this._reduxStore.dispatch(this._actionCreator.setFormEnabledState(
+      this._formId, true
+    ));
+  }
+
+  /**
+   * @return {Promise}
+   */
+  validateAll() {
     var fieldName, promises = [];
     for (fieldName in this._fields) {
       if (!this._fields.hasOwnProperty(fieldName)) continue;
       promises.push(this._fields[fieldName].validateAll());
     }
     var finalPromise = PromiseUtil.allParallel(Promise, promises);
-    finalPromise.then(function(isPassValidation) {
-      console.log('IS PASS VALIDATION', isPassValidation);
-    });
+    return finalPromise.then(
+      function(validationResults) {
+        var isPassValidation = mergeValidationResult(validationResults);
+        return isPassValidation;
+      },
+      function(error) {
+        console.log('Error when running validation!', error);
+        return false;
+      }
+    );
+  }
 
+  submit() {
+    // TODO: Disable the form. Maybe we shouldn't have submit, just validateAll instead?
     console.log(this);
     // First run each field's validators, sync or async.
 

@@ -13,6 +13,10 @@ import RadioButtonsField from '../../common/RadioButtonsField/RadioButtonsField'
 import CheckBoxesField from '../../common/CheckBoxesField/CheckBoxesField';
 import AirportField from '../../contextual/AirportField/AirportField';
 
+// TODO: Figure out how to do polyfill.
+// TODO: Figure out how to load client-side libraries like jQuery!
+import request from 'superagent';
+
 const TYPE = [
   { value: 'greetings', label: 'Say Hi' },
   { value: 'borrowing', label: 'Borrowing Money' },
@@ -61,6 +65,7 @@ export default class ContactForm extends React.Component {
                     reduxStore={this.props.reduxStore} config={this.props.config} />
       <TextField form={this._form} name="phoneNumber" label="Phone Number"
                  changeValidators={[required, phone]}
+                 asyncValidators={[this.validatePhoneNumber.bind(this)]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />
       <SelectBoxField form={this._form} name="type" label="Subject" options={TYPE}
                       changeValidators={[required]}
@@ -78,15 +83,37 @@ export default class ContactForm extends React.Component {
       <TextAreaField form={this._form} name="message" label="Your Message"
                      changeValidators={[required]}
                      reduxStore={this.props.reduxStore} config={this.props.config} />
-      <button onClick={this._form.submit.bind(this._form)}>Submit</button>
+      <button onClick={this.handleSubmit.bind(this)}>Submit</button>
     </div>;
   }
 
+  validatePhoneNumber(value) {
+    return new Promise(function(resolve, reject) {
+      request.get('http://localhost:8000/api/validate/phone/' + value).end((err, res) => {
+        if (res.ok) {
+          var payload = JSON.parse(res.text);
+          if (payload.isValid) resolve(true);
+          resolve(payload.message);
+        } else {
+          resolve('Cannot validate value.');
+        }
+      });
+    });
+  }
+
   validateRelationship(value) {
-    return value == 'girlfriend' ? 'Bullshit, I don\'t have a girlfriend (yet).' : true;
+    return value == 'girlfriend' ? 'Bullshit, my girlfriend would call me directly.' : true;
   }
 
   handleSubmit() {
-    console.log('asdf');
+    this._form.disable();
+    var validateAllPromise = this._form.validateAll();
+    validateAllPromise.then(function(isValid) {
+      if (!isValid) {
+        alert('Form has errors!');
+      } else {
+
+      }
+    });
   }
 }
