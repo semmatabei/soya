@@ -25,7 +25,8 @@ export default class Segment {
    * @param {Promise} PromiseImpl
    */
   constructor(config, cookieJar, PromiseImpl) {
-    // No-op. This constructor is only here to be interface.
+    this._config = config;
+    this._cookieJar = cookieJar;
   }
 
   /**

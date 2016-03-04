@@ -50,7 +50,6 @@ export default class MapSegment extends Segment {
   constructor(config, cookieJar, PromiseImpl) {
     super(config, cookieJar, PromiseImpl);
     Promise = PromiseImpl;
-    this._cookieJar = cookieJar;
 
     // Since segment name is guaranteed never to clash by ReduxStore, we can
     // safely use segment name as action type.

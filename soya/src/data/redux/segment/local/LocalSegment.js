@@ -44,8 +44,6 @@ export default class LocalSegment extends Segment {
    */
   constructor(config, cookieJar, PromiseImpl) {
     super(config, cookieJar, PromiseImpl);
-    this._config = config;
-    this._cookieJar = cookieJar;
     Promise = PromiseImpl;
 
     // Since segment name is guaranteed never to clash by ReduxStore, we can
