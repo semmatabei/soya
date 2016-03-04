@@ -50,12 +50,16 @@ export default function createField(InputComponent) {
       return [FormSegment];
     }
 
-    static subscribeQueries(nextProps, subscribe) {
+    static subscribeQueries(props, subscribe) {
       subscribe(FormSegment.id(), {
-        formId: nextProps.form._formId,
+        formId: props.form._formId,
         type: type,
-        fieldName: nextProps.name
+        fieldName: props.name
       }, 'field');
+      subscribe(FormSegment.id(), {
+        formId: props.form._formId,
+        type: 'isEnabled'
+      }, 'isEnabled');
     }
 
     constructor(props, context) {
@@ -100,6 +104,12 @@ export default function createField(InputComponent) {
         props.errorMessages = [];
         props.touched = false;
         props.isValidating = false;
+      }
+
+      if (this.props.result.hasOwnProperty('isEnabled')) {
+        props.isEnabled = this.props.result.isEnabled;
+      } else {
+        props.isEnabled = true;
       }
 
       props.handleChange = this.__handleChange;

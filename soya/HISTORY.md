@@ -25,6 +25,8 @@
   - Added generic FormSegment to contain data for our forms.
   - Added Field wrapper that wraps an input element to a specific field in a
     form.
+  - Form can be enabled and disabled. Added test cases for various input
+    elements.
 - Added soya/lib/scope for easier server/client conditional.
 
 ## 0.0.26

@@ -154,6 +154,7 @@ export default class FormSegment extends LocalSegment {
    * Possible queries:
    *
    * <pre>
+   *   {formId: 'formId', type: 'isEnabled'} --> true if form is enabled, false otherwise.
    *   {formId: 'formId', type: '*'} --> get all values as map, but without the error messages.
    *   {formId: 'formId', type: '**'} --> get all values as map with error messages.
    *   {formId: 'formId', type: 'hasErrors'} --> returns true if has errors, false otherwise.
@@ -168,6 +169,9 @@ export default class FormSegment extends LocalSegment {
         break;
       case '**':
         return state[query.formId] ? state[query.formId] : {};
+        break;
+      case 'isEnabled':
+        return state[query.formId] ? state[query.formId].isEnabled : true;
         break;
       case 'hasErrors':
         return this._hasErrors(state, query.formId);
@@ -251,7 +255,7 @@ export default class FormSegment extends LocalSegment {
     state = this._ensureFormExistence(state, action);
     state = update(state, {
       [action.formId]: {
-        isEnabled: {$set: false}
+        isEnabled: {$set: action.isEnabled}
       }
     });
     return state;
@@ -264,11 +268,11 @@ export default class FormSegment extends LocalSegment {
       if (!action.map.hasOwnProperty(fieldName)) continue;
       state = this._ensureFieldExistence(
         state, {formId: action.formId, fieldName: fieldName});
-      update(state, {
+      state = update(state, {
         [action.formId]: {
           fields: {
-            [action.fieldName]: {
-              isValidating: {$set: action.isValidating},
+            [fieldName]: {
+              isValidating: {$set: action.map[fieldName]},
               touched: {$set: true}
             }
           }

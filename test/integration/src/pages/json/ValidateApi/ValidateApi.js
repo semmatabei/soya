@@ -25,7 +25,13 @@ class ValidateApi extends Page {
     }
     var jsonRenderer = new JsonRenderer(result);
     var renderResult = new RenderResult(jsonRenderer);
-    callback(renderResult);
+
+    // Randomly decide when to return a response.
+    setTimeout(callback.bind({}, renderResult), this.getRandomInt(300, 2500));
+  }
+
+  getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
   }
 }
 

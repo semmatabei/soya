@@ -108,12 +108,13 @@ export default class ContactForm extends React.Component {
   handleSubmit() {
     this._form.disable();
     var validateAllPromise = this._form.validateAll();
-    validateAllPromise.then(function(isValid) {
+    validateAllPromise.then((isValid) => {
       if (!isValid) {
         alert('Form has errors!');
       } else {
 
       }
-    });
+      this._form.enable();
+    }).catch(this._form.enable.bind(this._form.enable));
   }
 }
