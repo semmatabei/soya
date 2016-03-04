@@ -21,11 +21,6 @@ export default class Form {
   _formId;
 
   /**
-   * @type {Function}
-   */
-  _handleSubmit;
-
-  /**
    * @type {Object}
    */
   _fields;
@@ -38,12 +33,10 @@ export default class Form {
   /**
    * @param {ReduxStore} reduxStore
    * @param {string} formId
-   * @param {Function} handleSubmit
    */
-  constructor(reduxStore, formId, handleSubmit) {
+  constructor(reduxStore, formId) {
     this._actionCreator = reduxStore.register(FormSegment);
     this._formId = formId;
-    this._handleSubmit = handleSubmit;
     this._reduxStore = reduxStore;
     this._fields = {};
   }

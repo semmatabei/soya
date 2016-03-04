@@ -12,7 +12,9 @@ export class CheckBoxesInput extends React.Component {
       id = 'CHK_' + this.props.form.getFormId() + this.props.name + '_' + i;
       boxes.push(
         <div key={id}>
-          <input type="checkbox" checked={currentValue[value]} id={id} value={value} onChange={this.handleCheck.bind(this)} />
+          <input type="checkbox" checked={currentValue[value]} id={id}
+                 value={value} onChange={this.handleCheck.bind(this)}
+                 disabled={this.props.isDisabled} />
           <label htmlFor={id}>{this.props.options[i].label}</label>
         </div>
       );

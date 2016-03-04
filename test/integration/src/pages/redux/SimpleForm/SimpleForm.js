@@ -19,6 +19,7 @@ const FORM_ID = 'contact';
 class Component extends React.Component {
   componentWillMount() {
     this.actions = this.props.reduxStore.register(FormSegment);
+    this._form = new Form(this.props.reduxStore, FORM_ID);
   }
 
   render() {
@@ -32,9 +33,11 @@ class Component extends React.Component {
         <li>Sync validation should also work for each field, required/optional validation also works.</li>
         <li>Per-field submit validation should work on <i>Base City</i> (set values first, then click submit button).</li>
         <li>Async validation should also work for phone number field (value must contain 021).</li>
-        <li>[TODO] On submission, all sync, async and submit validation should be run.</li>
+        <li>Form can be <a href="javascript:void(0)" onClick={this.enableForm.bind(this)}>enabled</a> and <a href="javascript:void(0)" onClick={this.disableForm.bind(this)}>disabled</a>, input fields listen to changes in enabled/disabled state.</li>
+        <li>[TODO] Form-wide validation (acquaintance cannot borrow money) will be run on submit.</li>
+        <li>[TODO] On submission, all per-field sync, async and submit validation should be run, along with custom form-wide validation.</li>
       </ul>
-      <ContactForm formId={FORM_ID} formName="Contact Us" reduxStore={this.props.reduxStore} config={this.props.config} />
+      <ContactForm form={this._form} formName="Contact Us" reduxStore={this.props.reduxStore} config={this.props.config} />
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
@@ -55,6 +58,14 @@ class Component extends React.Component {
       },
       type: 'borrowing'
     }));
+  }
+
+  enableForm() {
+    this._form.enable();
+  }
+
+  disableForm() {
+    this._form.disable();
   }
 
   clearValues() {

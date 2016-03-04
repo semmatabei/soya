@@ -14,11 +14,10 @@ export class TextInput extends React.Component {
   }
 
   render() {
-    var isDisabled = this.props.isValidating || !this.props.isEnabled;
     return <div className={style.textInput}>
       <label>{this.props.label}</label>
       <input type="text" value={this.props.value}
-             disabled={isDisabled}
+             disabled={this.props.isDisabled}
              onChange={this.handleChange.bind(this)}
              onBlur={this.handleBlur.bind(this)} />
       {this.props.isValidating ? <img src={loadingGif} /> : null}

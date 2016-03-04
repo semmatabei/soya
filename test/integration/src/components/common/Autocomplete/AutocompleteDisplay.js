@@ -43,10 +43,10 @@ export default class AutocompleteDisplay extends React.Component {
     return <div className={style.inputContainer} ref={(ref) => this.container = ref}>
         <label>{this.props.label}</label>
         <input className={style.input} type="text" value={this.props.value}
-          placeholder={this.props.placeholder}
+          placeholder={this.props.placeholder} disabled={this.props.isDisabled}
           onKeyDown={this.handleListNav.bind(this)}
           onChange={this.handleChange.bind(this)}
-          ref={(ref) => this.input = ref}/>
+          ref={(ref) => this.input = ref} />
         {resultView}
         {this.props.errorMessages.length > 0 ? <span>{this.props.errorMessages[0]}</span> : null}
       </div>;

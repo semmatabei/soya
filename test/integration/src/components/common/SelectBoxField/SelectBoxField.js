@@ -29,7 +29,8 @@ export class SelectBoxInput extends React.Component {
 
     return <div className={style.selectBox}>
       <label>{this.props.label}</label>
-      <select value={this.props.value} onChange={(event) => this.props.handleChange(event.target.value, event)}>
+      <select value={this.props.value} disabled={this.props.isDisabled}
+              onChange={(event) => this.props.handleChange(event.target.value, event)}>
         {options}
       </select>
       {this.props.errorMessages.length > 0 ? <span>{this.props.errorMessages[0]}</span> : null}

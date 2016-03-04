@@ -66,7 +66,7 @@ class AirportInputBase extends React.Component {
       <AutocompleteDisplay options={this.state.itemList}
                            label={this.props.label} errorMessages={this.props.errorMessages}
                            value={this.props.value} valueList={this.state.valueList}
-                           placeholder={this.props.label}
+                           placeholder={this.props.label} isDisabled={this.props.isDisabled}
                            handleChange={this.props.handleChange} />
     </div>;
   }

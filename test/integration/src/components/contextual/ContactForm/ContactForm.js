@@ -43,44 +43,36 @@ const CALL = [
 ];
 
 export default class ContactForm extends React.Component {
-  componentWillMount() {
-    this._form = new Form(
-      this.props.reduxStore,
-      this.props.formId,
-      this.handleSubmit.bind(this)
-    );
-  }
-
   render() {
     return <div className={style.form}>
       <h3>{this.props.formName}</h3>
-      <NameField form={this._form} name="name" label="Your Name"
+      <NameField form={this.props.form} name="name" label="Your Name"
                  changeValidators={[required]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />
-      <TextField form={this._form} name="nickname" label="Nick Name"
+      <TextField form={this.props.form} name="nickname" label="Nick Name"
                  changeValidators={[optional, name, maxLength.bind(null, 5)]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />
-      <AirportField form={this._form} name="from" label="Base City"
+      <AirportField form={this.props.form} name="from" label="Base City"
                     changeValidators={[required]}
                     reduxStore={this.props.reduxStore} config={this.props.config} />
-      <TextField form={this._form} name="phoneNumber" label="Phone Number"
+      <TextField form={this.props.form} name="phoneNumber" label="Phone Number"
                  changeValidators={[required, phone]}
                  asyncValidators={[this.validatePhoneNumber.bind(this)]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />
-      <SelectBoxField form={this._form} name="type" label="Subject" options={TYPE}
+      <SelectBoxField form={this.props.form} name="type" label="Subject" options={TYPE}
                       changeValidators={[required]}
                       reduxStore={this.props.reduxStore} config={this.props.config} />
-      <RadioButtonsField form={this._form} name="relationship"
+      <RadioButtonsField form={this.props.form} name="relationship"
                          changeValidators={[required, this.validateRelationship]}
                          label="Relationship" options={RELATIONSHIP}
                          reduxStore={this.props.reduxStore} config={this.props.config} />
-      <CheckBoxesField form={this._form} name="target" label="Target"
+      <CheckBoxesField form={this.props.form} name="target" label="Target"
                        options={TARGET} changeValidators={[requiredCheckbox]}
                        reduxStore={this.props.reduxStore} config={this.props.config} />
-      <SelectMultipleField form={this._form} name="call" label="Available for call"
+      <SelectMultipleField form={this.props.form} name="call" label="Available for call"
                            options={CALL} changeValidators={[minSelected.bind(null, 2)]}
                            reduxStore={this.props.reduxStore} config={this.props.config} />
-      <TextAreaField form={this._form} name="message" label="Your Message"
+      <TextAreaField form={this.props.form} name="message" label="Your Message"
                      changeValidators={[required]}
                      reduxStore={this.props.reduxStore} config={this.props.config} />
       <button onClick={this.handleSubmit.bind(this)}>Submit</button>
@@ -106,15 +98,17 @@ export default class ContactForm extends React.Component {
   }
 
   handleSubmit() {
-    this._form.disable();
-    var validateAllPromise = this._form.validateAll();
+    this.props.form.disable();
+    var validateAllPromise = this.props.form.validateAll();
     validateAllPromise.then((isValid) => {
+      
+
       if (!isValid) {
         alert('Form has errors!');
       } else {
 
       }
-      this._form.enable();
-    }).catch(this._form.enable.bind(this._form.enable));
+      this.props.form.enable();
+    }).catch(this.props.form.enable.bind(this.props.form.enable));
   }
 }

@@ -13,6 +13,7 @@ export class RadioButtonsInput extends React.Component {
         <div key={id}>
           <input id={id} type="radio" value={value}
                  checked={this.props.value == value} name={this.props.name}
+                 disabled={this.props.isDisabled}
                  onChange={(event) => {this.props.handleChange(event.target.value)}} />
           <label htmlFor={id}>{this.props.options[i].label}</label>
         </div>

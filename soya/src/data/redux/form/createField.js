@@ -107,11 +107,12 @@ export default function createField(InputComponent) {
       }
 
       if (this.props.result.hasOwnProperty('isEnabled')) {
-        props.isEnabled = this.props.result.isEnabled;
+        props.isFormEnabled = this.props.result.isEnabled;
       } else {
-        props.isEnabled = true;
+        props.isFormEnabled = true;
       }
 
+      props.isDisabled = props.isValidating || !props.isFormEnabled;
       props.handleChange = this.__handleChange;
       props.handleAsyncValidation = this.__handleAsyncValidation;
       props.registerChangeValidators = this.__registerChangeValidators;

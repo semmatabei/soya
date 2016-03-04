@@ -18,7 +18,8 @@ export class SelectMultipleInput extends React.Component {
     value = this.props.value == null ? [] : this.props.value;
     return <div className={style.selectMultipleBox}>
       <label>{this.props.label}</label>
-      <select multiple value={value} onChange={this.handleChange.bind(this)}>
+      <select multiple value={value} disabled={this.props.isDisabled}
+              onChange={this.handleChange.bind(this)}>
         {options}
       </select>
       {this.props.errorMessages.length > 0 ? <span>{this.props.errorMessages[0]}</span> : null}
