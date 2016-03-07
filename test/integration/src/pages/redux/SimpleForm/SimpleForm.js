@@ -15,11 +15,13 @@ import ContactForm from '../../../components/contextual/ContactForm/ContactForm.
 import style from '../../../shared/sitewide.css';
 
 const FORM_ID = 'contact';
+const REUSE_FORM_ID = 'kontakte';
 
 class Component extends React.Component {
   componentWillMount() {
     this.actions = this.props.reduxStore.register(FormSegment);
     this._form = new Form(this.props.reduxStore, FORM_ID);
+    this._kontakteForm = new Form(this.props.reduxStore, REUSE_FORM_ID);
   }
 
   render() {
@@ -38,6 +40,13 @@ class Component extends React.Component {
         <li>On submission, all per-field sync, async and submit validation should be run, along with custom form-wide validation.</li>
       </ul>
       <ContactForm form={this._form} formName="Contact Us" reduxStore={this.props.reduxStore} config={this.props.config} />
+      <h3>Reusing Form</h3>
+      <ul>
+        <li>Reusing the same form component, but saving it on another name.</li>
+        <li>Setting values to the first form doesn't set it to the other.</li>
+        <li><a href="javascript:void(0)" onClick={this.replaceKontakteForm.bind(this)}>Setting values to this form doesn't</a> set it to the first one.</li>
+      </ul>
+      <ContactForm form={this._kontakteForm} formName="Kontakte Form" reduxStore={this.props.reduxStore} config={this.props.config} />
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
@@ -57,6 +66,20 @@ class Component extends React.Component {
         email: true
       },
       type: 'borrowing'
+    }));
+  }
+
+  replaceKontakteForm() {
+    this.props.reduxStore.dispatch(this.actions.setValues(REUSE_FORM_ID, {
+      name: '',
+      phoneNumber: '',
+      nickname: 'Long Winded Man',
+      message: '',
+      relationship: 'acquaintance',
+      call: ['morning'],
+      from: 'Surabaya (SUB)',
+      target: { email: true },
+      type: 'friend'
     }));
   }
 

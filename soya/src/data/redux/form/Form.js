@@ -115,6 +115,7 @@ export default class Form {
       if (!result.isValid || validationFunc == null) {
         submitFunc(result);
         this.enable();
+        return;
       }
       // Result is valid and validation function is not null. Do form-wide validation.
       var formWideValidationPromise = Promise.resolve(validationFunc(result.values));
