@@ -23,10 +23,11 @@
   - Added static connectId() method to make log reading easier.
 - Form with redux:
   - Added generic FormSegment to contain data for our forms.
-  - Added Field wrapper that wraps an input element to a specific field in a
-    form.
+  - Added Field wrapper that wraps an input element to a specific field in a form.
   - Form can be enabled and disabled. Added test cases for various input
-    elements.
+    elements, including a rather complex autocomplete input.
+  - Form can have per-field sync, async and submit validations. It can also have
+    form-wide validation that is triggered on submit.
 - Added soya/lib/scope for easier server/client conditional.
 
 ## 0.0.26

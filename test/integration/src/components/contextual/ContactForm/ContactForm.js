@@ -97,12 +97,25 @@ export default class ContactForm extends React.Component {
     return value == 'girlfriend' ? 'Bullshit, my girlfriend would call me directly.' : true;
   }
 
+  validateFormWide(values) {
+    var result = {isValid: true, errorMessages: {}};
+    if (values.relationship == 'acquaintance' && values.type == 'borrowing') {
+      result.isValid = false;
+      result.errorMessages['type'] = ['Don\'t borrow money when you\'re just an acquaintance!'];
+    }
+    return result;
+  }
+
+  submit(result) {
+    if (!result.isValid) {
+      alert('Error in form!');
+      return;
+    }
+    alert('Form submitted!');
+  }
+
   handleSubmit() {
-    this.props.form.disable();
-    var validateAllPromise = this.props.form.validateAll();
-    validateAllPromise.then((result) => {
-      console.log('------------->', result);
-      this.props.form.enable();
-    }).catch(this.props.form.enable.bind(this.props.form.enable));
+    this.props.form.submit(
+      this.submit.bind(this), this.validateFormWide.bind(this));
   }
 }

@@ -10,12 +10,14 @@ export class SelectBoxInput extends React.Component {
 
   componentWillMount() {
     // First option always automatically picked in a select box.
-    this.props.handleChange(this.props.options[0].value);
+    if (this.props.value == null || this.props.value == '') {
+      this.props.handleChange(this.props.options[0].value);
+    }
   }
 
   componentWillReceiveProps(nextProps) {
     // First option always automatically picked in a select box.
-    if (nextProps.value == null) {
+    if (nextProps.value == null || nextProps.value == '') {
       this.props.handleChange(this.props.options[0].value);
     }
   }

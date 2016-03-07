@@ -217,6 +217,7 @@ export default function createField(InputComponent) {
       if (!hasAsyncValidation) {
         asyncPromise = Promise.resolve(true);
       } else {
+        this.lock();
         asyncPromise = this.validateAsync(value);
       }
 
@@ -227,15 +228,15 @@ export default function createField(InputComponent) {
       }
 
       return PromiseUtil.allParallel(Promise, [asyncPromise, submitPromise]).then(
-        function(results) {
+        (results) => {
+          this.unlock();
           var isValid = mergeValidationResult(results);
           return {isValid: isValid, value: value, name: name};
-        },
-        function(error) {
-          console.log('Unable to run submit validation.', error);
-          return {isValid: false, value: value, name: name};
         }
-      );
+      ).catch((error) => {
+        this.unlock();
+        PromiseUtil.throwError(error);
+      });
     }
 
     /**
@@ -270,7 +271,10 @@ export default function createField(InputComponent) {
 
       this.lock();
       var promise = this.validateAsync(value);
-      promise.then(this.unlock.bind(this)).catch(this.unlock.bind(this));
+      promise.then(this.unlock.bind(this)).catch((error) => {
+        this.unlock();
+        PromiseUtil.throwError(error);
+      });
       return promise;
     }
 
@@ -350,10 +354,8 @@ export default function createField(InputComponent) {
             for (i = 0; i < result.length; i++) {
               if (typeof result[i] == 'string') errorMessages.push(result[i]);
             }
-            this.props.reduxStore.dispatch(actions.addErrorMesages(
-              this.props.form._formId,
-              this.props.name,
-              errorMessages
+            this.props.reduxStore.dispatch(actions.addErrorMessages(
+              this.props.form._formId, {[this.props.name]: errorMessages}
             ));
             resolve(errorMessages.length <= 0);
           },

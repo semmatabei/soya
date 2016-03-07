@@ -8,4 +8,5 @@
 
 .selectBox span {
   color: red;
+  display: block;
 }

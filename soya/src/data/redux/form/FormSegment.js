@@ -119,12 +119,11 @@ export default class FormSegment extends LocalSegment {
           errorMessages: errorMessages
         };
       },
-      addErrorMesages: (formId, fieldName, errorMessages) => {
+      addErrorMessages: (formId, map) => {
         return {
           type: this._addErrorMessagesActionType,
           formId: formId,
-          fieldName: fieldName,
-          errorMessages: errorMessages
+          map: map
         };
       },
       clear: (formId) => {
@@ -352,16 +351,21 @@ export default class FormSegment extends LocalSegment {
 
   _addErrorMessages(state, action) {
     state = this._ensureFormExistence(state, action);
-    state = this._ensureFieldExistence(state, action);
-    return update(state, {
-      [action.formId]: {
-        fields: {
-          [action.fieldName]: {
-            errorMessages: {$push: action.errorMessages}
+    var fieldName;
+    for (fieldName in action.map) {
+      if (!action.map.hasOwnProperty(fieldName)) continue;
+      state = this._ensureFieldExistence(state, {formId: action.formId, fieldName: fieldName});
+      state = update(state, {
+        [action.formId]: {
+          fields: {
+            [fieldName]: {
+              errorMessages: {$push: action.map[fieldName]}
+            }
           }
         }
-      }
-    });
+      });
+    }
+    return state;
   }
 
   _clearForm(state, action) {

@@ -104,22 +104,39 @@ export default class Form {
           values[result.name] = result.value;
         }
         return {values: values, isValid: isValid};
-      },
-      function(error) {
-        console.log('Error when running validation!', error);
-        return false;
       }
-    );
+    ).catch(PromiseUtil.throwError);
   }
 
-  submit(submitFunc, formWideValidationFunc) {
-    // TODO: Disable the form. Maybe we shouldn't have submit, just validateAll instead?
-    console.log(this);
-    // First run each field's validators, sync or async.
-
-    // Gathers the value.
-
-    // Send submission.
-
+  submit(submitFunc, validationFunc) {
+    this.disable();
+    var validateAllPromise = this.validateAll();
+    validateAllPromise.then((result) => {
+      if (!result.isValid || validationFunc == null) {
+        submitFunc(result);
+        this.enable();
+      }
+      // Result is valid and validation function is not null. Do form-wide validation.
+      var formWideValidationPromise = Promise.resolve(validationFunc(result.values));
+      formWideValidationPromise.then((formWideValidationResult) => {
+        if (typeof formWideValidationResult == 'object' && !formWideValidationResult.isValid) {
+          // Render error messages.
+          this._reduxStore.dispatch(this._actionCreator.addErrorMessages(
+            this._formId, formWideValidationResult.errorMessages
+          ));
+          result.isValid = false;
+        }
+        submitFunc(result);
+        this.enable();
+      }).catch((error) => {
+        result.isValid = false;
+        submitFunc(result);
+        this.enable();
+        PromiseUtil.throwError(error);
+      });
+    }).catch((error) => {
+      this.enable();
+      PromiseUtil.throwError(error);
+    });
   }
 }
