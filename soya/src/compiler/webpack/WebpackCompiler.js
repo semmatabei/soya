@@ -226,7 +226,7 @@ export default class WebpackCompiler extends Compiler {
     if (config.staticAssetRegex) {
       test = config.staticAssetRegex;
     } else {
-      test = /(\.jpg|\.png|\.jpeg|\.gif|\.ico|\.svg|\.eot|\.woff|\.woff2|\.ttf)$/;
+      test = /(\.jpg|\.png|\.jpeg|\.gif|\.ico|\.(eot|ttf|svg|woff(2)?)(\??#[a-zA-Z0-9]+)?)$/;
     }
     return {
       test: test,
