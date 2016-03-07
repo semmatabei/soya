@@ -177,12 +177,22 @@ export default function createField(InputComponent) {
 
     /**
      * Runs all sync and async validators. Returns a promise that resolves to
-     * true if the value passes validation, it resolves to false otherwise.
+     * the following object:
+     *
+     * <pre>
+     *   {
+     *     isValid: true/false,
+     *     name: (field name),
+     *     value: (the value)
+     *   }
+     * </pre>
+     *
      * The promise should reject if there's an error with async validation.
      *
      * @returns {Promise}
      */
     handleValidateAll() {
+      var name = this.props.name;
       var value = this.props.result.field ? this.props.result.field.value : null;
       var errorMessages = this.validateSync(value);
       if (errorMessages.length > 0) {
@@ -194,14 +204,14 @@ export default function createField(InputComponent) {
             }
           }
         ));
-        return Promise.resolve(false);
+        return Promise.resolve({isValid: false, value: value, name: name});
       }
 
       var asyncPromise, submitPromise;
       var hasAsyncValidation = this.hasAsyncValidation();
       var hasSubmitValidation = this.hasSubmitValidation();
       if (!hasAsyncValidation && !hasSubmitValidation) {
-        return Promise.resolve(true);
+        return Promise.resolve({isValid: true, value: value, name: name});
       }
 
       if (!hasAsyncValidation) {
@@ -218,11 +228,12 @@ export default function createField(InputComponent) {
 
       return PromiseUtil.allParallel(Promise, [asyncPromise, submitPromise]).then(
         function(results) {
-          return mergeValidationResult(results);
+          var isValid = mergeValidationResult(results);
+          return {isValid: isValid, value: value, name: name};
         },
         function(error) {
           console.log('Unable to run submit validation.', error);
-          return false;
+          return {isValid: false, value: value, name: name};
         }
       );
     }

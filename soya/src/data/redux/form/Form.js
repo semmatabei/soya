@@ -1,6 +1,5 @@
 import FormSegment from './FormSegment.js';
 import PromiseUtil from '../PromiseUtil.js';
-import { mergeValidationResult } from '../helper.js';
 
 /**
  * Represents a form. Instance of this class may be passed to each Field
@@ -75,6 +74,18 @@ export default class Form {
   }
 
   /**
+   * Returns a promise that resolves to the following object:
+   *
+   * <pre>
+   *   {
+   *     isValid: true/false,
+   *     values: {
+   *       fieldName: (value),
+   *       ...
+   *     }
+   *   }
+   * </pre>
+   *
    * @return {Promise}
    */
   validateAll() {
@@ -86,8 +97,13 @@ export default class Form {
     var finalPromise = PromiseUtil.allParallel(Promise, promises);
     return finalPromise.then(
       function(validationResults) {
-        var isPassValidation = mergeValidationResult(validationResults);
-        return isPassValidation;
+        var i, result, values = {}, isValid = true;
+        for (i = 0; i < validationResults.length; i++) {
+          result = validationResults[i];
+          isValid = isValid && result.isValid;
+          values[result.name] = result.value;
+        }
+        return {values: values, isValid: isValid};
       },
       function(error) {
         console.log('Error when running validation!', error);
@@ -96,7 +112,7 @@ export default class Form {
     );
   }
 
-  submit() {
+  submit(submitFunc, formWideValidationFunc) {
     // TODO: Disable the form. Maybe we shouldn't have submit, just validateAll instead?
     console.log(this);
     // First run each field's validators, sync or async.
