@@ -65,4 +65,11 @@ export default class ClientHttpRequest {
   getPath() {
     return this._element.pathname;
   }
+
+  /**
+   * @returns {string}
+   */
+  getUrl() {
+    return this._element.href;
+  }
 }

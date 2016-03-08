@@ -44,7 +44,8 @@ export default class ServerHttpRequest {
    */
   isSecure() {
     // TODO: Create default nginx configuration for usage, use our own architecture, create contract to know whether this is https or not (use header? x-forwarded-proto like our arch).
-    return this._httpRequest.protocol == 'https';
+    // TODO: Make this configurable.
+    return this._httpRequest.headers['x-forwarded-proto'] === 'https';
   }
 
   /**
@@ -74,5 +75,12 @@ export default class ServerHttpRequest {
    */
   getPath() {
     return this._parsedUrl.path;
+  }
+
+  /**
+   * @returns {string}
+   */
+  getUrl() {
+    return (this.isSecure() ? 'https' : 'http') + '://' + this.getDomain() + this.getPath();
   }
 }
