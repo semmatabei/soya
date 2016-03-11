@@ -50,6 +50,13 @@ export default function createField(InputComponent) {
       return [FormSegment];
     }
 
+    static shouldSubscriptionsUpdate(props, nextProps) {
+      return (
+        props.form !== nextProps.form ||
+        props.name !== nextProps.name
+      );
+    }
+
     static subscribeQueries(props, subscribe) {
       subscribe(FormSegment.id(), {
         formId: props.form._formId,
@@ -75,6 +82,7 @@ export default function createField(InputComponent) {
     }
 
     componentWillMount() {
+      // TODO: Also do this when component receive new props, since owner component may reassign this component to a new field.
       this.props.form.regField(
         this.props.name, this.handleValidateAll.bind(this));
     }

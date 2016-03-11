@@ -64,6 +64,12 @@ SIMPLE_FORM:
     - [method, GET]
     - [path, /data/redux/simple-form]
 
+REPEATABLE_FORM:
+  page: RepeatableForm
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/repeatable-form]
+
 COOKIE_SET:
   page: CookieSet
   nodes:

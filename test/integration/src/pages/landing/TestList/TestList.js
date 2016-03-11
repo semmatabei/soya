@@ -36,7 +36,8 @@ class Component extends React.Component {
       </ul>
       <h3>Form With Redux</h3>
       <ul>
-        <li><a href={this.props.router.reverseRoute('SIMPLE_FORM')}>Simple Form Test</a></li>
+        <li><a href={this.props.router.reverseRoute('SIMPLE_FORM')}>Simple Form</a></li>
+        <li><a href={this.props.router.reverseRoute('REPEATABLE_FORM')}>Repeatable Form</a></li>
       </ul>
     </div>;
   }
@@ -59,6 +60,7 @@ class TestList extends Page {
       'LOAD_COMPONENT',
       'TEST_LOCAL_SEGMENT',
       'SIMPLE_FORM',
+      'REPEATABLE_FORM',
       'COOKIE_SET'
     ];
   }
