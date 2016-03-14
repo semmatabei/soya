@@ -6,11 +6,11 @@ export function required(value) {
 export function requiredCheckbox(value) {
   var key, isValid = false;
   if (value) {
-    isValid = true;
+    isValid = false;
     for (key in value) {
       if (!value.hasOwnProperty(key)) continue;
-      if (value[key] !== true) {
-        isValid = false;
+      if (value[key] === true) {
+        isValid = true;
         break;
       }
     }

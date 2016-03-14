@@ -1,5 +1,4 @@
 import React from 'react';
-import Form from 'soya/lib/data/redux/form/Form';
 
 import style from './style.css';
 import { required, minSelected, requiredCheckbox, optional } from '../../../validator/general.js';
@@ -101,7 +100,10 @@ export default class ContactForm extends React.Component {
     var result = {isValid: true, errorMessages: {}};
     if (values.relationship == 'acquaintance' && values.type == 'borrowing') {
       result.isValid = false;
-      result.errorMessages['type'] = ['Don\'t borrow money when you\'re just an acquaintance!'];
+      result.errorMessages = [{
+        fieldName: 'type',
+        messages: ['Don\'t borrow money when you\'re just an acquaintance!']
+      }];
     }
     return result;
   }

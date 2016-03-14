@@ -165,13 +165,14 @@ export default function createField(InputComponent) {
         ));
       } else {
         this.props.getReduxStore().dispatch(actions.mergeFields(
-          this.props.form._formId, {
-            [this.props.name]: {
+          this.props.form._formId, [{
+            fieldName: this.props.name,
+            object: {
               value: value,
               touched: true,
               errorMessages: errorMessages
             }
-          })
+          }])
         );
       }
 
@@ -206,11 +207,12 @@ export default function createField(InputComponent) {
       if (errorMessages.length > 0) {
         var actions = this.props.getActionCreator(FormSegment.id());
         this.props.reduxStore.dispatch(actions.mergeFields(
-          this.props.form._formId, {
-            [this.props.name]: {
+          this.props.form._formId, [{
+            fieldName: this.props.name,
+            object: {
               errorMessages: errorMessages
             }
-          }
+          }]
         ));
         return Promise.resolve({isValid: false, value: value, name: name});
       }
@@ -363,7 +365,10 @@ export default function createField(InputComponent) {
               if (typeof result[i] == 'string') errorMessages.push(result[i]);
             }
             this.props.reduxStore.dispatch(actions.addErrorMessages(
-              this.props.form._formId, {[this.props.name]: errorMessages}
+              this.props.form._formId, [{
+                fieldName: this.props.name,
+                messages: errorMessages
+              }]
             ));
             resolve(errorMessages.length <= 0);
           },

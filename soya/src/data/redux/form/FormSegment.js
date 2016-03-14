@@ -1,8 +1,15 @@
 import LocalSegment from '../segment/local/LocalSegment';
 import ActionNameUtil from '../segment/ActionNameUtil';
-import { isEqualShallow } from '../helper';
+import { isStringDuckType, isEqualShallow } from '../helper';
 
 import update from 'react-addons-update';
+
+const DEFAULT_FIELD = {
+  value: null,
+  touched: false,
+  errorMessages: [],
+  isValidating: false
+};
 
 /**
  * Sample data structure:
@@ -119,11 +126,11 @@ export default class FormSegment extends LocalSegment {
           errorMessages: errorMessages
         };
       },
-      addErrorMessages: (formId, map) => {
+      addErrorMessages: (formId, messages) => {
         return {
           type: this._addErrorMessagesActionType,
           formId: formId,
-          map: map
+          messages: messages
         };
       },
       clear: (formId) => {
@@ -144,9 +151,25 @@ export default class FormSegment extends LocalSegment {
       throw new Error('Field query should contain fieldName property.');
     }
 
-    if (query.fieldName) queryId += '-' + query.fieldName;
+    if (query.fieldName) {
+      var stringifiedName = this._generateFieldName(query.fieldName);
+      queryId += '-' + stringifiedName;
+    }
     this._queryIdCache[queryId] = query;
     return queryId;
+  }
+
+  /**
+   * @param {Array<string|number>|string} fieldName
+   */
+  _generateFieldName(fieldName) {
+    if (isStringDuckType(fieldName)) return fieldName;
+    var i, stringifiedName = '';
+    for (i = 0; i < fieldName.length; i++) {
+      stringifiedName += fieldName[i];
+      if (i < fieldName.length - 1) stringifiedName += '.';
+    }
+    return stringifiedName;
   }
 
   /**
@@ -205,12 +228,17 @@ export default class FormSegment extends LocalSegment {
   }
 
   _getField(state, formId, fieldName) {
-    if (state[formId] == null ||
-        state[formId].fields == null ||
-        state[formId].fields[fieldName] == null) {
+    if (state[formId] == null || state[formId].fields == null) {
       return null;
     }
-    return state[formId].fields[fieldName];
+    if (isStringDuckType(fieldName)) {
+      return state[formId].fields[fieldName];
+    }
+    var i, ref = state[formId].fields;
+    for (i = 0; i < fieldName.length; i++) {
+      ref = ref[fieldName[i]];
+    }
+    return ref;
   }
 
   _getActionCreator() {
@@ -262,46 +290,37 @@ export default class FormSegment extends LocalSegment {
 
   _setIsValidating(state, action) {
     state = this._ensureFormExistence(state, action);
-    var fieldName;
+    var fieldName, updateObject, tempAction;
     for (fieldName in action.map) {
       if (!action.map.hasOwnProperty(fieldName)) continue;
-      state = this._ensureFieldExistence(
-        state, {formId: action.formId, fieldName: fieldName});
-      state = update(state, {
-        [action.formId]: {
-          fields: {
-            [fieldName]: {
-              isValidating: {$set: action.map[fieldName]},
-              touched: {$set: true}
-            }
-          }
-        }
+      tempAction = {formId: action.formId, fieldName: fieldName};
+      state = this._extractField(state, tempAction).state;
+      updateObject = this._createFieldUpdateObject(tempAction, {
+        isValidating: {$set: action.map[fieldName]},
+        touched: {$set: true}
       });
+      state = update(state, updateObject);
     }
     return state;
   }
 
   _setValue(state, action) {
     state = this._ensureFormExistence(state, action);
-    state = this._ensureFieldExistence(state, action);
-    if (state[action.formId]['fields'][action.fieldName].value === action.value) {
+    var result = this._extractField(state, action);
+    if (result.field != null && result.field.value === action.value) {
       // If we are setting the same value, no need to update the state.
       return state;
     }
-    return update(state, {
-      [action.formId]: {
-        fields: {
-          [action.fieldName]: {
-            $set: {
-              value: action.value,
-              touched: true,
-              errorMessages: [],
-              isValidating: false
-            }
-          }
-        }
+    state = result.state;
+    var updateObject = this._createFieldUpdateObject(action, {
+      $set: {
+        value: action.value,
+        touched: true,
+        errorMessages: [],
+        isValidating: false
       }
     });
+    return update(state, updateObject);
   }
 
   _setValues(state, action) {
@@ -317,53 +336,37 @@ export default class FormSegment extends LocalSegment {
 
   _mergeFields(state, action) {
     state = this._ensureFormExistence(state, action);
-    var fieldName, tempAction = {formId: action.formId};
-    for (fieldName in action.fields) {
-      if (!action.fields.hasOwnProperty(fieldName)) continue;
-      tempAction.fieldName = fieldName;
-      state = this._ensureFieldExistence(state, tempAction);
-      state = update(state, {
-        [action.formId]: {
-          fields: {
-            [fieldName]: {
-              $merge: action.fields[fieldName]
-            }
-          }
-        }
+    var i, updateObject, tempAction = {formId: action.formId};
+    for (i = 0; i < action.fields.length; i++) {
+      tempAction.fieldName = action.fields[i].fieldName;
+      state = this._extractField(state, tempAction).state;
+      updateObject = this._createFieldUpdateObject(tempAction, {
+        $merge: action.fields[i].object
       });
+      state = update(state, updateObject);
     }
     return state;
   }
 
   _setErrorMessages(state, action) {
     state = this._ensureFormExistence(state, action);
-    state = this._ensureFieldExistence(state, action);
-    return update(state, {
-      [action.formId]: {
-        fields: {
-          [action.fieldName]: {$merge: {
-            errorMessages: action.errorMessages
-          }}
-        }
-      }
+    state = this._extractField(state, action).state;
+    var updateObject = this._createFieldUpdateObject(action, {
+      errorMessages: {$set: action.errorMessages}
     });
+    return update(state, updateObject);
   }
 
   _addErrorMessages(state, action) {
     state = this._ensureFormExistence(state, action);
-    var fieldName;
-    for (fieldName in action.map) {
-      if (!action.map.hasOwnProperty(fieldName)) continue;
-      state = this._ensureFieldExistence(state, {formId: action.formId, fieldName: fieldName});
-      state = update(state, {
-        [action.formId]: {
-          fields: {
-            [fieldName]: {
-              errorMessages: {$push: action.map[fieldName]}
-            }
-          }
-        }
+    var i, updateObject, tempAction = {formId: action.formId};
+    for (i = 0; i < action.messages.length; i++) {
+      tempAction.fieldName = action.messages[i].fieldName;
+      state = this._extractField(state, tempAction).state;
+      updateObject = this._createFieldUpdateObject(tempAction, {
+        errorMessages: {$push: action.messages[i].messages}
       });
+      state = update(state, updateObject);
     }
     return state;
   }
@@ -379,6 +382,14 @@ export default class FormSegment extends LocalSegment {
     })
   }
 
+  /**
+   * Ensures that the given form exists in the state. Returns the new state
+   * object with the initialized form.
+   *
+   * @param {Object} state
+   * @param {Object} action
+   * @returns {Object}
+   */
   _ensureFormExistence(state, action) {
     var form = state[action.formId];
     if (form == null) {
@@ -390,22 +401,134 @@ export default class FormSegment extends LocalSegment {
     return state;
   }
 
-  _ensureFieldExistence(state, action) {
-    var field = state[action.formId].fields[action.fieldName];
-    if (field == null) {
-      state = update(state, {
-        [action.formId]: {
-          fields: {
-            [action.fieldName]: { $set: {
-              value: null,
-              touched: false,
-              errorMessages: [],
-              isValidating: false
-            }}
+  /**
+   * Extract field from state, while also initializing the field. Returns the
+   * newly initialized state and the extracted field (may be null).
+   *
+   * IMPORTANT NOTE: It is assumed that this method is only called for fields,
+   * not arrays/objects containing fields.
+   *
+   * @param {Object} state
+   * @param {Object} action
+   * @returns {{state: state, field: ?Object}}
+   */
+  _extractField(state, action) {
+    var fieldName = action.fieldName, result = state[action.formId].fields;
+    if (isStringDuckType(fieldName)) {
+      // Field name is string, piece of cake.
+      if (result[action.fieldName] == null) {
+        state = update(state, {
+          [action.formId]: {
+            fields: {
+              [action.fieldName]: {
+                $set: DEFAULT_FIELD
+              }
+            }
           }
-        }
-      });
+        });
+      }
+      return {
+        state: state,
+        field: result[action.fieldName]
+      };
     }
-    return state;
+
+    // Field name is array, now we need to loop.
+    var i, j, namePiece, finalPieceIdx = fieldName.length - 1;
+    var updateObject = {[action.formId]: {fields: {}}}, fieldExists = true;
+    var updateObjectFields = updateObject[action.formId].fields, hasUpdated = false;
+    for (i = 0; i < fieldName.length; i++) {
+      namePiece = fieldName[i];
+      fieldExists = fieldExists && result.hasOwnProperty(namePiece);
+      if (fieldExists) {
+        // If name piece still exists, just continue looping.
+        result = result[namePiece];
+        continue;
+      }
+
+      // If name piece does not exist, we'll need to initialize default values.
+      // This would be empty object/array or the default field value.
+      if (!hasUpdated) {
+        // If we haven't run update(), run it first to replace this state with
+        // a new one.
+        if (i == finalPieceIdx) {
+          updateObjectFields[namePiece] = {$set: DEFAULT_FIELD};
+        } else if (isStringDuckType(fieldName[i+1])) {
+          // The next name piece is a string, so this name piece is an object.
+          updateObjectFields[namePiece] = {$set: {}};
+        } else {
+          // The next name piece is an number, so this name piece is an array.
+          updateObjectFields[namePiece] = {$set: []};
+        }
+        state = update(state, updateObject);
+        updateObjectFields[namePiece] = {};
+        updateObjectFields = updateObjectFields[namePiece];
+
+        // Create a new result reference.
+        result = state[action.formId].fields;
+        for (j = 0; j <= i; j++) {
+          result = result[fieldName[j]];
+        }
+      } else {
+        // If we have run update() once, we don't need to do it again.
+        // We can assign values directly.
+        if (i == finalPieceIdx) {
+          result[namePiece] = DEFAULT_FIELD;
+        } else if (isStringDuckType(fieldName[i+1])) {
+          result[namePiece] = {};
+        } else {
+          result[namePiece] = [];
+        }
+        result = result[namePiece];
+      }
+    }
+    return {
+      state: state,
+      field: fieldExists ? result : null
+    };
+  }
+
+  /**
+   * Accepts an action object and a react-addons-update object, creating a ready
+   * to use object for the update() method.
+   *
+   * Example output:
+   *
+   * <pre>
+   *   {
+   *     formId: {
+   *       fields: {
+   *         a: {
+   *           b: {
+   *             3: {
+   *               $set: {...}
+   *             }
+   *           }
+   *         }
+   *       }
+   *     }
+   *   }
+   * </pre>
+   *
+   * @param {Object} action
+   * @param {Object} updateObject
+   * @returns {Object}
+   */
+  _createFieldUpdateObject(action, updateObject) {
+    var i, result = {}, ref = result, fieldName = action.fieldName;
+    if (isStringDuckType(fieldName)) {
+      return {[action.formId]: {fields: {[fieldName]: updateObject}}};
+    }
+    var finalLength = fieldName.length - 1;
+    for (i = 0; i < fieldName.length; i++) {
+      if (i == finalLength) {
+        ref[fieldName[i]] = updateObject;
+      } else {
+        ref[fieldName[i]] = {};
+        ref = ref[fieldName[i]];
+      }
+    }
+    result = {[action.formId]: {fields: result}};
+    return result;
   }
 }

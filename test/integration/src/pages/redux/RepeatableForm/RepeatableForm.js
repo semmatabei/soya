@@ -12,7 +12,10 @@ import FormSegment from 'soya/lib/data/redux/form/FormSegment';
 // TODO: Figure out how to do promise polyfill.
 import style from '../../../shared/sitewide.css';
 
-const FORM_ID = 'contact';
+import WishlistForm from '../../../components/contextual/WishlistForm/WishlistForm';
+import TextField from '../../../components/common/TextField/TextField.js';
+
+const FORM_ID = 'wishlist';
 
 class Component extends React.Component {
   componentWillMount() {
@@ -30,6 +33,7 @@ class Component extends React.Component {
         <li>We can have maps inside of lists.</li>
         <li>We can have lists inside of maps.</li>
       </ul>
+      <WishlistForm formName="Personal Wishlist" form={this._form} config={this.props.config} reduxStore={this.props.reduxStore} />
       <h3>Repeatable Fields</h3>
       <ul>
         <li>Forms are able to easily create custom object hierarchies.</li>

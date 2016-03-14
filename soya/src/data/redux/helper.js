@@ -69,3 +69,19 @@ export function isReactChildrenEqual(childrenA, childrenB) {
   }
   return true;
 }
+
+/**
+ * @param {?} value
+ * @return {boolean}
+ */
+export var isArray = Array.isArray ? Array.isArray : function(value) {
+  return Object.prototype.toString.call(value) === '[object Array]';
+};
+
+/**
+ * @param {?} value
+ * @returns {boolean}
+ */
+export function isStringDuckType(value) {
+  return value.substring;
+}

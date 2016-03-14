@@ -1,5 +1,6 @@
 import FormSegment from './FormSegment.js';
 import PromiseUtil from '../PromiseUtil.js';
+import { isStringDuckType } from '../helper.js';
 
 /**
  * Represents a form. Instance of this class may be passed to each Field
@@ -97,11 +98,28 @@ export default class Form {
     var finalPromise = PromiseUtil.allParallel(Promise, promises);
     return finalPromise.then(
       function(validationResults) {
-        var i, result, values = {}, isValid = true;
+        var i, j, result, values = {}, isValid = true;
         for (i = 0; i < validationResults.length; i++) {
           result = validationResults[i];
           isValid = isValid && result.isValid;
-          values[result.name] = result.value;
+          if (isStringDuckType(result.name)) {
+            values[result.name] = result.value;
+            continue;
+          }
+          var ref = values, namePiece, finalPieceIdx = result.name.length - 1;
+          for (j = 0; j < result.name.length; j++) {
+            namePiece = result.name[j];
+            if (j == finalPieceIdx) {
+              ref[namePiece] = result.value;
+            } else if (ref.hasOwnProperty(namePiece)) {
+              // no-op.
+            } else if (result.name[j+1].substring) {
+              ref[namePiece] = {};
+            } else {
+              ref[namePiece] = [];
+            }
+            ref = ref[namePiece];
+          }
         }
         return {values: values, isValid: isValid};
       }
