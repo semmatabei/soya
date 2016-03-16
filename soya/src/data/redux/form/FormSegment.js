@@ -1,6 +1,6 @@
 import LocalSegment from '../segment/local/LocalSegment';
 import ActionNameUtil from '../segment/ActionNameUtil';
-import { isStringDuckType, isEqualShallow } from '../helper';
+import { isStringDuckType, isArray, isEqualShallow } from '../helper';
 
 import update from 'react-addons-update';
 
@@ -12,25 +12,38 @@ const DEFAULT_FIELD = {
 };
 
 /**
- * Sample data structure:
+ * Schema of the data structure:
  *
  * <pre>
  *   {
  *     formId: {
- *       fields: {
- *         fieldName: {
- *           touched: true,
- *           errorMessages: [],
- *           value: ?,
- *           isValidating: false
- *         },
- *         ...
- *       },
- *       ...
+ *       fields: Object<string, T>,
+ *       isEnabled: boolean
  *     },
  *     ...
  *   }
  * </pre>
+ *
+ * Where T is:
+ *
+ * <pre>
+ *   Field | Object<string, T> | Array<T>
+ * </pre>
+ *
+ * Field is:
+ *
+ * <pre>
+ *   {
+ *     touched: boolean,
+ *     errorMessages: Array<string>,
+ *     isValidating: boolean,
+ *     value: ?
+ *   }
+ * </pre>
+ *
+ * IMPORTANT NOTE: This segment assumes that you do not name your fields
+ * 'touched', 'errorMessages', 'isValidating', or 'value'.
+ * TODO: Perform a check in createField for field name?
  *
  * @CLIENT_SERVER
  */
@@ -111,11 +124,11 @@ export default class FormSegment extends LocalSegment {
           value: value
         };
       },
-      setValues: (formId, map) => {
+      setValues: (formId, values) => {
         return {
           type: this._setValuesActionType,
           formId: formId,
-          map: map
+          values: values
         };
       },
       setErrorMessages: (formId, fieldName, errorMessages) => {
@@ -152,7 +165,7 @@ export default class FormSegment extends LocalSegment {
     }
 
     if (query.fieldName) {
-      var stringifiedName = this._generateFieldName(query.fieldName);
+      var stringifiedName = this._generateStringFieldName(query.fieldName);
       queryId += '-' + stringifiedName;
     }
     this._queryIdCache[queryId] = query;
@@ -162,7 +175,7 @@ export default class FormSegment extends LocalSegment {
   /**
    * @param {Array<string|number>|string} fieldName
    */
-  _generateFieldName(fieldName) {
+  _generateStringFieldName(fieldName) {
     if (isStringDuckType(fieldName)) return fieldName;
     var i, stringifiedName = '';
     for (i = 0; i < fieldName.length; i++) {
@@ -208,21 +221,62 @@ export default class FormSegment extends LocalSegment {
   }
 
   _getAllValues(state, formId) {
-    var fieldName, result = {};
+    var result = {}, currentKey;
     if (state[formId] == null || state[formId].fields == null) return result;
-    for (fieldName in state[formId].fields) {
-      if (!state[formId].fields.hasOwnProperty(fieldName)) continue;
-      result[fieldName] = state[formId].fields[fieldName].value;
+    var fields = state[formId].fields;
+    for (currentKey in fields) {
+      if (!fields.hasOwnProperty(currentKey)) continue;
+      this._fetchValue(fields[currentKey], currentKey, result);
     }
     return result;
   }
 
+  /**
+   * Recursively fill the given container with only values.
+   *
+   * @param {Object|Array} field
+   * @param {string|number} currentKey
+   * @param {Object} container
+   */
+  _fetchValue(field, currentKey, container) {
+    var key;
+    if (isArray(field)) {
+      // Its an list of T.
+      container[currentKey] = [];
+      for (key = 0; key < field.length; key++) {
+        this._fetchValue(field[key], key, container[currentKey]);
+      }
+    } else if (isArray(field.errorMessages)) {
+      // It's a field object.
+      container[currentKey] = field.value;
+    } else {
+      // It's an object of T.
+      container[currentKey] = {};
+      for (key in field) {
+        if (!field.hasOwnProperty(key)) continue;
+        this._fetchValue(field[key], key, container[currentKey]);
+      }
+    }
+  }
+
   _hasErrors(state, formId) {
-    var fieldName;
     if (state[formId] == null || state[formId].fields == null) return false;
-    for (fieldName in state[formId].fields) {
-      if (!state[formId].fields.hasOwnProperty(fieldName)) continue;
-      if (state[formId].fields[fieldName].errorMessages.length > 0) return true;
+    return this._fetchHasError(state[formId].fields);
+  }
+
+  _fetchHasError(fields) {
+    var i;
+    if (isArray(fields.errorMessages)) {
+      return fields.errorMessages.length > 0;
+    } else if (isArray(fields)) {
+      for (i = 0; i < fields.length; i++) {
+        if (this._fetchHasError(fields[i])) return true;
+      }
+    } else {
+      for (i in fields) {
+        if (!fields.hasOwnProperty(i)) continue;
+        if (this._fetchHasError(fields[i])) return true;
+      }
     }
     return false;
   }
@@ -234,8 +288,10 @@ export default class FormSegment extends LocalSegment {
     if (isStringDuckType(fieldName)) {
       return state[formId].fields[fieldName];
     }
+    // If not string, we'll need to loop through the field name.
     var i, ref = state[formId].fields;
     for (i = 0; i < fieldName.length; i++) {
+      if (!ref.hasOwnProperty(fieldName[i])) return null;
       ref = ref[fieldName[i]];
     }
     return ref;
@@ -325,11 +381,12 @@ export default class FormSegment extends LocalSegment {
 
   _setValues(state, action) {
     state = this._ensureFormExistence(state, action);
-    var fieldName;
-    for (fieldName in action.map) {
-      if (!action.map.hasOwnProperty(fieldName)) continue;
+    var i, value;
+    for (i = 0; i < action.values.length; i++) {
+      value = action.values[i];
       state = this._setValue(state, this._actionCreator.setValue(
-        action.formId, fieldName, action.map[fieldName]));
+        action.formId, value.fieldName, value.value
+      ));
     }
     return state;
   }
@@ -439,10 +496,12 @@ export default class FormSegment extends LocalSegment {
     var updateObjectFields = updateObject[action.formId].fields, hasUpdated = false;
     for (i = 0; i < fieldName.length; i++) {
       namePiece = fieldName[i];
-      fieldExists = fieldExists && result.hasOwnProperty(namePiece);
+      fieldExists = fieldExists && result.hasOwnProperty(namePiece) && result[namePiece] != null;
       if (fieldExists) {
         // If name piece still exists, just continue looping.
         result = result[namePiece];
+        updateObjectFields[namePiece] = {};
+        updateObjectFields = updateObjectFields[namePiece];
         continue;
       }
 
@@ -463,6 +522,7 @@ export default class FormSegment extends LocalSegment {
         state = update(state, updateObject);
         updateObjectFields[namePiece] = {};
         updateObjectFields = updateObjectFields[namePiece];
+        hasUpdated = true;
 
         // Create a new result reference.
         result = state[action.formId].fields;

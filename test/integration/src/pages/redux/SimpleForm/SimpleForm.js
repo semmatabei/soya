@@ -54,33 +54,33 @@ class Component extends React.Component {
   }
 
   replaceValues() {
-    this.props.reduxStore.dispatch(this.actions.setValues(FORM_ID, {
-      name: 'Rick Christie',
-      phoneNumber: '123 456 789',
-      message: 'Bring me back that Meteora LP that you borrowed!',
-      relationship: 'girlfriend',
-      call: ['evening', 'night'],
-      from: 'Jayakarta (CGK)',
-      target: {
+    this.props.reduxStore.dispatch(this.actions.setValues(FORM_ID, [
+      { fieldName: 'name', value: 'Rick Christie' },
+      { fieldName: 'phoneNumber', value: '123 456 789'},
+      { fieldName: 'message', value: 'Bring me back that Meteora LP that you borrowed!' },
+      { fieldName: 'relationship', value: 'girlfriend' },
+      { fieldName: 'call', value: ['evening', 'night'] },
+      { fieldName: 'from', value: 'Jayakarta (CGK)' },
+      { fieldName: 'target', value: {
         sms: true,
         email: true
-      },
-      type: 'borrowing'
-    }));
+      }},
+      { fieldName: 'type', value: 'borrowing' }
+    ]));
   }
 
   replaceKontakteForm() {
-    this.props.reduxStore.dispatch(this.actions.setValues(REUSE_FORM_ID, {
-      name: '',
-      phoneNumber: '',
-      nickname: 'Long Winded Man',
-      message: '',
-      relationship: 'acquaintance',
-      call: ['morning'],
-      from: 'Surabaya (SUB)',
-      target: { email: true },
-      type: 'friend'
-    }));
+    this.props.reduxStore.dispatch(this.actions.setValues(REUSE_FORM_ID, [
+      { fieldName: 'name', value: '' },
+      { fieldName: 'phoneNumber', value: '' },
+      { fieldName: 'nickname', value: 'Long Winded Man' },
+      { fieldName: 'message', value: '' },
+      { fieldName: 'relationship', value: 'acquaintance' },
+      { fieldName: 'call', value: ['morning'] },
+      { fieldName: 'from', value: 'Surabaya (SUB)' },
+      { fieldName: 'target', value: { email: true } },
+      { fieldName: 'type', value: 'friend' }
+    ]));
   }
 
   enableForm() {

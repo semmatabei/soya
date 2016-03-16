@@ -28,10 +28,9 @@ class Component extends React.Component {
       <h1>Repeatable Form</h1>
       <h3>Complex Form Data Structure</h3>
       <ul>
-        <li>We can have maps, and map inside of map.</li>
-        <li>We can have lists, and list inside of list.</li>
-        <li>We can have maps inside of lists.</li>
-        <li>We can have lists inside of maps.</li>
+        <li>We can have maps <code>(goals.professional)</code>, and map inside of map <code>(goals.material.lodging)</code>.</li>
+        <li>We can have lists <code>(games)</code>, and list inside of list <code>(visited[0][1])</code>.</li>
+        <li>We can have maps inside of lists <code>(games[0].name)</code> and lists inside of maps <code>(games[0].reviews)</code>.</li>
       </ul>
       <WishlistForm formName="Personal Wishlist" form={this._form} config={this.props.config} reduxStore={this.props.reduxStore} />
       <h3>Repeatable Fields</h3>
