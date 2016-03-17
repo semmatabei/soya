@@ -85,3 +85,11 @@ export var isArray = Array.isArray ? Array.isArray : function(value) {
 export function isStringDuckType(value) {
   return value.substring;
 }
+
+/**
+ * @param {?} value
+ * @returns {boolean}
+ */
+export function isArrayDuckType(value) {
+  return value.splice;
+}

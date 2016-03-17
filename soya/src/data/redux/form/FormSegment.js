@@ -1,6 +1,6 @@
 import LocalSegment from '../segment/local/LocalSegment';
 import ActionNameUtil from '../segment/ActionNameUtil';
-import { isStringDuckType, isArray, isEqualShallow } from '../helper';
+import { isStringDuckType, isArrayDuckType, isArray, isEqualShallow } from '../helper';
 
 import update from 'react-addons-update';
 
@@ -48,6 +48,7 @@ const DEFAULT_FIELD = {
  * @CLIENT_SERVER
  */
 export default class FormSegment extends LocalSegment {
+  // Simple field related action.
   _setValueActionType;
   _setValuesActionType;
   _mergeFieldsActionType;
@@ -57,6 +58,14 @@ export default class FormSegment extends LocalSegment {
   _setFormEnabledStateActionType;
   _clearFormActionType;
   _actionCreator;
+
+  // Repeatable field related action.
+  _addListItemActionType;
+  _removeListItemActionType;
+  _reorderListItemActionType;
+  _reorderListItemIncActionType;
+  _reorderListItemDecActionType;
+
   _queryIdCache;
   _pieceCustomEqualComparators;
 
@@ -88,6 +97,12 @@ export default class FormSegment extends LocalSegment {
     this._setFormEnabledStateActionType = ActionNameUtil.generate(id, 'SET_ENABLED_STATE');
     this._clearFormActionType = ActionNameUtil.generate(id, 'CLEAR_FORM');
 
+    this._addListItemActionType = ActionNameUtil.generate(id, 'ADD_ITEM');
+    this._removeListItemActionType = ActionNameUtil.generate(id, 'REMOVE_ITEM');
+    this._reorderListItemActionType = ActionNameUtil.generate(id, 'REORDER_ITEM');
+    this._reorderListItemIncActionType = ActionNameUtil.generate(id, 'REORDER_ITEM_INC');
+    this._reorderListItemDecActionType = ActionNameUtil.generate(id, 'REORDER_ITEM_DEC');
+
     this._pieceCustomEqualComparators = {
       errorMessages: function(a, b) {
         return a.length == 0 && b.length == 0;
@@ -95,6 +110,7 @@ export default class FormSegment extends LocalSegment {
     };
 
     this._actionCreator = {
+      // Simple field related actions.
       setFormEnabledState: (formId, isEnabled) => {
         return {
           type: this._setFormEnabledStateActionType,
@@ -151,8 +167,53 @@ export default class FormSegment extends LocalSegment {
           type: this._clearFormActionType,
           formId: formId
         };
+      },
+
+      // Repeatable field related action.
+      addListItem: (formId, fieldName) => {
+        return {
+          type: this._addListItemActionType,
+          formId: formId,
+          fieldName: fieldName
+        };
+      },
+      removeListItem: (formId, fieldName, index) => {
+        return {
+          type: this._removeListItemActionType,
+          formId: formId,
+          fieldName: fieldName,
+          index: index
+        };
+      },
+      reorderListItemInc: (formId, fieldName, index, amount = 1) => {
+        return {
+          type: this._reorderListItemIncActionType,
+          formId: formId,
+          fieldName: fieldName,
+          index: index,
+          amount: amount
+        };
+      },
+      reorderListItemDec: (formId, fieldName, index, amount = 1) => {
+        return {
+          type: this._reorderListItemDecActionType,
+          formId: formId,
+          fieldName: fieldName,
+          index: index,
+          amount: amount
+        }
+      },
+      reorderListItem: (formId, fieldName, index, targetIndex) => {
+        return {
+          type: this._reorderListItemActionType,
+          formId: formId,
+          fieldName: fieldName,
+          index: index,
+          targetIndex: targetIndex
+        };
       }
-    };
+    }
+    ;
   }
 
   _generateQueryId(query) {
@@ -186,7 +247,7 @@ export default class FormSegment extends LocalSegment {
   }
 
   /**
-   * Possible queries:
+   * Simple field queries:
    *
    * <pre>
    *   {formId: 'formId', type: 'isEnabled'} --> true if form is enabled, false otherwise.
@@ -194,6 +255,12 @@ export default class FormSegment extends LocalSegment {
    *   {formId: 'formId', type: '**'} --> get all values as map with error messages.
    *   {formId: 'formId', type: 'hasErrors'} --> returns true if has errors, false otherwise.
    *   {formId: 'formId', type: 'field', fieldName: 'fieldName'} --> get all values of field.
+   * </pre>
+   *
+   * Repeatable specific queries:
+   *
+   * <pre>
+   *   {formId: 'formId', type: 'length', fieldName: ['fieldName']}
    * </pre>
    */
   _getPieceObject(state, queryId) {
@@ -213,6 +280,9 @@ export default class FormSegment extends LocalSegment {
         break;
       case 'field':
         return this._getField(state, query.formId, query.fieldName);
+        break;
+      case 'length':
+        return this._getLength(state, query.formId, query.fieldName);
         break;
       default:
         throw new Error('Unable to translate query: ' + queryId);
@@ -257,6 +327,27 @@ export default class FormSegment extends LocalSegment {
         this._fetchValue(field[key], key, container[currentKey]);
       }
     }
+  }
+
+  /**
+   * @param {Object} state
+   * @param {string} formId
+   * @param {string|Array<string>} fieldName
+   * @return {number}
+   */
+  _getLength(state, formId, fieldName) {
+    if (isStringDuckType(fieldName)) {
+      return state[formId].fields[fieldName].length;
+    }
+    var i, ref = state[formId].fields;
+    for (i = 0; i < fieldName.length; i++) {
+      if (!ref.hasOwnProperty(fieldName[i])) {
+        // Field hasn't been initialized yet.
+        return 0;
+      }
+      ref = ref[fieldName[0]];
+    }
+    return ref.length;
   }
 
   _hasErrors(state, formId) {
@@ -328,6 +419,22 @@ export default class FormSegment extends LocalSegment {
           break;
         case this._clearFormActionType:
           return this._clearForm(state, action);
+          break;
+
+        case this._addListItemActionType:
+          return this._addListItem(state, action);
+          break;
+        case this._removeListItemActionType:
+          return this._removeListItem(state, action);
+          break;
+        case this._reorderListItemIncActionType:
+          return this._reorderListItemInc(state, action);
+          break;
+        case this._reorderListItemDecActionType:
+          return this._reorderListItemDec(state, action);
+          break;
+        case this._reorderListItemActionType:
+          return this._reorderListItem(state, action);
           break;
       }
       return state;
@@ -439,6 +546,55 @@ export default class FormSegment extends LocalSegment {
     })
   }
 
+  _addListItem(state, action) {
+    state = this._ensureFormExistence(state, action);
+    state = this._extractField(state, action).state;
+    var updateObject = this._createFieldUpdateObject(action, {
+      $push: [null]
+    });
+    return update(state, updateObject);
+  }
+
+  _removeListItem(state, action) {
+    state = this._ensureFormExistence(state, action);
+    state = this._extractField(state, action).state;
+    var updateObject = this._createFieldUpdateObject(action, {
+      $splice: [[action.index, 1]]
+    });
+    return update(state, updateObject);
+  }
+
+  _reorderListItemInc(state, action) {
+    return this._reorderListItem(state, this._actionCreator.reorderListItem(
+      action.formId, action.fieldName, action.index, action.index + action.amount
+    ));
+  }
+
+  _reorderListItemDec(state, action) {
+    return this._reorderListItem(state, this._actionCreator.reorderListItem(
+      action.formId, action.fieldName, action.index, action.index - action.amount
+    ));
+  }
+
+  _reorderListItem(state, action) {
+    state = this._ensureFormExistence(state, action);
+    var item, result = this._extractField(state, action);
+    state = result.state;
+    if (result.field == null || !isArray(result.field)) {
+      // If the field is non-existent or of the wrong type, there's no need to
+      // do anything, just return the initialized field state.
+      return state;
+    }
+    item = result[action.index];
+
+    // First remove the item that we want to reorder, then we add the item
+    // we just removed to the target index.
+    var updateObject = this._createFieldUpdateObject(action, {
+      $splice: [[action.index, 1], [action.targetIndex, 0, item]]
+    });
+    return update(state, updateObject);
+  }
+
   /**
    * Ensures that the given form exists in the state. Returns the new state
    * object with the initialized form.
@@ -494,12 +650,32 @@ export default class FormSegment extends LocalSegment {
     var i, j, namePiece, finalPieceIdx = fieldName.length - 1;
     var updateObject = {[action.formId]: {fields: {}}}, fieldExists = true;
     var updateObjectFields = updateObject[action.formId].fields, hasUpdated = false;
+    var isNextFieldStr, isCurrentResultArray;
     for (i = 0; i < fieldName.length; i++) {
       namePiece = fieldName[i];
+      // Field only exists if they are not null. This allows us to add item to
+      // repeatable list by adding null entry. The length of the list increases,
+      // prompting the repeatable component to render additional field set. We
+      // don't need to know the structure of the item to be added. Next time
+      // a value setting action is triggered, this method will initialize the
+      // structure for us.
       fieldExists = fieldExists && result.hasOwnProperty(namePiece) && result[namePiece] != null;
       if (fieldExists) {
         // If name piece still exists, just continue looping.
         result = result[namePiece];
+
+        // Do type checking to tell users that they are being inconsistent.
+        if (i != finalPieceIdx) {
+          isNextFieldStr = isStringDuckType(fieldName[i+1]);
+          isCurrentResultArray = isArray(result);
+          // If next name is number, current object must be an array. If next
+          // name is string, current object must be an map.
+          if (isNextFieldStr === isCurrentResultArray) {
+            var fieldNameStr = this._generateStringFieldName(fieldName);
+            throw new Error('Inconsistency in field, some expected array, other expected map: \'' + fieldNameStr + '\'.');
+          }
+        }
+
         updateObjectFields[namePiece] = {};
         updateObjectFields = updateObjectFields[namePiece];
         continue;

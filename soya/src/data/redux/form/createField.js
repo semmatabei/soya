@@ -27,6 +27,8 @@ import connect from '../connect.js';
  *
  * @param {React.Component} InputComponent
  * @return {ReactComponent}
+ *
+ * @CLIENT_SERVER
  */
 export default function createField(InputComponent) {
   var type = typeof InputComponent.getQueryType == 'function' ? InputComponent.getQueryType() : 'field';
@@ -42,10 +44,16 @@ export default function createField(InputComponent) {
     __registerAsyncValidators;
     __registerSubmitValidators;
 
+    /**
+     * @returns {string}
+     */
     static connectId() {
       return InputComponent.connectId ? InputComponent.connectId() : 'Field Component';
     }
 
+    /**
+     * @returns {Array<Segment>}
+     */
     static getSegmentDependencies() {
       return [FormSegment];
     }
