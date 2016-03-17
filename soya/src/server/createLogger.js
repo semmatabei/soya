@@ -15,6 +15,9 @@ var Logger = require('../logger/Logger');
 export default function createLogger(serverConfig) {
   // Ideally you should change logger configuration depending on whether or
   // not we are in production.
-  // TODO: Move debug settings to user configuration.
-  return new Logger(false);
+  let isProduction = false;
+  if (serverConfig && serverConfig.isProduction) {
+    isProduction = true;
+  }
+  return new Logger(isProduction);
 };
