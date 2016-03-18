@@ -50,6 +50,22 @@ export function isEqualShallow(objectA, objectB, customEqualComparators) {
 }
 
 /**
+ * @param {Array} arrayA
+ * @param {Array} arrayB
+ * @return {boolean}
+ */
+export function isEqualShallowArray(arrayA, arrayB) {
+  if (arrayA.length != arrayB.length) {
+    return false;
+  }
+  var i;
+  for (i = 0; i < arrayA.length; i++) {
+    if (arrayA[i] !== arrayB[i]) return false;
+  }
+  return true;
+}
+
+/**
  * Compares equality between two react children property. Only compares the
  * props between the two.
  *

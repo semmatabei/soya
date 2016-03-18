@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { isEqualShallow, mergeValidationResult } from '../helper.js';
+import { isEqualShallow, mergeValidationResult, isStringDuckType, isEqualShallowArray } from '../helper.js';
 import PromiseUtil from '../PromiseUtil.js';
 import FormSegment from './FormSegment.js';
 import connect from '../connect.js';
@@ -59,9 +59,13 @@ export default function createField(InputComponent) {
     }
 
     static shouldSubscriptionsUpdate(props, nextProps) {
+      var isNameString = isStringDuckType(props.name);
+      var isNextNameString = isStringDuckType(nextProps.name);
       return (
         props.form !== nextProps.form ||
-        props.name !== nextProps.name
+        isNameString !== isNextNameString ||
+        isNameString && props.name !== nextProps.name ||
+        !isNameString && !isEqualShallowArray(props.name, nextProps.name)
       );
     }
 
@@ -93,6 +97,10 @@ export default function createField(InputComponent) {
       // TODO: Also do this when component receive new props, since owner component may reassign this component to a new field.
       this.props.form.regField(
         this.props.name, this.handleValidateAll.bind(this));
+    }
+
+    componentWillUnmount() {
+      this.props.form.unregField(this.props.name);
     }
 
     shouldComponentUpdate(nextProps, nextState) {

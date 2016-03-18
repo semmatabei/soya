@@ -83,7 +83,7 @@ export default function connect(ReactComponent) {
   var connectId = ReactComponent.connectId ? ReactComponent.connectId() : ReactComponent;
   var getSegmentDependencies = ReactComponent.getSegmentDependencies;
   var subscribeQueries = ReactComponent.subscribeQueries;
-  var shouldSubscriptionsUpdate = ReactComponent.shouldSubscriptionUpdate;
+  var shouldSubscriptionsUpdate = ReactComponent.shouldSubscriptionsUpdate;
   var shouldWrapperComponentUpdate = ReactComponent.shouldWrapperComponentUpdate;
   if (typeof shouldSubscriptionsUpdate !== 'function') shouldSubscriptionsUpdate = defaultShouldSubcriptionsUpdate;
   if (typeof subscribeQueries !== 'function') subscribeQueries = defaultSubscribeQueries;

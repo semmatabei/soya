@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { isArray } from '../helper.js';
+import { isArray, isEqualShallow } from '../helper.js';
 import PromiseUtil from '../PromiseUtil.js';
 import FormSegment from './FormSegment.js';
 import connect from '../connect.js';
@@ -39,16 +39,18 @@ export default function createRepeatable(FieldSetComponent) {
 
     static subscribeQueries(props, subscribe) {
       subscribe(FormSegment.id(), {
-        formId: this.props.form._formId,
+        formId: props.form._formId,
         type: 'length',
-        fieldName: this.props.name
-      }, 'length')
+        fieldName: props.name,
+        minLength: props.minLength
+      }, 'length');
     }
 
     static shouldSubscriptionsUpdate(props, nextProps) {
       return (
         props.form !== nextProps.form ||
-        props.name !== nextProps.name
+        props.name !== nextProps.name ||
+        props.length !== nextProps.length
       );
     }
 
@@ -80,16 +82,20 @@ export default function createRepeatable(FieldSetComponent) {
 
     render() {
       var i, props = {}, fieldSetList = null;
-      if (this.props.result.length > 0) {
+      var minLength = this.props.minLength || 0;
+      var length = this.props.result.length > minLength ? this.props.result.length : minLength;
+      if (length > 0) {
+        for (i in this.props) {
+          if (!this.props.hasOwnProperty(i)) continue;
+          props[i] = this.props[i];
+        }
         fieldSetList = [];
-        props.reduxStore = this.props.reduxStore;
         props.addListItem = this._addListItemFunc;
         props.removeListItem = this._removeListItemFunc;
         props.reorderListItemInc = this._reorderListItemIncFunc;
         props.reorderListItemDec = this._reorderListItemDecFunc;
         props.reorderListItem = this._reorderListItemFunc;
-        props.config = this.props.config;
-        for (i = 0; i < this.props.result.length; i++) {
+        for (i = 0; i < length; i++) {
           props.index = i;
           props.name = this.getNameFunc(i);
           fieldSetList.push(<FieldSetComponent key={i} {...props} />);
@@ -122,7 +128,7 @@ export default function createRepeatable(FieldSetComponent) {
     addListItem() {
       var actions = this.props.getActionCreator(FormSegment.id());
       this.props.reduxStore.dispatch(actions.addListItem(
-        this.props.form._formId, this.props.name
+        this.props.form._formId, this.props.name, this.props.minLength
       ));
     }
 

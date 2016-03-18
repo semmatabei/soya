@@ -170,11 +170,12 @@ export default class FormSegment extends LocalSegment {
       },
 
       // Repeatable field related action.
-      addListItem: (formId, fieldName) => {
+      addListItem: (formId, fieldName, minLength) => {
         return {
           type: this._addListItemActionType,
           formId: formId,
-          fieldName: fieldName
+          fieldName: fieldName,
+          minLength: minLength
         };
       },
       removeListItem: (formId, fieldName, index) => {
@@ -237,13 +238,9 @@ export default class FormSegment extends LocalSegment {
    * @param {Array<string|number>|string} fieldName
    */
   _generateStringFieldName(fieldName) {
-    if (isStringDuckType(fieldName)) return fieldName;
-    var i, stringifiedName = '';
-    for (i = 0; i < fieldName.length; i++) {
-      stringifiedName += fieldName[i];
-      if (i < fieldName.length - 1) stringifiedName += '.';
-    }
-    return stringifiedName;
+    // This should join all members if the field name is an array or leave it
+    // untouched if it's a string.
+    return fieldName.toString();
   }
 
   /**
@@ -282,7 +279,7 @@ export default class FormSegment extends LocalSegment {
         return this._getField(state, query.formId, query.fieldName);
         break;
       case 'length':
-        return this._getLength(state, query.formId, query.fieldName);
+        return this._getLength(state, query.formId, query.fieldName, query.minLength);
         break;
       default:
         throw new Error('Unable to translate query: ' + queryId);
@@ -333,17 +330,21 @@ export default class FormSegment extends LocalSegment {
    * @param {Object} state
    * @param {string} formId
    * @param {string|Array<string>} fieldName
+   * @param {?number} minLength
    * @return {number}
    */
-  _getLength(state, formId, fieldName) {
+  _getLength(state, formId, fieldName, minLength) {
+    minLength = minLength == null ? 0 : minLength;
+    if (state[formId] == null || state[formId].fields == null) return minLength;
     if (isStringDuckType(fieldName)) {
+      if (state[formId].fields[fieldName] == null) return minLength;
       return state[formId].fields[fieldName].length;
     }
     var i, ref = state[formId].fields;
     for (i = 0; i < fieldName.length; i++) {
       if (!ref.hasOwnProperty(fieldName[i])) {
         // Field hasn't been initialized yet.
-        return 0;
+        return minLength;
       }
       ref = ref[fieldName[0]];
     }
@@ -382,6 +383,10 @@ export default class FormSegment extends LocalSegment {
     // If not string, we'll need to loop through the field name.
     var i, ref = state[formId].fields;
     for (i = 0; i < fieldName.length; i++) {
+      if (ref == null) {
+        // This might happen, since addListItem() will add null array entry.
+        return null;
+      }
       if (!ref.hasOwnProperty(fieldName[i])) return null;
       ref = ref[fieldName[i]];
     }
@@ -548,16 +553,22 @@ export default class FormSegment extends LocalSegment {
 
   _addListItem(state, action) {
     state = this._ensureFormExistence(state, action);
-    state = this._extractField(state, action).state;
+    var result = this._extractField(state, action, []);
+    var fieldLength = result.field != null ? result.field.length : 0, addition = [null], i,
+        minLength = action.minLength == null ? 0 : action.minLength;
+    state = result.state;
+    for (i = 0; i < minLength - fieldLength; i++) {
+      addition.push(null);
+    }
     var updateObject = this._createFieldUpdateObject(action, {
-      $push: [null]
+      $push: addition
     });
     return update(state, updateObject);
   }
 
   _removeListItem(state, action) {
     state = this._ensureFormExistence(state, action);
-    state = this._extractField(state, action).state;
+    state = this._extractField(state, action, []).state;
     var updateObject = this._createFieldUpdateObject(action, {
       $splice: [[action.index, 1]]
     });
@@ -623,9 +634,11 @@ export default class FormSegment extends LocalSegment {
    *
    * @param {Object} state
    * @param {Object} action
+   * @param {Object|Array|?} defaultFinalValue
    * @returns {{state: state, field: ?Object}}
    */
-  _extractField(state, action) {
+  _extractField(state, action, defaultFinalValue) {
+    defaultFinalValue = defaultFinalValue || DEFAULT_FIELD;
     var fieldName = action.fieldName, result = state[action.formId].fields;
     if (isStringDuckType(fieldName)) {
       // Field name is string, piece of cake.
@@ -634,7 +647,7 @@ export default class FormSegment extends LocalSegment {
           [action.formId]: {
             fields: {
               [action.fieldName]: {
-                $set: DEFAULT_FIELD
+                $set: defaultFinalValue
               }
             }
           }
@@ -687,7 +700,7 @@ export default class FormSegment extends LocalSegment {
         // If we haven't run update(), run it first to replace this state with
         // a new one.
         if (i == finalPieceIdx) {
-          updateObjectFields[namePiece] = {$set: DEFAULT_FIELD};
+          updateObjectFields[namePiece] = {$set: defaultFinalValue};
         } else if (isStringDuckType(fieldName[i+1])) {
           // The next name piece is a string, so this name piece is an object.
           updateObjectFields[namePiece] = {$set: {}};
@@ -709,7 +722,7 @@ export default class FormSegment extends LocalSegment {
         // If we have run update() once, we don't need to do it again.
         // We can assign values directly.
         if (i == finalPieceIdx) {
-          result[namePiece] = DEFAULT_FIELD;
+          result[namePiece] = defaultFinalValue;
         } else if (isStringDuckType(fieldName[i+1])) {
           result[namePiece] = {};
         } else {

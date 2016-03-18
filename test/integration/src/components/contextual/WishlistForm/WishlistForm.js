@@ -3,6 +3,8 @@ import React from 'react';
 import style from './style.css';
 
 import TextField from '../../common/TextField/TextField';
+import RepeatableGames from './RepeatableGames';
+import RepeatableAdd from '../../common/RepeatableAdd/RepeatableAdd';
 import { required, minSelected, requiredCheckbox, optional } from '../../../validator/general.js';
 
 export default class WishlistForm extends React.Component {
@@ -46,40 +48,10 @@ export default class WishlistForm extends React.Component {
                    reduxStore={this.props.reduxStore} config={this.props.config} />
       </div>
       <h4>Games</h4>
-      <div>
-        <h5>Game 1</h5>
-        <TextField form={this.props.form} name={['games', 0, 'name']} label="Name"
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
-        <TextField form={this.props.form} name={['games', 0, 'genre']} label="Genre"
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
-        <div>
-          <h6>Review 1</h6>
-          <TextField form={this.props.form} name={['games', 0, 'reviews', 0, 'reviewer']} label="Reviewer"
-                     reduxStore={this.props.reduxStore} config={this.props.config} />
-          <TextField form={this.props.form} name={['games', 0, 'reviews', 0, 'score']} label="Score"
-                     reduxStore={this.props.reduxStore} config={this.props.config} />
-        </div>
-        <div>
-          <h6>Review 2</h6>
-          <TextField form={this.props.form} name={['games', 0, 'reviews', 1, 'reviewer']} label="Reviewer"
-                     reduxStore={this.props.reduxStore} config={this.props.config} />
-          <TextField form={this.props.form} name={['games', 0, 'reviews', 1, 'score']} label="Score"
-                     reduxStore={this.props.reduxStore} config={this.props.config} />
-        </div>
-
-        <h5>Game 1</h5>
-        <TextField form={this.props.form} name={['games', 1, 'name']} label="Name"
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
-        <TextField form={this.props.form} name={['games', 1, 'genre']} label="Genre"
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
-        <div>
-          <h6>Reviews</h6>
-          <TextField form={this.props.form} name={['games', 1, 'reviews', 0, 'reviewer']} label="Reviewer"
-                     reduxStore={this.props.reduxStore} config={this.props.config} />
-          <TextField form={this.props.form} name={['games', 1, 'reviews', 0, 'score']} label="Score"
-                     reduxStore={this.props.reduxStore} config={this.props.config} />
-        </div>
-      </div>
+      <RepeatableGames form={this.props.form} name={'games'} minLength={1}
+                       reduxStore={this.props.reduxStore} config={this.props.config} />
+      <RepeatableAdd form={this.props.form} reduxStore={this.props.reduxStore}
+                     name={'games'} minLength={1} label={'Tambah Game'} />
       <button onClick={this.handleSubmit.bind(this)}>Submit</button>
     </div>;
   }

@@ -49,11 +49,18 @@ export default class Form {
   }
 
   /**
-   * @param {string} fieldName
+   * @param {Array<string>|string} fieldName
    * @param {Function} validateAll
    */
   regField(fieldName, validateAll) {
-    this._fields[fieldName] = { validateAll: validateAll };
+    this._fields[fieldName.toString()] = { validateAll: validateAll };
+  }
+
+  /**
+   * @param {Array<string>|string} fieldName
+   */
+  unregField(fieldName) {
+    delete this._fields[fieldName.toString()];
   }
 
   /**
