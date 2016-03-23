@@ -22,4 +22,5 @@
 .repeatable a {
   display: block;
   float: right;
+  margin-left: 10px;
 }

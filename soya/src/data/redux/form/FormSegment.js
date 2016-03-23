@@ -588,15 +588,19 @@ export default class FormSegment extends LocalSegment {
   }
 
   _reorderListItem(state, action) {
+    if (action.targetIndex < 0) {
+      // No need to do anything
+      return state;
+    }
     state = this._ensureFormExistence(state, action);
-    var item, result = this._extractField(state, action);
+    var item, result = this._extractField(state, action, []);
     state = result.state;
     if (result.field == null || !isArray(result.field)) {
       // If the field is non-existent or of the wrong type, there's no need to
       // do anything, just return the initialized field state.
       return state;
     }
-    item = result[action.index];
+    item = result.field[action.index];
 
     // First remove the item that we want to reorder, then we add the item
     // we just removed to the target index.

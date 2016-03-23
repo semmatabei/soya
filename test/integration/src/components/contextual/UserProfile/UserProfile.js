@@ -13,15 +13,15 @@ class UserProfile extends React.Component {
     return [UserSegment];
   }
 
-  static subscribeQueries(nextProps, subscribe) {
+  static subscribeQueries(props, subscribe) {
     var hydrationOption = null;
-    if (nextProps.loadAtClient) {
+    if (props.loadAtClient) {
       hydrationOption = {
         SERVER: false
       };
     }
 
-    subscribe(UserSegment.id(), { username: nextProps.username }, 'user',
+    subscribe(UserSegment.id(), { username: props.username }, 'user',
       hydrationOption);
   }
 

@@ -2,7 +2,7 @@ import React from 'react';
 
 import style from './style.css';
 import { required, minSelected, requiredCheckbox, optional } from '../../../validator/general.js';
-import { name, phone, maxLength } from '../../../validator/string.js';
+import { name, phone, maxLength, minLength } from '../../../validator/string.js';
 import TextField from '../../common/TextField/TextField';
 import NameField from '../../common/TextField/NameField';
 import TextAreaField from '../../common/TextAreaField/TextAreaField';
@@ -49,7 +49,7 @@ export default class ContactForm extends React.Component {
                  changeValidators={[required]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />
       <TextField form={this.props.form} name="nickname" label="Nick Name"
-                 changeValidators={[optional, name, maxLength.bind(null, 5)]}
+                 changeValidators={[optional, name, minLength.bind(null, 5)]}
                  reduxStore={this.props.reduxStore} config={this.props.config} />
       <AirportField form={this.props.form} name="from" label="Base City"
                     changeValidators={[required]}
