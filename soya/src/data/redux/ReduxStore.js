@@ -11,6 +11,7 @@ import QueryDependencies from './QueryDependencies.js';
 import { compose, createStore, applyMiddleware } from 'redux';
 import { devTools, persistState } from 'redux-devtools';
 import thunk from 'redux-thunk';
+import scope from 'soya/lib/scope';
 
 var Promise;
 
@@ -246,9 +247,15 @@ export default class ReduxStore extends Store {
   _createStore(initialState) {
     // TODO: Disable devTools with configuration.
     // TODO: Hot reload reducer/segments?
+    let devTool = f => f;
+    if (scope.client) {
+      if (window !== null && window.devToolsExtension) {
+        devTool = window.devToolsExtension();
+      }
+    }
     var composedCreateStore = compose(
       applyMiddleware(thunk),
-      devTools()
+      devTool
     )(createStore);
     return composedCreateStore(this._rootReducer.bind(this), initialState);
   }
