@@ -32,7 +32,7 @@ class Component extends React.Component {
         <li>We can have lists <code>(games)</code>, and list inside of list <code>(visited[0][1])</code>.</li>
         <li>We can have maps inside of lists <code>(games[0].name)</code> and lists inside of maps <code>(games[0].reviews)</code>.</li>
         <li>We can have repeatable inside of another repeatable field set (multiple <code>reviews</code> inside of <code>game</code>).</li>
-        <li>[TODO] We can <a href="javascript:void(0)" onClick={this.setValues.bind(this)}>set values</a>, making items in array appears.</li>
+        <li>We can <a href="javascript:void(0)" onClick={this.setValues.bind(this)}>set values</a>, making items in array appears.</li>
       </ul>
       <WishlistForm formName="Personal Wishlist" form={this._form} config={this.props.config} reduxStore={this.props.reduxStore} />
       <h3>Repeatable Fields</h3>
@@ -47,7 +47,20 @@ class Component extends React.Component {
   }
 
   setValues() {
-
+    this.props.reduxStore.dispatch(this.actions.setValues(FORM_ID, [
+      { fieldName: ['goals', 'professional'], value: 'Entrepreneur' },
+      { fieldName: ['goals', 'material', 'lodging'], value: 'Simple home' },
+      { fieldName: ['goals', 'material', 'electronics'], value: '' },
+      { fieldName: ['goals', 'material', 'furniture'], value: 'Minimalist' },
+      { fieldName: ['visited', 0, 0], value: 'Bali' },
+      { fieldName: ['visited', 1, 0], value: 'Augsburg' },
+      { fieldName: ['games', 1, 'name'], value: 'Homeworld Remastered' },
+      { fieldName: ['games', 1, 'genre'], value: 'Real Time Strategy' },
+      { fieldName: ['games', 1, 'reviews', 0, 'reviewer'], value: 'Rock Paper Shotgun' },
+      { fieldName: ['games', 1, 'reviews', 0, 'score'], value: 'Amazing' },
+      { fieldName: ['games', 1, 'reviews', 1, 'reviewer'], value: 'IGN' },
+      { fieldName: ['games', 1, 'reviews', 1, 'score'], value: '9/10' }
+    ]));
   }
 }
 
