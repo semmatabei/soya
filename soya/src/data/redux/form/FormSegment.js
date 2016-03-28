@@ -170,12 +170,13 @@ export default class FormSegment extends LocalSegment {
       },
 
       // Repeatable field related action.
-      addListItem: (formId, fieldName, minLength) => {
+      addListItem: (formId, fieldName, minLength, maxLength) => {
         return {
           type: this._addListItemActionType,
           formId: formId,
           fieldName: fieldName,
-          minLength: minLength
+          minLength: minLength,
+          maxLength: maxLength
         };
       },
       removeListItem: (formId, fieldName, index) => {
@@ -554,10 +555,19 @@ export default class FormSegment extends LocalSegment {
   _addListItem(state, action) {
     state = this._ensureFormExistence(state, action);
     var result = this._extractField(state, action, []);
-    var fieldLength = result.field != null ? result.field.length : 0, addition = [null], i,
-        minLength = action.minLength == null ? 0 : action.minLength;
+    var fieldLength = result.field != null ? result.field.length : 0, addition = [], i,
+        minLength = action.minLength == null ? 0 : action.minLength,
+        maxLength = action.maxLength != null ? action.maxLength : null;
     state = result.state;
-    for (i = 0; i < minLength - fieldLength; i++) {
+    var numberToAdd = 1;
+    if (fieldLength < minLength) {
+      numberToAdd += minLength - fieldLength;
+    }
+    if (maxLength != null && fieldLength + numberToAdd > maxLength) {
+      // If more than max length, do not change.
+      return state;
+    }
+    for (i = 0; i < numberToAdd; i++) {
       addition.push(null);
     }
     var updateObject = this._createFieldUpdateObject(action, {

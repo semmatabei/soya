@@ -17,7 +17,8 @@ export default class RepeatableAdd extends React.Component {
 
   addListItem() {
     this.props.reduxStore.dispatch(this._actions.addListItem(
-      this.props.form.getFormId(), this.props.name, this.props.minLength
+      this.props.form.getFormId(), this.props.name, this.props.minLength,
+      this.props.maxLength
     ));
   }
 }

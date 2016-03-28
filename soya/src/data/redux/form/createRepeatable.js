@@ -50,7 +50,9 @@ export default function createRepeatable(FieldSetComponent) {
       return (
         props.form !== nextProps.form ||
         props.name !== nextProps.name ||
-        props.length !== nextProps.length
+        props.length !== nextProps.length ||
+        props.minLength !== nextProps.minLength ||
+        props.maxLength !== nextProps.maxLength
       );
     }
 
@@ -128,7 +130,8 @@ export default function createRepeatable(FieldSetComponent) {
     addListItem() {
       var actions = this.props.getActionCreator(FormSegment.id());
       this.props.reduxStore.dispatch(actions.addListItem(
-        this.props.form._formId, this.props.name, this.props.minLength
+        this.props.form._formId, this.props.name, this.props.minLength,
+        this.props.maxLength
       ));
     }
 

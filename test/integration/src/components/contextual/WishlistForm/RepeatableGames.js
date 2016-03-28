@@ -22,7 +22,8 @@ export class GamesFieldSet extends React.Component {
       <RepeatableReviews form={this.props.form} name={this.props.name(['reviews'])} minLength={1}
                          reduxStore={this.props.reduxStore} config={this.props.config} />
       <RepeatableAdd form={this.props.form} reduxStore={this.props.reduxStore}
-                     name={this.props.name(['reviews'])} minLength={1} label={'Tambah Review'} />
+                     name={this.props.name(['reviews'])} minLength={1} maxLength={3}
+                     label={'Tambah Review'} />
     </div>;
   }
 }
