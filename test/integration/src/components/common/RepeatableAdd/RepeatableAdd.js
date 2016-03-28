@@ -10,9 +10,9 @@ export default class RepeatableAdd extends React.Component {
   }
 
   render() {
-    return <div>
+    return <p>
       <a href="javascript:void(0)" onClick={this.addListItem.bind(this)}>{this.props.label}</a>
-    </div>;
+    </p>;
   }
 
   addListItem() {

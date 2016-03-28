@@ -247,8 +247,9 @@ export default class ReduxStore extends Store {
   _createStore(initialState) {
     // TODO: Disable devTools with configuration.
     // TODO: Hot reload reducer/segments?
-    let devTool = f => f;
+    let devTool = devTools();
     if (scope.client) {
+      // If the user has devTools plugin installed, use it.
       if (window !== null && window.devToolsExtension) {
         devTool = window.devToolsExtension();
       }

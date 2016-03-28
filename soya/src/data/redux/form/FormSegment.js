@@ -342,11 +342,11 @@ export default class FormSegment extends LocalSegment {
     }
     var i, ref = state[formId].fields;
     for (i = 0; i < fieldName.length; i++) {
-      if (!ref.hasOwnProperty(fieldName[i])) {
+      if (ref == null || !ref.hasOwnProperty(fieldName[i])) {
         // Field hasn't been initialized yet.
         return minLength;
       }
-      ref = ref[fieldName[0]];
+      ref = ref[fieldName[i]];
     }
     return ref.length;
   }

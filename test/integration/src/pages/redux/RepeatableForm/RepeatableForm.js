@@ -31,6 +31,7 @@ class Component extends React.Component {
         <li>We can have maps <code>(goals.professional)</code>, and map inside of map <code>(goals.material.lodging)</code>.</li>
         <li>We can have lists <code>(games)</code>, and list inside of list <code>(visited[0][1])</code>.</li>
         <li>We can have maps inside of lists <code>(games[0].name)</code> and lists inside of maps <code>(games[0].reviews)</code>.</li>
+        <li>We can have repeatable inside of another repeatable field set (multiple <code>reviews</code> inside of <code>game</code>).</li>
         <li>[TODO] We can <a href="javascript:void(0)" onClick={this.setValues.bind(this)}>set values</a>, making items in array appears.</li>
       </ul>
       <WishlistForm formName="Personal Wishlist" form={this._form} config={this.props.config} reduxStore={this.props.reduxStore} />
