@@ -262,7 +262,8 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
-          { test: /\.css$/, loader: cssLoaderStr }
+          { test: /\.css$/, loader: cssLoaderStr, exclude: /\.global\.css$/ },
+          { test: /\.global\.css$/, loader: 'style-loader!css-loader' }
         ]
       },
       resolve: { alias: {} },
