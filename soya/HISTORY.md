@@ -28,7 +28,10 @@
     elements, including a rather complex autocomplete input.
   - Form can have per-field sync, async and submit validations. It can also have
     form-wide validation that is triggered on submit.
+  - Form can have complex structures, including recursive maps and lists.
+  - Form can have repeatable structures.
 - Added soya/lib/scope for easier server/client conditional.
+- Segment can access action creator of its dependencies.
 
 ## 0.0.26
 
