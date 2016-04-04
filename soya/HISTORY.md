@@ -1,5 +1,9 @@
 # Version 0.0.x
 
+## 0.0.28
+
+-
+
 ## 0.0.27
 
 - LocalSegment implementation for browser-only redux store state:
@@ -32,6 +36,7 @@
   - Form can have repeatable structures.
 - Added soya/lib/scope for easier server/client conditional.
 - Segment can access action creator of its dependencies.
+- Added support to redux chrome plugin (hack).
 
 ## 0.0.26
 
