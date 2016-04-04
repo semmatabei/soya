@@ -40,10 +40,11 @@ export default class LocalSegment extends Segment {
   /**
    * @param {Object} config
    * @param {CookieJar} cookieJar
+   * @param {Object} dependencyActionCreatorMap
    * @param {Promise} PromiseImpl
    */
-  constructor(config, cookieJar, PromiseImpl) {
-    super(config, cookieJar, PromiseImpl);
+  constructor(config, cookieJar, dependencyActionCreatorMap, PromiseImpl) {
+    super(config, cookieJar, dependencyActionCreatorMap, PromiseImpl);
     Promise = PromiseImpl;
 
     // Since segment name is guaranteed never to clash by ReduxStore, we can

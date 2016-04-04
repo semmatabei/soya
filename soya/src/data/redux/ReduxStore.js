@@ -507,13 +507,16 @@ export default class ReduxStore extends Store {
    * TODO: Handle Segment dependencies!
    *
    * @param {Class<Segment>} SegmentClass
-   * @return {ActionCreator}
+   * @param {?Class<Segment>} SegmentDependencyOwner
+   * @return {Object<string, Function>} Action creator.
    */
   register(SegmentClass) {
     // First let's register all dependencies that this Segment class has.
-    var i, dependencies = SegmentClass.getSegmentDependencies();
+    var i, dependencies = SegmentClass.getSegmentDependencies(),
+        dependencyActionCreatorMap = {}, actionCreator;
     for (i = 0; i < dependencies.length; i++) {
-      this.register(dependencies[i]);
+      actionCreator = this.register(dependencies[i]);
+      dependencyActionCreatorMap[dependencies[i].id()] = actionCreator;
     }
 
     // Get the segment ID to see if we already have registered the segment.
@@ -542,7 +545,7 @@ export default class ReduxStore extends Store {
 
     // Register segment.
     if (!registeredSegment) {
-      registeredSegment = this._initSegment(SegmentClass);
+      registeredSegment = this._initSegment(SegmentClass, dependencyActionCreatorMap);
       RegisteredSegmentClass = SegmentClass;
     }
     else if (SegmentClass !== RegisteredSegmentClass) {
@@ -550,7 +553,7 @@ export default class ReduxStore extends Store {
         // TODO: Create a DEBUG flag using webpack so that we can silent logging in production? or..
         // TODO: Make two logger implementation, client and server, then use clientReplace accordingly.
         console.log('Replacing segment.. (this should not happen in production!)', RegisteredSegmentClass, SegmentClass);
-        registeredSegment = this._initSegment(SegmentClass);
+        registeredSegment = this._initSegment(SegmentClass, dependencyActionCreatorMap);
         RegisteredSegmentClass = SegmentClass;
 
         // Nullifies the current segment data. Because we are replacing Segment
@@ -573,12 +576,13 @@ export default class ReduxStore extends Store {
    * Returns the instantiated segment.
    *
    * @param {Class<Segment>} SegmentClass
+   * @param {Object} dependencyActionCreatorMap
    * @return {Segment}
    */
-  _initSegment(SegmentClass) {
+  _initSegment(SegmentClass, dependencyActionCreatorMap) {
     var id = SegmentClass.id();
     // TODO: Fix! This is ugly - Promise only exists to ensure ReduxStore and its Segments utilize the same Promise implementation.
-    var segment = new SegmentClass(this._config, this._cookieJar, Promise);
+    var segment = new SegmentClass(this._config, this._cookieJar, dependencyActionCreatorMap, Promise);
     this._segments[id] = segment;
     this._segmentClasses[id] = SegmentClass;
     this._reducers[id] = segment._getReducer();

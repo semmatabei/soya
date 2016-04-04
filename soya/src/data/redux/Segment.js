@@ -22,11 +22,13 @@ export default class Segment {
   /**
    * @param {Object} config
    * @param {CookieJar} cookieJar
+   * @param {Object} dependencyActionCreatorMap
    * @param {Promise} PromiseImpl
    */
-  constructor(config, cookieJar, PromiseImpl) {
+  constructor(config, cookieJar, dependencyActionCreatorMap, PromiseImpl) {
     this._config = config;
     this._cookieJar = cookieJar;
+    this._dependencyActionCreators = dependencyActionCreatorMap;
   }
 
   /**
