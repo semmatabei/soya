@@ -95,6 +95,61 @@ export default class Cookie {
   }
 
   /**
+   * Create cookie from set-cookie string:
+   * i.e : tap-lifetime-0002="oBCeULc9g3dsAGIVbc0+Y1dMUTUfe8tgA1tGc8dl7tdR/nOsT7pdctTPxfg6RWNeCTKONugC+gIsTAxwlHmZ1FTmpKPhzCHP6H8SMy21eMHRzzRF7tIZdSE7z8iDagaUS4xNmz/p3y80P0AdfkVR5wXquz+7JAk4x15aFAwN2ng0LI3bXs6pPJfUR94hLriazBfuNMNrhafN0cg9nLcEgg==";Path=/;Expires=Wed, 06-Apr-2016 08:46:51 GMT
+   * @param cookieString
+   */
+  static createFromSetCookieString(cookieString) {
+    const cookieParts = cookieString.split(';');
+    const cookieObject = {};
+    for (const part of cookieParts) {
+      const splitHelper = part.trim().split('=');
+      const splitResult = splitHelper.splice(0, 1);
+      splitResult.push(splitHelper.join('='));
+      const { 0: key, 1: val } = splitResult;
+
+      if (_isCookieKeyword(key)) {
+        cookieObject[key.toLowerCase()] = val || '';
+      } else {
+        cookieObject.name = key;
+        cookieObject.value = val.replace(/\"/g, '');
+      }
+    }
+
+    function _isCookieKeyword(key) {
+      switch (key.toLowerCase()) {
+        case 'expires':
+        case 'domain':
+        case 'path':
+        case 'secure':
+        case 'httponly':
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    if (cookieObject.expires) {
+      return Cookie.createExpireInMsec(
+        cookieObject.name,
+        cookieObject.value,
+        (new Date(cookieObject.expires)).getTime(),
+        cookieObject.domain,
+        Boolean(cookieObject.secure),
+        cookieObject.path
+      );
+    }
+
+    return Cookie.createSession(
+      cookieObject.name,
+      cookieObject.value,
+      cookieObject.domain,
+      Boolean(cookieObject.secure),
+      cookieObject.path
+    );
+  }
+
+  /**
    * @param {string} name
    * @param {string} value
    * @param {?number} expire

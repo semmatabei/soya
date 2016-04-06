@@ -82,6 +82,10 @@ export default class ServerCookieJar extends CookieJar {
     return values;
   }
 
+  getHttpRequest() {
+    return this._httpRequest;
+  }
+
   /**
    * Creates a cache of cookie from http.incomingMessage.
    */
