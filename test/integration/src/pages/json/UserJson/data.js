@@ -11,27 +11,27 @@ export default {
     firstName: 'Willy',
     lastName: 'Wonka',
     email: 'willy@wonka.com',
-    posts: 10
+    posts: 5
   },
   captainjack: {
     username: 'captainjack',
     firstName: 'Captain',
     lastName: 'Jack Sparrow',
     email: 'captain@blackpearl.com',
-    posts: 10
+    posts: 17
   },
   jedikiller: {
     username: 'jedikiller',
     firstName: 'Anakin',
     lastName: 'Skywalker',
     email: 'jedikiller@deathstar.com',
-    posts: 10
+    posts: 9
   },
   meesa: {
     username: 'meesa',
     firstName: 'Jar',
     lastName: 'Jar Binks',
     email: 'meesa@jarjar.com',
-    posts: 10
+    posts: 6
   }
 };

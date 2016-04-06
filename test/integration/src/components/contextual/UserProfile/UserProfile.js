@@ -39,6 +39,7 @@ class UserProfile extends React.Component {
         <li>Last name: {this.props.result.user.data.lastName}</li>
         <li>Email: {this.props.result.user.data.email}</li>
         <li>Posts: {this.props.result.user.data.posts}</li>
+        <li>Badge: {this.props.result.user.data.badge}</li>
       </ul>
     </div>
   }

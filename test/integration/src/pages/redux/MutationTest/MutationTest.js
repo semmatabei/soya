@@ -5,34 +5,55 @@ import ReactRenderer from 'soya/lib/page/react/ReactRenderer.js';
 import register from 'soya/lib/client/Register';
 import ReduxStore from 'soya/lib/data/redux/ReduxStore.js';
 import UserProfile from '../../../components/contextual/UserProfile/UserProfile.js';
+import BadgeList from '../../../components/contextual/BadgeList/BadgeList.js';
 import IncrementUserPostMutation from '../../../mutation/IncrementUserPostMutation.js';
+import ResetUserPostMutation from '../../../mutation/ResetUserPostMutation.js';
+import FlipBadgeMutation from '../../../mutation/FlipBadgeMutation.js';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 // TODO: Figure out how to do promise polyfill.
 import style from '../../../shared/sitewide.css';
 
-const USERNAME = 'rickchristie';
+const USERNAME_A = 'rickchristie';
+const USERNAME_B = 'willywonka';
+const USERNAME_C = 'captainjack';
 
 class Component extends React.Component {
   render() {
     return <div>
       <h1>Mutation Test</h1>
       <ul>
-        <li>When you <a href="javascript:void(0)" onClick={this.execMutation.bind(this, USERNAME)}>click this link</a>, the increment post mutation for <code>{USERNAME}</code> will be executed.</li>
+        <li>When you <a href="javascript:void(0)" onClick={this.incrementSingle.bind(this, USERNAME_A)}>click this link</a>, the increment post mutation for <code>{USERNAME_A}</code> will be executed.</li>
         <li>When mutation is successful, the user profile data should be automatically refetched by <code>ReduxStore</code>.</li>
-        <li>When you click this link, increment all posts mutation will be executed, and all user profiles should refresh.</li>
-        <li>When you click this link, it toggles badge names so not only <code>BadgeSegment</code> should change, but also <code>UserSegment</code>.</li>
+        <li>When you <a href="javascript:void(0)" onClick={this.resetAll.bind(this, 5)}>click this link</a>, reset all posts mutation will be executed, and all user profiles should refresh.</li>
+        <li>When you <a href="javascript:void(0)" onClick={this.flipBadge.bind(this)}>click this link</a>, it toggles badge names so not only <code>BadgeSegment</code> should change, but also <code>UserSegment</code>.</li>
       </ul>
-      <h3>Username: {USERNAME}</h3>
-      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={USERNAME}></UserProfile>
+      <h3>Username: {USERNAME_A}</h3>
+      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={USERNAME_A}></UserProfile>
+      <h3>Username: {USERNAME_B}</h3>
+      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={USERNAME_B}></UserProfile>
+      <h3>Username: {USERNAME_C}</h3>
+      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={USERNAME_C}></UserProfile>
+      <h3>Badge Names</h3>
+      <BadgeList reduxStore={this.props.reduxStore} config={this.props.config} />
       <DebugPanel top right bottom>
         <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>
   }
 
-  execMutation(username) {
+  incrementSingle(username) {
     var mutation = new IncrementUserPostMutation(username);
+    this.props.reduxStore.execute(mutation);
+  }
+
+  resetAll(number) {
+    var mutation = new ResetUserPostMutation(number);
+    this.props.reduxStore.execute(mutation);
+  }
+
+  flipBadge() {
+    var mutation = new FlipBadgeMutation();
     this.props.reduxStore.execute(mutation);
   }
 }

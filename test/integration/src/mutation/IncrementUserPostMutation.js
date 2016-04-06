@@ -13,7 +13,6 @@ export default class IncrementUserPostMutation {
     return new Promise((resolve, reject) => {
       request.get('http://localhost:8000/api/user/inc-post/' + encodeURIComponent(this._userId)).end((err, res) => {
         if (res.ok) {
-          var payload = JSON.parse(res.text);
           resolve({
             [UserSegmentId]: [this._userId]
           });

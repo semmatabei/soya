@@ -4,6 +4,7 @@
 
 - Moved integration test IDs into another package so that mutations can refer
   to these IDs without explicitly declaring dependency to Segment.
+- Mutation system implemented and tested.
 
 ## 0.0.28
 

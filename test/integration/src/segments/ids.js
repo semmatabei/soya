@@ -9,3 +9,4 @@ export const LifetimeSessionSegmentId = 'context';
 export const LyingSegmentId = 'lying';
 export const ModalSegmentId = 'modal';
 export const RandomTimeEchoSegmentId = 'randomTimeEcho';
+export const BadgeSegmentId = 'badge';

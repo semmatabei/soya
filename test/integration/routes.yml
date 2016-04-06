@@ -124,6 +124,24 @@ INC_USER_POST_API:
     - [method, GET]
     - [path, /api/user/inc-post/:username]
 
+RESET_USER_POST_API:
+  page: ResetUserPostApi
+  nodes:
+    - [method, GET]
+    - [path, /api/user/reset-post/:number]
+
+BADGE_JSON:
+  page: BadgeJson
+  nodes:
+    - [method, GET]
+    - [path, /api/user/badge/list]
+
+FLIP_BADGE_API:
+  page: FlipBadgeApi
+  nodes:
+    - [method, GET]
+    - [path, /api/user/badge/flip]
+
 ADDITION_JSON:
   page: AdditionJson
   nodes:

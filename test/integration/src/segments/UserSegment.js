@@ -37,7 +37,16 @@ export default class UserSegment extends MapSegment {
 
   _processRefreshRequests(segmentState, refreshRequests) {
     var i, result = [];
-    // We expect refresh requests to be an array.
+    if (refreshRequests == '*') {
+      // Update all fetched user data.
+      for (i in segmentState) {
+        if (!segmentState.hasOwnProperty(i)) continue;
+        result.push({username: i});
+      }
+      return result;
+    }
+
+    // We expect refresh requests to be an array, if not '*'.
     for (i = 0; i < refreshRequests.length; i++) {
       if (!segmentState.hasOwnProperty(refreshRequests[i])) continue;
       result.push({username: refreshRequests[i]});
