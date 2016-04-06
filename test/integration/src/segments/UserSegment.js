@@ -5,9 +5,11 @@ import Thunk from 'soya/lib/data/redux/Thunk.js';
 // TODO: Figure out how to load client-side libraries like jQuery!
 import request from 'superagent';
 
+import { UserSegmentId } from './ids.js';
+
 export default class UserSegment extends MapSegment {
   static id() {
-    return 'user';
+    return UserSegmentId;
   }
 
   _generateQueryId(query) {
@@ -31,5 +33,15 @@ export default class UserSegment extends MapSegment {
       });
       return result;
     };
+  }
+
+  _processRefreshRequests(segmentState, refreshRequests) {
+    var i, result = [];
+    // We expect refresh requests to be an array.
+    for (i = 0; i < refreshRequests.length; i++) {
+      if (!segmentState.hasOwnProperty(refreshRequests[i])) continue;
+      result.push({username: refreshRequests[i]});
+    }
+    return result;
   }
 }

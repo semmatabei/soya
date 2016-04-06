@@ -33,6 +33,7 @@ class Component extends React.Component {
         <li><a href={this.props.router.reverseRoute('SEGMENT_COOKIE')}>Segment Cookie</a></li>
         <li><a href={this.props.router.reverseRoute('SEGMENT_COOKIE_CLIENT')}>Segment Cookie (Client Side)</a></li>
         <li><a href={this.props.router.reverseRoute('TEST_LOCAL_SEGMENT')}>Local Segment</a></li>
+        <li><a href={this.props.router.reverseRoute('MUTATION_TEST')}>Mutation Test</a></li>
       </ul>
       <h3>Form With Redux</h3>
       <ul>
@@ -61,7 +62,8 @@ class TestList extends Page {
       'TEST_LOCAL_SEGMENT',
       'SIMPLE_FORM',
       'REPEATABLE_FORM',
-      'COOKIE_SET'
+      'COOKIE_SET',
+      'MUTATION_TEST'
     ];
   }
 

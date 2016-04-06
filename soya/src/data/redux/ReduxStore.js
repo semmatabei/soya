@@ -546,7 +546,6 @@ export default class ReduxStore extends Store {
     // Register segment.
     if (!registeredSegment) {
       registeredSegment = this._initSegment(SegmentClass, dependencyActionCreatorMap);
-      RegisteredSegmentClass = SegmentClass;
     }
     else if (SegmentClass !== RegisteredSegmentClass) {
       if (this._allowOverwriteSegment[id]) {
@@ -554,7 +553,6 @@ export default class ReduxStore extends Store {
         // TODO: Make two logger implementation, client and server, then use clientReplace accordingly.
         console.log('Replacing segment.. (this should not happen in production!)', RegisteredSegmentClass, SegmentClass);
         registeredSegment = this._initSegment(SegmentClass, dependencyActionCreatorMap);
-        RegisteredSegmentClass = SegmentClass;
 
         // Nullifies the current segment data. Because we are replacing Segment
         // implementation, state data may differ.
@@ -649,6 +647,49 @@ export default class ReduxStore extends Store {
     if (!this._queries[segmentId][queryId].hasOwnProperty('query')) {
       this._queries[segmentId][queryId].query = query;
     }
+  }
+
+  /**
+   * Executes the mutation, returns an object containing the original Mutation
+   * promise, and another promise that resolves when all refresh requests is
+   * done.
+   *
+   * @param {Mutation} mutation
+   * @return {{mutation: Promise; refresh: Promise}}
+   */
+  execute(mutation) {
+    var mutationPromise = mutation.execute();
+    var refreshPromise = new Promise((resolve, reject) => {
+      mutationPromise.then((refreshRequestMap) => {
+        if (refreshRequestMap == null) resolve();
+        var segmentId, i, segment, segmentState, queryList, state = this._getState();
+        var promiseList = [];
+        for (segmentId in refreshRequestMap) {
+          if (!refreshRequestMap.hasOwnProperty(segmentId) ||
+              !this._segments.hasOwnProperty(segmentId)) {
+            continue;
+          }
+          segment = this._segments[segmentId];
+          segmentState = state[segmentId];
+          queryList = segment._processRefreshRequests(
+            segmentState, refreshRequestMap[segmentId]);
+          for (i = 0; i < queryList.length; i++) {
+            promiseList.push(this.query(segmentId, queryList[i], true));
+          }
+          PromiseUtil.allParallel(Promise, promiseList).then(resolve, reject).catch(function(error) {
+            reject(error);
+            PromiseUtil.throwError(error);
+          });
+        }
+      }, reject).catch(function(error) {
+        reject(error);
+        PromiseUtil.throwError(error);
+      });
+    });
+    return {
+      mutation: mutationPromise,
+      refresh: refreshPromise
+    };
   }
 
   /**

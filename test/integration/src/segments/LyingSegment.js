@@ -1,6 +1,8 @@
 import LocalSegment from 'soya/lib/data/redux/segment/local/LocalSegment';
 import ActionNameUtil from 'soya/lib/data/redux/segment/ActionNameUtil';
 
+import { LyingSegmentId } from './ids.js';
+
 /**
  * @CLIENT_SERVER
  */
@@ -8,7 +10,7 @@ export default class LyingSegment extends LocalSegment {
   _incrementActionType;
 
   static id() {
-    return 'lying';
+    return LyingSegmentId;
   }
 
   static createInitialData() {

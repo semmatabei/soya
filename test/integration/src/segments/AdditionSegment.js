@@ -5,9 +5,11 @@ import Thunk from 'soya/lib/data/redux/Thunk.js';
 // TODO: Figure out how to load client-side libraries like jQuery!
 import request from 'superagent';
 
+import { AdditionSegmentId } from './ids.js';
+
 export default class AdditionSegment extends MapSegment {
   static id() {
-    return 'addition';
+    return AdditionSegmentId;
   }
 
   _generateQueryId(query) {

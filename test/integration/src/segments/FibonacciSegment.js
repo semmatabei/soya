@@ -6,11 +6,12 @@ import QueryDependencies from 'soya/lib/data/redux/QueryDependencies';
 // TODO: Figure out how to load client-side libraries like jQuery!
 import request from 'superagent';
 
+import { FibonacciSegmentId } from './ids.js';
 import AdditionSegment from './AdditionSegment.js';
 
 export default class FibonacciSegment extends MapSegment {
   static id() {
-    return 'fibonacci';
+    return FibonacciSegmentId;
   }
 
   static getSegmentDependencies() {

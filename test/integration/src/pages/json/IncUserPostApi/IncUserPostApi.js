@@ -3,33 +3,30 @@ import RenderResult from 'soya/lib/page/RenderResult';
 import JsonRenderer from 'soya/lib/page/json/JsonRenderer.js';
 import register from 'soya/lib/client/Register';
 
-import userJson from './data.js';
+import userJson from '../UserJson/data.js';
 
-var notFound = {
-  error: 'Username does not exist.'
-};
-
-class UserJson extends Page {
+class IncUserPostApi extends Page {
   static get pageName() {
-    return 'UserJson';
+    return 'IncUserPostApi';
   }
 
   render(httpRequest, routeArgs, store, callback) {
     var username = routeArgs.username;
     var jsonRenderer, renderResult;
     if (userJson.hasOwnProperty(username)) {
-      jsonRenderer = new JsonRenderer(userJson[username]);
+      userJson[username].posts++;
+      jsonRenderer = new JsonRenderer(true);
       renderResult = new RenderResult(jsonRenderer);
     } else {
-      jsonRenderer = new JsonRenderer(notFound);
+      jsonRenderer = new JsonRenderer(false);
       renderResult = new RenderResult(jsonRenderer);
       renderResult.setStatusCode(404);
     }
 
     // Simulate network delay of 3 seconds.
-    setTimeout(callback.bind({}, renderResult), 3000);
+    setTimeout(callback.bind({}, renderResult), 250);
   }
 }
 
-register(UserJson);
-export default UserJson;
+register(IncUserPostApi);
+export default IncUserPostApi;

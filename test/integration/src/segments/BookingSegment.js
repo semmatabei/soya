@@ -6,11 +6,12 @@ import QueryDependencies from 'soya/lib/data/redux/QueryDependencies.js';
 // TODO: Figure out how to load client-side libraries like jQuery!
 import request from 'superagent';
 
+import { BookingSegmentId } from './ids.js';
 import LifetimeSessionSegment from './LifetimeSessionSegment.js';
 
 export default class BookingSegment extends MapSegment {
   static id() {
-    return 'booking';
+    return BookingSegmentId;
   }
 
   static getSegmentDependencies() {

@@ -6,12 +6,14 @@ import Cookie from 'soya/lib/http/Cookie.js';
 // TODO: Figure out how to load client-side libraries like jQuery!
 import request from 'superagent';
 
+import { LifetimeSessionSegmentId } from './ids.js';
+
 var SESSION_COOKIE_NAME = 'session';
 var LIFETIME_COOKIE_NAME = 'lifetime';
 
 export default class LifetimeSessionSegment extends MapSegment {
   static id() {
-    return 'context';
+    return LifetimeSessionSegmentId;
   }
 
   _generateQueryId(query) {

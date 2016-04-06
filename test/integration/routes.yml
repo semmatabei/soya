@@ -58,6 +58,12 @@ TEST_LOCAL_SEGMENT:
     - [method, GET]
     - [path, /data/redux/local]
 
+MUTATION_TEST:
+  page: MutationTest
+  nodes:
+    - [method, GET]
+    - [path, /data/redux/mutation]
+
 SIMPLE_FORM:
   page: SimpleForm
   nodes:
@@ -111,6 +117,12 @@ VALIDATE_API:
   nodes:
     - [method, GET]
     - [path, /api/validate/:type/:value]
+
+INC_USER_POST_API:
+  page: IncUserPostApi
+  nodes:
+    - [method, GET]
+    - [path, /api/user/inc-post/:username]
 
 ADDITION_JSON:
   page: AdditionJson

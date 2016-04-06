@@ -2,6 +2,8 @@ import LocalSegment from 'soya/lib/data/redux/segment/local/LocalSegment';
 import ActionNameUtil from 'soya/lib/data/redux/segment/ActionNameUtil';
 import update from 'react-addons-update';
 
+import { ModalSegmentId } from './ids.js';
+
 /**
  * @CLIENT_SERVER
  */
@@ -13,7 +15,7 @@ export default class ModalSegment extends LocalSegment {
   _actionCreator;
 
   static id() {
-    return 'modal';
+    return ModalSegmentId;
   }
 
   static createInitialData() {

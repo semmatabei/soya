@@ -6,11 +6,12 @@ import QueryDependencies from 'soya/lib/data/redux/QueryDependencies.js';
 // TODO: Figure out how to load client-side libraries like jQuery!
 import request from 'superagent';
 
+import { ConcatRandomTimeEchoSegmentId } from './ids.js';
 import RandomTimeEchoSegment from './RandomTimeEchoSegment.js';
 
 export default class ConcatRandomTimeEchoSegment extends MapSegment {
   static id() {
-    return 'concatRandomTimeEcho';
+    return ConcatRandomTimeEchoSegmentId;
   }
 
   static getSegmentDependencies() {

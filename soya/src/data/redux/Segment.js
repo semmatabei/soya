@@ -182,4 +182,16 @@ export default class Segment {
   _getActionCreator() {
 
   }
+
+  /**
+   * Processes the refresh requests according to the given state and generates
+   * list of queries that must be run with cache turned off.
+   *
+   * @param {?} segmentState
+   * @param {?} refreshRequests
+   * @returns {Array<?>}
+   */
+  _processRefreshRequests(segmentState, refreshRequests) {
+    return [];
+  }
 }

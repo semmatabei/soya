@@ -1,13 +1,15 @@
 import MapSegment from 'soya/lib/data/redux/segment/map/MapSegment.js';
 import Thunk from 'soya/lib/data/redux/Thunk.js';
 
+import { RandomTimeEchoSegmentId } from './ids.js';
+
 // TODO: Figure out how to do polyfill.
 // TODO: Figure out how to load client-side libraries like jQuery!
 import request from 'superagent';
 
 export default class RandomTimeEchoSegment extends MapSegment {
   static id() {
-    return 'randomTimeEcho';
+    return RandomTimeEchoSegmentId;
   }
 
   _generateQueryId(query) {
