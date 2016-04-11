@@ -123,10 +123,13 @@ export default function createField(InputComponent) {
         props.errorMessages = this.props.result.field.errorMessages;
         props.touched = this.props.result.field.touched;
         props.isValidating = this.props.result.field.isValidating;
+        props.isFieldEnabled = this.props.result.field.isEnabled;
       } else {
+        // TODO: Use default value from FormSegment.
         props.value = null;
         props.errorMessages = [];
         props.touched = false;
+        props.isFieldEnabled = true;
         props.isValidating = false;
       }
 
@@ -136,7 +139,7 @@ export default function createField(InputComponent) {
         props.isFormEnabled = true;
       }
 
-      props.isDisabled = props.isValidating || !props.isFormEnabled;
+      props.isDisabled = props.isValidating || !props.isFormEnabled || !props.isFieldEnabled;
       props.handleChange = this.__handleChange;
       props.handleAsyncValidation = this.__handleAsyncValidation;
       props.registerChangeValidators = this.__registerChangeValidators;

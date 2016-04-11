@@ -8,6 +8,7 @@ const DEFAULT_FIELD = {
   value: null,
   touched: false,
   errorMessages: [],
+  isEnabled: true,
   isValidating: false
 };
 
@@ -486,7 +487,8 @@ export default class FormSegment extends LocalSegment {
         value: action.value,
         touched: true,
         errorMessages: [],
-        isValidating: false
+        isValidating: false,
+        isEnabled: true
       }
     });
     return update(state, updateObject);
