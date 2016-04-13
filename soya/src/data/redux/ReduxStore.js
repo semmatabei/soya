@@ -211,6 +211,7 @@ export default class ReduxStore extends Store {
     this._subscribers = {};
     this._nextSubscriberId = 1;
     this._store = this._createStore(initialState);
+    this._previousState = initialState;
     this._store.subscribe(this._handleChange.bind(this));
     this._hydrationOptions = {};
     this._actionCreators = {};
