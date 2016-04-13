@@ -278,6 +278,11 @@ export default class ReduxStore extends Store {
 
     var reducer, segmentName, segment, segmentState, nextSegmentState;
     var nextState = {}, isChanged = false;
+    for (segmentName in state) {
+      if (!state.hasOwnProperty(segmentName)) continue;
+      nextState[segmentName] = state[segmentName];
+    }
+
     for (segmentName in this._reducers) {
       if (!this._reducers.hasOwnProperty(segmentName)) continue;
       if (!this._segments.hasOwnProperty(segmentName)) continue;
