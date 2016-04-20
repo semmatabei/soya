@@ -152,10 +152,7 @@ export default class SoyaClient {
     // Create new page instance - dependencies should be fetched and cached
     // by Provider.
     var page = new pageClass(this._provider, this._cookieJar, false);
-    var storeNamespace = '__default';
-    if (typeof pageClass.getStoreNamespace == 'function') {
-      storeNamespace = pageClass.getStoreNamespace();
-    }
+    var storeNamespace = this._getPageStoreNamespace(pageClass);
 
     var store = this._storeCache[storeNamespace];
     if (!store) {
@@ -173,6 +170,24 @@ export default class SoyaClient {
 
     page.render(pageArgs.httpRequest, pageArgs.routeArgs,
       store, this._renderCallback.bind(this, store));
+  }
+
+  /**
+   * Extract state from the currently active store.
+   *
+   * @return {any}
+   */
+  _extractState() {
+    var store = this._getCurrentStore();
+    return store._getState();
+  }
+
+  /**
+   * @param {any} newState
+   */
+  _replaceState(newState) {
+    var store = this._getCurrentStore();
+    store._replaceState(newState);
   }
 
   /**
@@ -196,6 +211,27 @@ export default class SoyaClient {
       throw new Error('Call to non-existent or non-loaded page: ' + name);
     }
     return pageClass;
+  }
+
+  /**
+   * @param {Page} pageClass
+   * @return {string}
+   */
+  _getPageStoreNamespace(pageClass) {
+    var storeNamespace = '__default';
+    if (typeof pageClass.getStoreNamespace == 'function') {
+      storeNamespace = pageClass.getStoreNamespace();
+    }
+    return storeNamespace;
+  }
+
+  /**
+   * @returns {Store}
+   */
+  _getCurrentStore() {
+    var pageClass = this._getPageClass(this._currentPageName);
+    var storeNamespace = this._getPageStoreNamespace(pageClass);
+    return this._storeCache[storeNamespace];
   }
 
   _dismantleCurrentPage() {

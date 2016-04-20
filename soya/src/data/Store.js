@@ -26,6 +26,13 @@ export default class Store {
   }
 
   /**
+   * @param {any} state
+   */
+  _replaceState(state) {
+    throw new Error('Abstract method not implemented');
+  }
+
+  /**
    * Tells this Store that upon first Segment conflict, it has to nullify the
    * Segment's state, second conflict throws error as usual.
    *
