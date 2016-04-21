@@ -22,7 +22,7 @@
     "watch-starter-redux": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter-redux/node_modules/soya/lib\" --source-maps --watch",
     "watch-test-integration": "./node_modules/.bin/babel src/ --out-dir \"../test/integration/node_modules/soya/lib\" --source-maps --watch",
     "deploy-tapfe": "./node_modules/.bin/babel src/ --out-dir \"../tapfe/node_modules/soya/lib\"",
-    "watch-tap": "./node_modules/.bin/babel src/ --out-dir \"../../tap/node_modules/soya/lib\" --source-maps --watch"
+    "watch-tapfe": "./node_modules/.bin/babel src/ --out-dir \"../tapfe/node_modules/soya/lib\" --source-maps --watch"
   },
   "peerDependencies": {
     "babel": "^5.8.23",
