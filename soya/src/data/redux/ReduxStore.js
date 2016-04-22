@@ -153,7 +153,7 @@ export default class ReduxStore extends Store {
   _store;
 
   /**
-   * @type {{[key: string]: any}}
+   * @type {{state: any; timestamp: number}}
    */
   _previousState;
 
@@ -211,7 +211,10 @@ export default class ReduxStore extends Store {
     this._subscribers = {};
     this._nextSubscriberId = 1;
     this._store = this._createStore(initialState);
-    this._previousState = initialState;
+    this._previousState = {
+      state: initialState,
+      timestamp: this._getTimestamp()
+    };
     this._store.subscribe(this._handleChange.bind(this));
     this._hydrationOptions = {};
     this._actionCreators = {};
@@ -298,6 +301,9 @@ export default class ReduxStore extends Store {
   }
 
   /**
+   * We need to watch out because _handleChange() could be recursive. For more
+   * information please see _setPreviousState().
+   *
    * @private
    */
   _handleChange() {
@@ -307,10 +313,11 @@ export default class ReduxStore extends Store {
       return;
     }
 
+    var timestamp = this._getTimestamp();
     var state = this._store.getState();
-    if (this._previousState == null) {
+    if (this._previousState.state == null) {
       // If no change, no need to trigger callbacks.
-      this._previousState = state;
+      this._setPreviousState(state, timestamp);
       return;
     }
 
@@ -324,13 +331,14 @@ export default class ReduxStore extends Store {
       segment = this._segments[segmentName];
       segmentSubscribers = this._subscribers[segmentName];
       segmentState = state[segmentName];
-      prevSegmentState = this._previousState[segmentName];
+      prevSegmentState = this._previousState.state[segmentName];
       for (queryId in segmentSubscribers) {
         if (!segmentSubscribers.hasOwnProperty(queryId)) continue;
         querySubscribers = segmentSubscribers[queryId];
         // If segmentState is previously null, then this is a new query call.
         // First getState() method call should already return the initialized
         // object, so we don't need to call update.
+        // TODO: This assumption/design seems to be flawed, null to existence is a change, and we should notify listeners.
         shouldUpdate = false;
         if (prevSegmentState != null) {
           segmentPiece = segment._comparePiece(prevSegmentState, segmentState, queryId);
@@ -347,7 +355,34 @@ export default class ReduxStore extends Store {
     }
 
     // Update previous state.
-    this._previousState = state;
+    this._setPreviousState(state, timestamp);
+  }
+
+  /**
+   * Sets previous state for future comparison on _handleChange(). We need
+   * to compare timestamp of each state because of these chain of events:
+   *
+   * 1) _handleChange() is called, it triggers listeners for appropriate
+   *    components.
+   * 2) One of those components (or its children), upon updating needs to
+   *    dispatch another action. This triggers another _handleChange()
+   *    before the first one is finished.
+   *
+   * Recursive handleChange() doesn't seem to have any negative effects,
+   * only that we should be careful when setting previous state. It might
+   * be that the previous state is already stale.
+   *
+   * @param {Object} newState
+   * @param {number} timestamp
+   * @private
+   */
+  _setPreviousState(newState, timestamp) {
+    if (this._previousState.timestamp < timestamp) {
+      this._previousState = {
+        state: newState,
+        timestamp: timestamp
+      };
+    }
   }
 
   /**
@@ -927,5 +962,14 @@ export default class ReduxStore extends Store {
       type: REPLACE_STATE,
       state: newState
     });
+  }
+
+  /**
+   * Returns current timestamp.
+   *
+   * @returns {number}
+   */
+  _getTimestamp() {
+    return Date.now ? Date.now() : (new Date()).getTime();
   }
 }
