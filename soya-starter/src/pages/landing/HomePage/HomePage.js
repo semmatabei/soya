@@ -1,6 +1,5 @@
 import React from 'react';
 import Cookie from 'soya/lib/http/Cookie';
-import {prop} from 'soya/lib/helper';
 import Page from 'soya/lib/page/Page';
 import register from 'soya/lib/client/Register.js';
 import RenderResult from 'soya/lib/page/RenderResult';
