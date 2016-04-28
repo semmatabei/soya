@@ -79,7 +79,7 @@ export default class FormSegment extends LocalSegment {
     return {};
   }
 
-  static formFieldToMap(fields) {
+  static extractValues(fields) {
     const result = {};
     for (const currentKey in fields) {
       if (!fields.hasOwnProperty(currentKey)) continue;
