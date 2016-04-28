@@ -52,6 +52,7 @@ export default class FormSegment extends LocalSegment {
   // Simple field related action.
   _setValueActionType;
   _setValuesActionType;
+  _clearFieldActionType;
   _mergeFieldsActionType;
   _setErrorMessagesActionType;
   _addErrorMessagesActionType;
@@ -78,6 +79,15 @@ export default class FormSegment extends LocalSegment {
     return {};
   }
 
+  static extractValues(fields) {
+    const result = {};
+    for (const currentKey in fields) {
+      if (!fields.hasOwnProperty(currentKey)) continue;
+      FormSegment.fetchValue(fields[currentKey], currentKey, result);
+    }
+    return result;
+  }
+
   /**
    * TODO: Remove the need for PromiseImpl.
    *
@@ -91,6 +101,7 @@ export default class FormSegment extends LocalSegment {
     this._queryIdCache = {};
     this._setValueActionType = ActionNameUtil.generate(id, 'SET_VALUE');
     this._setValuesActionType = ActionNameUtil.generate(id, 'SET_VALUES');
+    this._clearFieldActionType = ActionNameUtil.generate(id, 'CLEAR_FIELD');
     this._mergeFieldsActionType = ActionNameUtil.generate(id, 'MERGE_FIELDS');
     this._setIsValidatingActionType = ActionNameUtil.generate(id, 'SET_IS_VALIDATING');
     this._setErrorMessagesActionType = ActionNameUtil.generate(id, 'SET_ERRORS');
@@ -146,6 +157,13 @@ export default class FormSegment extends LocalSegment {
           type: this._setValuesActionType,
           formId: formId,
           values: values
+        };
+      },
+      clearField: (formId, fieldName) => {
+        return {
+          type: this._clearFieldActionType,
+          formId: formId,
+          fieldName: fieldName
         };
       },
       setErrorMessages: (formId, fieldName, errorMessages) => {
@@ -295,7 +313,7 @@ export default class FormSegment extends LocalSegment {
     var fields = state[formId].fields;
     for (currentKey in fields) {
       if (!fields.hasOwnProperty(currentKey)) continue;
-      this._fetchValue(fields[currentKey], currentKey, result);
+      FormSegment.fetchValue(fields[currentKey], currentKey, result);
     }
     return result;
   }
@@ -307,13 +325,15 @@ export default class FormSegment extends LocalSegment {
    * @param {string|number} currentKey
    * @param {Object} container
    */
-  _fetchValue(field, currentKey, container) {
+  static fetchValue(field, currentKey, container) {
     var key;
-    if (isArray(field)) {
+    if (field == null) {
+      container[currentKey] = null;
+    } else if (isArray(field)) {
       // Its an list of T.
       container[currentKey] = [];
       for (key = 0; key < field.length; key++) {
-        this._fetchValue(field[key], key, container[currentKey]);
+        FormSegment.fetchValue(field[key], key, container[currentKey]);
       }
     } else if (isArray(field.errorMessages)) {
       // It's a field object.
@@ -323,7 +343,7 @@ export default class FormSegment extends LocalSegment {
       container[currentKey] = {};
       for (key in field) {
         if (!field.hasOwnProperty(key)) continue;
-        this._fetchValue(field[key], key, container[currentKey]);
+        FormSegment.fetchValue(field[key], key, container[currentKey]);
       }
     }
   }
@@ -415,6 +435,8 @@ export default class FormSegment extends LocalSegment {
         case this._setValuesActionType:
           return this._setValues(state, action);
           break;
+        case this._clearFieldActionType:
+          return this._clearField(state, action);
         case this._setErrorMessagesActionType:
           return this._setErrorMessages(state, action);
           break;
@@ -551,7 +573,17 @@ export default class FormSegment extends LocalSegment {
           isEnabled: true
         }
       }
-    })
+    });
+  }
+
+  _clearField(state, action) {
+    state = this._ensureFormExistence(state, action);
+    const result = this._extractField(state, action);
+    state = result.state;
+    const updateObject = this._createFieldUpdateObject(action, {
+      $set: null
+    });
+    return update(state, updateObject);
   }
 
   _addListItem(state, action) {
