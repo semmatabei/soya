@@ -573,7 +573,7 @@ export default class FormSegment extends LocalSegment {
           isEnabled: true
         }
       }
-    })
+    });
   }
 
   _clearField(state, action) {
