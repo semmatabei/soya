@@ -264,7 +264,8 @@ export default class WebpackCompiler extends Compiler {
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
           { test: /\.css$/, loader: cssLoaderStr, exclude: /\.global\.css$/ },
           { test: /\.global\.css$/, loader: 'style-loader!css-loader' }
-        ]
+        ],
+        noParse: /node_modules\/quill\/dist/
       },
       resolve: { alias: {} },
       plugins: [ new this._webpack.optimize.OccurenceOrderPlugin() ]
