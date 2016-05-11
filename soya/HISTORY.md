@@ -5,6 +5,13 @@
 - Moved integration test IDs into another package so that mutations can refer
   to these IDs without explicitly declaring dependency to Segment.
 - Mutation system implemented and tested.
+- Implemented webpack's extract-text-plugin.
+  - CSS now delivered as files instead of appended dynamically by javascript,
+    this means no more flash-of-unstyled-content, although we can no longer
+    hot-reload CSS.
+  - CSS can also have common.css module.
+- Added commonFileThreshold framework configuration to mirror webpack's
+  minChunks configuration.
 
 ## 0.0.28
 
