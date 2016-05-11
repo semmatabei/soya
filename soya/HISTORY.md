@@ -6,9 +6,8 @@
   to these IDs without explicitly declaring dependency to Segment.
 - Mutation system implemented and tested.
 - Implemented webpack's extract-text-plugin.
-  - CSS now delivered as files instead of appended dynamically by javascript,
-    this means no more flash-of-unstyled-content, although we can no longer
-    hot-reload CSS.
+  - CSS now delivered as files instead of appended dynamically by javascript
+    when hot-reload is turned off. This means no more flash-of-unstyled-content.
   - CSS can also have common.css module.
 - Added commonFileThreshold framework configuration to mirror webpack's
   minChunks configuration.

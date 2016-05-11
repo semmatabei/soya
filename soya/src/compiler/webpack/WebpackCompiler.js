@@ -266,31 +266,40 @@ export default class WebpackCompiler extends Compiler {
       module: {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
-          WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
-          {
-            test: /\.css$/,
-            loader: ExtractTextPlugin.extract(
-              "style-loader",
-              cssLoaderStr
-            ),
-            exclude: /\.global\.css$/
-          },
-          {
-            test: /\.global\.css$/,
-            loader: ExtractTextPlugin.extract(
-              "style-loader",
-              "css-loader"
-            )
-          }
+          WebpackCompiler.getFileLoaderConfig(this._frameworkConfig)
         ]
       },
       devtool: "source-map",
       resolve: { alias: {} },
       plugins: [
-        new this._webpack.optimize.OccurenceOrderPlugin(),
-        new ExtractTextPlugin('css/[name]-[contenthash].css')
+        new this._webpack.optimize.OccurenceOrderPlugin()
       ]
     };
+
+    var normalCssLoader = {
+      test: /\.css$/,
+      loader: 'style-loader!' + cssLoaderStr,
+      exclude: /\.global\.css$/
+    };
+    var globalCssLoader = {
+      test: /\.global\.css$/,
+      loader: 'style-loader!' + cssLoaderStr
+    };
+    if (!this._frameworkConfig.hotReload) {
+      // Enable loading CSS as files.
+      normalCssLoader.loader = ExtractTextPlugin.extract(
+        "style-loader",
+        cssLoaderStr
+      );
+      globalCssLoader.loader = ExtractTextPlugin.extract(
+        "style-loader",
+        "css-loader"
+      );
+      configuration.plugins.push(
+        new ExtractTextPlugin('css/[name]-[contenthash].css'));
+    }
+    configuration.module.loaders.push(normalCssLoader);
+    configuration.module.loaders.push(globalCssLoader);
 
     for (i in this._clientReplace) {
       if (!this._clientReplace.hasOwnProperty(i)) continue;
