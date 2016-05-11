@@ -26,7 +26,7 @@ export default function register(pageClass) {
     window.__soyaClient = new SoyaClient(config);
     window.__soyaClient.addRouteConfig(routes);
     window.__soyaClient.register(pageClass);
-    window.__soyaClient.navigate(pageClass.name, routeArgs, hydratedState);
+    window.__soyaClient.navigate(pageClass.pageName, routeArgs, hydratedState);
     return;
   }
 
