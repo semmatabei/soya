@@ -80,9 +80,12 @@ export default class AssetServer {
 
   /**
    * @param {string} path
-   * @returns {any}
+   * @returns {{size: number; content: any}}
    */
   get(path) {
-    return this.assets[path];
+    return {
+      size: this.assets[path].length,
+      content: this.assets[path]
+    }
   }
 }

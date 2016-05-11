@@ -3,6 +3,7 @@ import ServerHttpRequest from '../../http/ServerHttpRequest.js';
 
 var fs = require('fs');
 var path = require('path');
+var mime = require('mime');
 
 /**
  * Reads asset from the webpack output directory.
@@ -41,14 +42,17 @@ export default class WebpackAssetServer extends AssetServer {
 
   /**
    * @param {string} assetPath
-   * @returns {any}
+   * @returns {{size: number; content: any}}
    */
   get(assetPath) {
-    var cached = super.get(assetPath);
-    if (cached) return cached;
-    var fullPath = path.join(this._absoluteTempDir, assetPath);
+    var fullPath = path.join(this._absoluteTempDir, assetPath), stat;
     try {
-      return fs.readFileSync(fullPath);
+      // TODO: We might have to switch to async for better performance here.
+      stat = fs.statSync(fullPath);
+      return {
+        size: stat.size,
+        content: fs.readFileSync(fullPath)
+      }
     } catch (err) {
       this._logger.notice('Asset server failed to retrieve: \'' + fullPath + '\'.', err);
       return null;
@@ -65,13 +69,16 @@ export default class WebpackAssetServer extends AssetServer {
     if (httpRequest.startsWith(this._assetHostPath)) {
       var fullRequestPath = path.join(httpRequest.getHost(), decodeURI(httpRequest.getPath()));
       var realPath = fullRequestPath.substr(this._assetHostPath.length);
-      var content = this.get(realPath);
-      if (content == null) {
+      var asset = this.get(realPath);
+      if (asset == null || asset.content == null) {
         return false;
       }
-      // TODO: Handle content type headers, content size, e-tag, etc.
-      response.writeHead(200, {'Content-Type': 'text/plain'});
-      response.end(content);
+      // TODO: Handle e-tag, etc.
+      response.writeHead(200, {
+        'Content-Type': mime.lookup(realPath),
+        'Content-Length': asset.size
+      });
+      response.end(asset.content);
       return true;
     }
     return false;

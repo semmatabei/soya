@@ -54,7 +54,7 @@ export default class ReactRenderer extends ContentRenderer {
     var i, url;
     for (i = 0; i < pageDependencies.cssDependencies.length; i++) {
       url = pageDependencies.cssDependencies[i];
-      result += '<link rel="stylesheet" type="text/css" src="' + url + '">';
+      result += '<link rel="stylesheet" type="text/css" href="' + url + '">';
     }
 
     result += '</head>';
