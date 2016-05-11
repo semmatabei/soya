@@ -302,9 +302,11 @@ export default class WebpackCompiler extends Compiler {
     }
 
     configuration.plugins.push(new this._webpack.NoErrorsPlugin());
-    configuration.plugins.push(new this._webpack.optimize.CommonsChunkPlugin(
-      COMMONS_ENTRY_NAME, 'common-[hash].js'
-    ));
+    configuration.plugins.push(new this._webpack.optimize.CommonsChunkPlugin({
+      name: COMMONS_ENTRY_NAME,
+      filename: 'common-[hash].js',
+      minChunks: this._frameworkConfig.commonFileThreshold
+    }));
 
     if (this._frameworkConfig.minifyJs) {
       configuration.plugins.push(new this._webpack.optimize.UglifyJsPlugin({}));
