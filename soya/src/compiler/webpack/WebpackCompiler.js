@@ -276,6 +276,12 @@ export default class WebpackCompiler extends Compiler {
       ]
     };
 
+    // Links you need to read to understand this CSS section:
+    // - https://webpack.github.io/docs/stylesheets.html
+    // - https://github.com/webpack/extract-text-webpack-plugin
+    // - https://webpack.github.io/docs/list-of-plugins.html
+    // - https://github.com/webpack/css-loader
+    // - https://github.com/webpack/style-loader
     var normalCssLoader = {
       test: /\.css$/,
       loader: 'style-loader!' + cssLoaderStr,
