@@ -8,6 +8,11 @@ var path = require('path');
 var fs = require('fs');
 var rimraf = require('rimraf');
 var COMMONS_ENTRY_NAME = '__commons';
+var ExtractTextPlugin  = require("extract-text-webpack-plugin");
+
+const SOURCE_MAP_FILE_REGEX = /\.[a-zA-Z0-9]{1,4}\.map/;
+const CSS_FILE_REGEX = /\.css[\?#]?/;
+const JS_FILE_REGEX = /\.js[\?#]?/;
 
 /**
  * @SERVER
@@ -140,7 +145,7 @@ export default class WebpackCompiler extends Compiler {
         __dirname: true,
         __filename: true
       },
-      devtool: 'sourcemap',
+      devtool: 'source-map',
       module: {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
@@ -250,7 +255,7 @@ export default class WebpackCompiler extends Compiler {
    */
   run(entryPoints, updateCompileResultCallback) {
     var i, j, entryPoint, entryPointList = [];
-    var cssLoaderStr = this._frameworkConfig.cssModules ? 'style-loader!css-loader?modules' : 'style-loader!css-loader';
+    var cssLoaderStr = this._frameworkConfig.cssModules ? 'css-loader?sourceMap&modules' : 'css-loader?sourceMap';
     var configuration = {
       entry: {},
       output: {
@@ -262,12 +267,29 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig),
-          { test: /\.css$/, loader: cssLoaderStr, exclude: /\.global\.css$/ },
-          { test: /\.global\.css$/, loader: 'style-loader!css-loader' }
+          {
+            test: /\.css$/,
+            loader: ExtractTextPlugin.extract(
+              "style-loader",
+              cssLoaderStr
+            ),
+            exclude: /\.global\.css$/
+          },
+          {
+            test: /\.global\.css$/,
+            loader: ExtractTextPlugin.extract(
+              "style-loader",
+              "css-loader"
+            )
+          }
         ]
       },
+      devtool: "source-map",
       resolve: { alias: {} },
-      plugins: [ new this._webpack.optimize.OccurenceOrderPlugin() ]
+      plugins: [
+        new this._webpack.optimize.OccurenceOrderPlugin(),
+        new ExtractTextPlugin('css/[name]-[contenthash].css')
+      ]
     };
 
     for (i in this._clientReplace) {
@@ -281,7 +303,7 @@ export default class WebpackCompiler extends Compiler {
 
     configuration.plugins.push(new this._webpack.NoErrorsPlugin());
     configuration.plugins.push(new this._webpack.optimize.CommonsChunkPlugin(
-      COMMONS_ENTRY_NAME, 'common-[hash].js', entryPointList
+      COMMONS_ENTRY_NAME, 'common-[hash].js'
     ));
 
     if (this._frameworkConfig.minifyJs) {
@@ -322,7 +344,8 @@ export default class WebpackCompiler extends Compiler {
       }
       var commonsChunk = chunkMap[COMMONS_ENTRY_NAME];
 
-      var compileResult = new CompileResult(), entryPointChunk, entryPointName, pageDep;
+      var compileResult = new CompileResult(), entryPointChunk, entryPointName,
+          pageDep, depArray;
       for (i = 0; i < entryPointList.length; i++) {
         entryPointName = entryPointList[i];
         if (!chunkMap.hasOwnProperty(entryPointName)) {
@@ -343,12 +366,16 @@ export default class WebpackCompiler extends Compiler {
         };
 
         for (j = 0; j < commonsChunk.files.length; j++) {
-          pageDep.jsDependencies.push(self._assetServer.toUrlWithProtocol(
+          if (SOURCE_MAP_FILE_REGEX.test(commonsChunk.files[j])) continue;
+          depArray = CSS_FILE_REGEX.test(commonsChunk.files[j]) ? pageDep.cssDependencies : pageDep.jsDependencies;
+          depArray.push(self._assetServer.toUrlWithProtocol(
             commonsChunk.files[j], this._frameworkConfig.assetProtocol
           ));
         }
         for (j = 0; j < entryPointChunk.files.length; j++) {
-          pageDep.jsDependencies.push(self._assetServer.toUrlWithProtocol(
+          if (SOURCE_MAP_FILE_REGEX.test(entryPointChunk.files[j])) continue;
+          depArray = CSS_FILE_REGEX.test(entryPointChunk.files[j]) ? pageDep.cssDependencies : pageDep.jsDependencies;
+          depArray.push(self._assetServer.toUrlWithProtocol(
             entryPointChunk.files[j], this._frameworkConfig.assetProtocol
           ));
         }
