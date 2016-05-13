@@ -13,44 +13,38 @@ export default class WishlistForm extends React.Component {
       <h3>{this.props.formName}</h3>
       <h4>Goals</h4>
       <TextField form={this.props.form} name={['goals', 'professional']} label="Professional"
-                 changeValidators={[required]}
-                 reduxStore={this.props.reduxStore} config={this.props.config} />
+                 changeValidators={[required]} context={this.props.context} />
       <div>
         <h5>Material</h5>
         <TextField form={this.props.form} name={['goals', 'material', 'lodging']} label="Lodging"
-                   changeValidators={[required]}
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   changeValidators={[required]} context={this.props.context} />
         <TextField form={this.props.form} name={['goals', 'material', 'electronics']} label="Electronics"
-                   changeValidators={[required]}
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   changeValidators={[required]} context={this.props.context} />
         <TextField form={this.props.form} name={['goals', 'material', 'furniture']} label="Furniture"
-                   changeValidators={[required]}
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   changeValidators={[required]} context={this.props.context} />
       </div>
       <div>
         <h5>Personality</h5>
         <TextField form={this.props.form} name={['goals', 'personality', 'anger']} label="Anger"
-                   changeValidators={[required]}
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   changeValidators={[required]} context={this.props.context} />
         <TextField form={this.props.form} name={['goals', 'personality', 'patience']} label="Patience"
-                   changeValidators={[required]}
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   changeValidators={[required]} context={this.props.context} />
       </div>
       <h4>Places Visited</h4>
       <div>
         <h5>SEA</h5>
         <TextField form={this.props.form} name={['visited', 0, 0]} label="Indonesia"
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   context={this.props.context} />
         <TextField form={this.props.form} name={['visited', 0, 1]} label="Malaysia"
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   context={this.props.context} />
         <h5>Europe</h5>
         <TextField form={this.props.form} name={['visited', 1, 0]} label="Germany"
-                   reduxStore={this.props.reduxStore} config={this.props.config} />
+                   context={this.props.context} />
       </div>
       <h4>Games</h4>
       <RepeatableGames form={this.props.form} name={'games'} minLength={1}
-                       reduxStore={this.props.reduxStore} config={this.props.config} />
-      <RepeatableAdd form={this.props.form} reduxStore={this.props.reduxStore}
+                       context={this.props.context} />
+      <RepeatableAdd form={this.props.form} context={this.props.context}
                      name={'games'} minLength={1} label={'Tambah Game'} />
       <button onClick={this.handleSubmit.bind(this)}>Submit</button>
     </div>;

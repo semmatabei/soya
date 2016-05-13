@@ -12,7 +12,7 @@ import BookingBox from '../../../components/contextual/BookingBox/BookingBox.js'
 
 class Component extends React.Component {
   componentWillMount() {
-    this.props.reduxStore.registerDataComponent(BookingBox);
+    this.props.context.reduxStore.registerDataComponent(BookingBox);
     this.setState({
       clientBookingBox: null,
       clientErrorBookingBox: null
@@ -29,24 +29,24 @@ class Component extends React.Component {
         <li><a href="javascript:void(0)" onClick={this.addBookingBox.bind(this)}>Click here</a> to fetch new booking box.</li>
         <li><a href="javascript:void(0)" onClick={this.addErrorBookingBox.bind(this)}>Click here</a> to fetch an error booking box.</li>
       </ul>
-      <BookingBox reduxStore={this.props.reduxStore} config={this.props.config} bookingId={29000} />
+      <BookingBox context={this.props.context} bookingId={29000} />
       {this.state.clientBookingBox}
       {this.state.clientErrorBookingBox}
       <DebugPanel top right bottom>
-        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+        <DevTools store={this.props.context.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>
   }
 
   addBookingBox() {
-    var component = <BookingBox reduxStore={this.props.reduxStore} config={this.props.config} bookingId={29001} />;
+    var component = <BookingBox context={this.props.context} bookingId={29001} />;
     this.setState({
       clientBookingBox: component
     });
   }
 
   addErrorBookingBox() {
-    var component = <BookingBox reduxStore={this.props.reduxStore} config={this.props.config} bookingId={28000} />;
+    var component = <BookingBox context={this.props.context} bookingId={28000} />;
     this.setState({
       clientErrorBookingBox: component
     });
@@ -67,8 +67,10 @@ class SegmentCookie extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Segment With Cookie Test</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store,
-      config: this.config
+      context: {
+        reduxStore: store,
+        config: this.config
+      }
     });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);

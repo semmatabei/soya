@@ -19,9 +19,9 @@ const REUSE_FORM_ID = 'kontakte';
 
 class Component extends React.Component {
   componentWillMount() {
-    this.actions = this.props.reduxStore.register(FormSegment);
-    this._form = new Form(this.props.reduxStore, FORM_ID);
-    this._kontakteForm = new Form(this.props.reduxStore, REUSE_FORM_ID);
+    this.actions = this.props.context.reduxStore.register(FormSegment);
+    this._form = new Form(this.props.context.reduxStore, FORM_ID);
+    this._kontakteForm = new Form(this.props.context.reduxStore, REUSE_FORM_ID);
   }
 
   render() {
@@ -39,22 +39,22 @@ class Component extends React.Component {
         <li>Form-wide validation (acquaintance cannot borrow money) will be run on submit, only when other validation passes.</li>
         <li>On submission, all per-field sync, async and submit validation should be run, along with custom form-wide validation.</li>
       </ul>
-      <ContactForm form={this._form} formName="Contact Us" reduxStore={this.props.reduxStore} config={this.props.config} />
+      <ContactForm form={this._form} formName="Contact Us" context={this.props.context} />
       <h3>Reusing Form</h3>
       <ul>
         <li>Reusing the same form component, but saving it on another name.</li>
         <li>Setting values to the first form doesn't set it to the other.</li>
         <li><a href="javascript:void(0)" onClick={this.replaceKontakteForm.bind(this)}>Setting values to this form doesn't</a> set it to the first one.</li>
       </ul>
-      <ContactForm form={this._kontakteForm} formName="Kontakte Form" reduxStore={this.props.reduxStore} config={this.props.config} />
+      <ContactForm form={this._kontakteForm} formName="Kontakte Form" context={this.props.context} />
       <DebugPanel top right bottom>
-        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+        <DevTools store={this.props.context.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>
   }
 
   replaceValues() {
-    this.props.reduxStore.dispatch(this.actions.setValues(FORM_ID, [
+    this.props.context.reduxStore.dispatch(this.actions.setValues(FORM_ID, [
       { fieldName: 'name', value: 'Rick Christie' },
       { fieldName: 'phoneNumber', value: '123 456 789'},
       { fieldName: 'message', value: 'Bring me back that Meteora LP that you borrowed!' },
@@ -70,7 +70,7 @@ class Component extends React.Component {
   }
 
   replaceKontakteForm() {
-    this.props.reduxStore.dispatch(this.actions.setValues(REUSE_FORM_ID, [
+    this.props.context.reduxStore.dispatch(this.actions.setValues(REUSE_FORM_ID, [
       { fieldName: 'name', value: '' },
       { fieldName: 'phoneNumber', value: '' },
       { fieldName: 'nickname', value: 'Long Winded Man' },
@@ -92,7 +92,7 @@ class Component extends React.Component {
   }
 
   clearValues() {
-    this.props.reduxStore.dispatch(this.actions.clear(FORM_ID));
+    this.props.context.reduxStore.dispatch(this.actions.clear(FORM_ID));
   }
 }
 
@@ -110,8 +110,10 @@ class SimpleForm extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Simple Form Test</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store,
-      config: this.config
+      context: {
+        reduxStore: store,
+        config: this.config
+      }
     });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);

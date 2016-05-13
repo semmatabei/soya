@@ -4,7 +4,7 @@ import update from 'react-addons-update';
 import { isEqualShallow } from './helper.js';
 
 /**
- * Wraps a react component inside a component that subcribes to queries to the
+ * Wraps a react component inside a component that subscribes to queries to the
  * ReduxStore. The wrapping component encapsulates how, when, what and where
  * to fetch the context. The relationship between a subscriber component and
  * ReduxStore is as follows:
@@ -47,7 +47,7 @@ var defaultGetSegmentDependencies = function() {
  * determines whether to re-run subscribeQueries() or not when this component
  * will receive new props.
  *
- * Props is the prime determinator of query subscription in DataComponent.
+ * Props is the prime determiner of query subscription in DataComponent.
  *
  * Default implementation uses shallowEqual. User can override as needed.
  *
@@ -156,17 +156,23 @@ export default function connect(ReactComponent) {
      * @returns {ReduxStore}
      */
     getReduxStore() {
-      return this.props.reduxStore;
+      if (this.props.context && this.props.context.reduxStore) {
+        return this.props.context.reduxStore;
+      }
+      throw new Error('Context not properly wired to: ' + connectId + '.');
     }
 
     /**
-     * Defaults to getting Config object from props.config. If you want to use
+     * Defaults to getting Config object from props.context. If you want to use
      * context you can override this method.
      *
      * @returns {Object}
      */
     getConfig() {
-      return this.props.config;
+      if (this.props.context && this.props.context.config) {
+        return this.props.context.config;
+      }
+      throw new Error('Context not properly wired to: ' + connectId + '.');
     }
 
     /**

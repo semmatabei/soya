@@ -12,9 +12,9 @@ export class ReviewFieldSet extends React.Component {
       <a href="javascript:void(0)" onClick={this.props.reorderListItemDec.bind(null, this.props.index, 1)}>Up</a>
       <h5>Review {this.props.index + 1}</h5>
       <TextField form={this.props.form} name={this.props.name(['reviewer'])} label="Reviewer"
-        reduxStore={this.props.reduxStore} config={this.props.config} />
+                 context={this.props.context} />
       <TextField form={this.props.form} name={this.props.name(['score'])} label="Score"
-                 reduxStore={this.props.reduxStore} config={this.props.config} />
+                 context={this.props.context} />
     </div>;
   }
 }

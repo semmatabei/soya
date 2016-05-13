@@ -29,32 +29,32 @@ class Component extends React.Component {
         <li>When you <a href="javascript:void(0)" onClick={this.flipBadge.bind(this)}>click this link</a>, it toggles badge names so not only <code>BadgeSegment</code> should change, but also <code>UserSegment</code>.</li>
       </ul>
       <h3>Username: {USERNAME_A}</h3>
-      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={USERNAME_A}></UserProfile>
+      <UserProfile context={this.props.context} username={USERNAME_A}></UserProfile>
       <h3>Username: {USERNAME_B}</h3>
-      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={USERNAME_B}></UserProfile>
+      <UserProfile context={this.props.context} username={USERNAME_B}></UserProfile>
       <h3>Username: {USERNAME_C}</h3>
-      <UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={USERNAME_C}></UserProfile>
+      <UserProfile context={this.props.context} username={USERNAME_C}></UserProfile>
       <h3>Badge Names</h3>
-      <BadgeList reduxStore={this.props.reduxStore} config={this.props.config} />
+      <BadgeList context={this.props.context} />
       <DebugPanel top right bottom>
-        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+        <DevTools store={this.props.context.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>
   }
 
   incrementSingle(username) {
     var mutation = new IncrementUserPostMutation(username);
-    this.props.reduxStore.execute(mutation);
+    this.props.context.reduxStore.execute(mutation);
   }
 
   resetAll(number) {
     var mutation = new ResetUserPostMutation(number);
-    this.props.reduxStore.execute(mutation);
+    this.props.context.reduxStore.execute(mutation);
   }
 
   flipBadge() {
     var mutation = new FlipBadgeMutation();
-    this.props.reduxStore.execute(mutation);
+    this.props.context.reduxStore.execute(mutation);
   }
 }
 
@@ -72,8 +72,10 @@ class MutationTest extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Mutation Test</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store,
-      config: this.config
+      context: {
+        reduxStore: store,
+        config: this.config
+      }
     });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);

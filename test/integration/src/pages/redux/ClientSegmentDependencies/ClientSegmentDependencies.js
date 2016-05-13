@@ -14,9 +14,9 @@ import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {
   componentWillMount() {
-    this.props.reduxStore.registerDataComponent(RandomTimeEchoString);
-    this.props.reduxStore.registerDataComponent(FibonacciSequence);
-    this.props.reduxStore.registerDataComponent(FibonacciTotal);
+    this.props.context.reduxStore.registerDataComponent(RandomTimeEchoString);
+    this.props.context.reduxStore.registerDataComponent(FibonacciSequence);
+    this.props.context.reduxStore.registerDataComponent(FibonacciTotal);
     this.setState({
       serialStr: 'Fetch Serial',
       parallelStr: 'Fetch Parallel',
@@ -74,70 +74,75 @@ class Component extends React.Component {
       </ul>
       {this.state.fibonacciTotalComponent}
       <DebugPanel top right bottom>
-        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+        <DevTools store={this.props.context.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>;
   }
 
   addFibonacciComponent() {
-    var component = <FibonacciSequence reduxStore={this.props.reduxStore}
-      config={this.props.config} number={10} />;
+    var component = <FibonacciSequence context={this.props.context} number={10} />;
     this.setState({
       fibonacciComponent: component
     });
   }
 
   addFibonacciTotalComponent() {
-    var component = <FibonacciTotal reduxStore={this.props.reduxStore}
-      config={this.props.config} number={10} />;
+    var component = <FibonacciTotal context={this.props.context} number={10} />;
     this.setState({
       fibonacciTotalComponent: component
     });
   }
 
   addSerialSerialComponent() {
-    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} value={'Olsen'} shouldReplace={true} />;
+    var component = <RandomTimeEchoString context={this.props.context}
+                                          value={'Olsen'} shouldReplace={true} />;
     this.setState({
       serialSerialComponent: component
     });
   }
 
   addSerialParallelComponent() {
-    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} value={'Olsen'} shouldReplace={true} isReplaceParallel={true} />;
+    var component = <RandomTimeEchoString context={this.props.context}
+                                          value={'Olsen'} shouldReplace={true}
+                                          isReplaceParallel={true} />;
     this.setState({
       serialParallelComponent: component
     });
   }
 
   addParallelParallelComponent() {
-    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} value={'Olsen'} shouldReplace={true} isParallel={true} isReplaceParallel={true} />;
+    var component = <RandomTimeEchoString context={this.props.context}
+                                          value={'Olsen'} shouldReplace={true}
+                                          isParallel={true}
+                                          isReplaceParallel={true} />;
     this.setState({
       parallelParallelComponent: component
     });
   }
 
   addParallelSerialComponent() {
-    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} value={'Olsen'} shouldReplace={true} isParallel={true} />;
+    var component = <RandomTimeEchoString context={this.props.context}
+                                          value={'Olsen'} shouldReplace={true}
+                                          isParallel={true} />;
     this.setState({
       parallelSerialComponent: component
     });
   }
 
   addSerialDependencyComponent() {
-    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} loadAtClient={true} value={this.state.serialStr} />;
+    var component = <RandomTimeEchoString context={this.props.context}
+                                          loadAtClient={true}
+                                          value={this.state.serialStr} />;
     this.setState({
       serialClientComponent: component
     });
   }
 
   addParallelDependencyComponent() {
-    var component = <RandomTimeEchoString reduxStore={this.props.reduxStore}
-      config={this.props.config} loadAtClient={true} value={this.state.parallelStr} isParallel={true} />;
+    var component = <RandomTimeEchoString context={this.props.context}
+                                          loadAtClient={true}
+                                          value={this.state.parallelStr}
+                                          isParallel={true} />;
     this.setState({
       parallelClientComponent: component
     });
@@ -158,8 +163,10 @@ class ClientSegmentDependencies extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Segment Dependencies Test</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store,
-      config: this.config
+      context: {
+        reduxStore: store,
+        config: this.config
+      }
     });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);

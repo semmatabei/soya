@@ -3,8 +3,6 @@
 import Store from '../Store.js';
 import { SERVER, CLIENT } from '../RenderType.js';
 import PromiseUtil from './PromiseUtil.js';
-import SegmentPiece from './AsyncSegmentPiece.js';
-import DataComponent from './DataComponent.js';
 import Thunk from './Thunk.js';
 import QueryDependencies from './QueryDependencies.js';
 

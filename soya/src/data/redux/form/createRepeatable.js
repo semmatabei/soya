@@ -122,14 +122,14 @@ export default function createRepeatable(FieldSetComponent) {
      */
     removeListItem(index) {
       var actions = this.props.getActionCreator(FormSegment.id());
-      this.props.reduxStore.dispatch(actions.removeListItem(
+      this.props.getReduxStore().dispatch(actions.removeListItem(
         this.props.form._formId, this.props.name, index
       ));
     }
 
     addListItem() {
       var actions = this.props.getActionCreator(FormSegment.id());
-      this.props.reduxStore.dispatch(actions.addListItem(
+      this.props.getReduxStore().dispatch(actions.addListItem(
         this.props.form._formId, this.props.name, this.props.minLength,
         this.props.maxLength
       ));
@@ -141,7 +141,7 @@ export default function createRepeatable(FieldSetComponent) {
      */
     reorderListItemInc(index, amount) {
       var actions = this.props.getActionCreator(FormSegment.id());
-      this.props.reduxStore.dispatch(actions.reorderListItemInc(
+      this.props.getReduxStore().dispatch(actions.reorderListItemInc(
         this.props.form._formId, this.props.name, index, amount
       ));
     }
@@ -152,7 +152,7 @@ export default function createRepeatable(FieldSetComponent) {
      */
     reorderListItemDec(index, amount) {
       var actions = this.props.getActionCreator(FormSegment.id());
-      this.props.reduxStore.dispatch(actions.reorderListItemDec(
+      this.props.getReduxStore().dispatch(actions.reorderListItemDec(
         this.props.form._formId, this.props.name, index, amount
       ));
     }
@@ -163,7 +163,7 @@ export default function createRepeatable(FieldSetComponent) {
      */
     reorderListItem(index, targetIndex) {
       var actions = this.props.getActionCreator(FormSegment.id());
-      this.props.reduxStore.dispatch(actions.reorderListItem(
+      this.props.getReduxStore().dispatch(actions.reorderListItem(
         this.props.form._formId, this.props.name, index, targetIndex
       ));
     }

@@ -46,34 +46,30 @@ export default class ContactForm extends React.Component {
     return <div className={style.form}>
       <h3>{this.props.formName}</h3>
       <NameField form={this.props.form} name="name" label="Your Name"
-                 changeValidators={[required]}
-                 reduxStore={this.props.reduxStore} config={this.props.config} />
+                 changeValidators={[required]} context={this.props.context} />
       <TextField form={this.props.form} name="nickname" label="Nick Name"
                  changeValidators={[optional, name, minLength.bind(null, 5)]}
-                 reduxStore={this.props.reduxStore} config={this.props.config} />
+                 context={this.props.context} />
       <AirportField form={this.props.form} name="from" label="Base City"
-                    changeValidators={[required]}
-                    reduxStore={this.props.reduxStore} config={this.props.config} />
+                    changeValidators={[required]} context={this.props.context} />
       <TextField form={this.props.form} name="phoneNumber" label="Phone Number"
                  changeValidators={[required, phone]}
                  asyncValidators={[this.validatePhoneNumber.bind(this)]}
-                 reduxStore={this.props.reduxStore} config={this.props.config} />
+                 context={this.props.context} />
       <SelectBoxField form={this.props.form} name="type" label="Subject" options={TYPE}
-                      changeValidators={[required]}
-                      reduxStore={this.props.reduxStore} config={this.props.config} />
+                      changeValidators={[required]} context={this.props.context} />
       <RadioButtonsField form={this.props.form} name="relationship"
                          changeValidators={[required, this.validateRelationship]}
                          label="Relationship" options={RELATIONSHIP}
-                         reduxStore={this.props.reduxStore} config={this.props.config} />
+                         context={this.props.context} />
       <CheckBoxesField form={this.props.form} name="target" label="Target"
                        options={TARGET} changeValidators={[requiredCheckbox]}
-                       reduxStore={this.props.reduxStore} config={this.props.config} />
+                       context={this.props.context} />
       <SelectMultipleField form={this.props.form} name="call" label="Available for call"
                            options={CALL} changeValidators={[minSelected.bind(null, 2)]}
-                           reduxStore={this.props.reduxStore} config={this.props.config} />
+                           context={this.props.context} />
       <TextAreaField form={this.props.form} name="message" label="Your Message"
-                     changeValidators={[required]}
-                     reduxStore={this.props.reduxStore} config={this.props.config} />
+                     changeValidators={[required]} context={this.props.context} />
       <button onClick={this.handleSubmit.bind(this)}>Submit</button>
     </div>;
   }

@@ -21,13 +21,13 @@ class Component extends React.Component {
         <li>HTML response should already contain the text 'Quick Fox' fetched serially below.</li>
         <li>Redux store state should already contain letters for 'Quick Fox'.</li>
       </ul>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Quick Fox'} />
+      <RandomTimeEchoString context={this.props.context} loadAtClient={true} value={'Quick Fox'} />
       <h3>Parallel Dependency</h3>
       <ul>
         <li>HTML response should already contain an anagram of text 'Jumps Over', fetched parallely below.</li>
         <li>Redux store state should already contain letters for 'Jumps Over'.</li>
       </ul>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Jumps Over'} isParallel={true} />
+      <RandomTimeEchoString context={this.props.context} loadAtClient={true} value={'Jumps Over'} isParallel={true} />
       <h3>Recursive <code>QueryDependencies</code></h3>
       <ul>
         <li>This tests recursive characteristics of <code>QueryDependencies</code> class.</li>
@@ -35,24 +35,24 @@ class Component extends React.Component {
         <li>If Child is Serial, the string 'soya' should be ordered correctly, otherwise it should be an anagram.</li>
       </ul>
       <h4>Serial-Serial</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} />
+      <RandomTimeEchoString context={this.props.context} loadAtClient={true} value={'Olsen'} shouldReplace={true} />
       <h4>Serial-Parallel</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} isReplaceParallel={true} />
+      <RandomTimeEchoString context={this.props.context} loadAtClient={true} value={'Olsen'} shouldReplace={true} isReplaceParallel={true} />
       <h4>Parallel-Serial</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} isParallel={true} />
+      <RandomTimeEchoString context={this.props.context} loadAtClient={true} value={'Olsen'} shouldReplace={true} isParallel={true} />
       <h4>Parallel-Parallel</h4>
-      <RandomTimeEchoString reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} value={'Olsen'} shouldReplace={true} isParallel={true} isReplaceParallel={true} />
+      <RandomTimeEchoString context={this.props.context} loadAtClient={true} value={'Olsen'} shouldReplace={true} isParallel={true} isReplaceParallel={true} />
       <h3>Serial Function Dependencies</h3>
       <ul>
         <li>We have an addition API, and we're going to create a Fibonacci sequence using it.</li>
         <li>Since it's Fibonacci, the next number in the sequence can only be calculated if we know the previous two numbers.</li>
         <li>We expect the Fibonacci sequence is correct, and it must be present in the HTML.</li>
       </ul>
-      <FibonacciSequence reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} number={10} />
+      <FibonacciSequence context={this.props.context} loadAtClient={true} number={10} />
       <h3>Recursive Segment Dependencies</h3>
-      <FibonacciTotal reduxStore={this.props.reduxStore} config={this.props.config} loadAtClient={true} number={10} />
+      <FibonacciTotal context={this.props.context} loadAtClient={true} number={10} />
       <DebugPanel top right bottom>
-        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+        <DevTools store={this.props.context.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>;
   }
@@ -72,8 +72,10 @@ class ClientInstantSegmentDependencies extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Segment Dependencies Test</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store,
-      config: this.config
+      context: {
+        reduxStore: store,
+        config: this.config
+      }
     });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);

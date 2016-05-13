@@ -13,8 +13,8 @@ import style from '../../../shared/sitewide.css';
 
 class Component extends React.Component {
   componentWillMount() {
-    this.props.reduxStore.registerDataComponent(UserProfile);
-    this.props.reduxStore.register(UserSegment);
+    this.props.context.reduxStore.registerDataComponent(UserProfile);
+    this.props.context.reduxStore.register(UserSegment);
     this.setState({
       index: 0,
       components: []
@@ -35,7 +35,7 @@ class Component extends React.Component {
       </ul>
       {this.state.components}
       <DebugPanel top right bottom>
-        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+        <DevTools store={this.props.context.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>;
   }
@@ -60,14 +60,14 @@ class Component extends React.Component {
     var query = this.props.queries[this.state.index];
     var components = this.state.components;
     components.push(<h3>Profile {this.state.index}</h3>);
-    components.push(<UserProfile reduxStore={this.props.reduxStore} config={this.props.config} username={query} />);
+    components.push(<UserProfile context={this.props.context} username={query} />);
     this.setState({
       index: nextIndex,
       components: components
     });
 
     if (forceLoad) {
-      this.props.reduxStore.query(UserSegment.id(), {username: query}, true);
+      this.props.context.reduxStore.query(UserSegment.id(), {username: query}, true);
     }
   }
 }
@@ -86,8 +86,10 @@ class RuntimeComponent extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Runtime Data Component</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store,
-      config: this.config,
+      context: {
+        reduxStore: store,
+        config: this.config
+      },
       queries: [
         'rickchristie',
         'willywonka',

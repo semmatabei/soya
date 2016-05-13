@@ -16,12 +16,12 @@ export class GamesFieldSet extends React.Component {
       </div>
       <h5>Game {this.props.index + 1}</h5>
       <TextField form={this.props.form} name={this.props.name(['name'])} label="Name"
-                 reduxStore={this.props.reduxStore} config={this.props.config} />
+                 context={this.props.context} />
       <TextField form={this.props.form} name={this.props.name(['genre'])} label="Genre"
-                 reduxStore={this.props.reduxStore} config={this.props.config} />
+                 context={this.props.context} />
       <RepeatableReviews form={this.props.form} name={this.props.name(['reviews'])} minLength={1}
-                         reduxStore={this.props.reduxStore} config={this.props.config} />
-      <RepeatableAdd form={this.props.form} reduxStore={this.props.reduxStore}
+                         context={this.props.context} />
+      <RepeatableAdd form={this.props.form} context={this.props.context}
                      name={this.props.name(['reviews'])} minLength={1} maxLength={3}
                      label={'Tambah Review'} />
     </div>;

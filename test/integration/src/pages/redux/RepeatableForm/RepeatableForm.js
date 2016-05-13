@@ -19,8 +19,8 @@ const FORM_ID = 'wishlist';
 
 class Component extends React.Component {
   componentWillMount() {
-    this.actions = this.props.reduxStore.register(FormSegment);
-    this._form = new Form(this.props.reduxStore, FORM_ID);
+    this.actions = this.props.context.reduxStore.register(FormSegment);
+    this._form = new Form(this.props.context.reduxStore, FORM_ID);
   }
 
   render() {
@@ -34,20 +34,20 @@ class Component extends React.Component {
         <li>We can have repeatable inside of another repeatable field set (multiple <code>reviews</code> inside of <code>game</code>).</li>
         <li>We can <a href="javascript:void(0)" onClick={this.setValues.bind(this)}>set values</a>, making items in array appears.</li>
       </ul>
-      <WishlistForm formName="Personal Wishlist" form={this._form} config={this.props.config} reduxStore={this.props.reduxStore} />
+      <WishlistForm formName="Personal Wishlist" form={this._form} context={this.props.context} />
       <h3>Repeatable Fields</h3>
       <ul>
         <li>Forms are able to easily create custom object hierarchies.</li>
         <li>Forms are able to easily repeat a set of fields to create a <code>List&lt;T&gt;</code> structure.</li>
       </ul>
       <DebugPanel top right bottom>
-        <DevTools store={this.props.reduxStore._store} monitor={LogMonitor} />
+        <DevTools store={this.props.context.reduxStore._store} monitor={LogMonitor} />
       </DebugPanel>
     </div>
   }
 
   setValues() {
-    this.props.reduxStore.dispatch(this.actions.setValues(FORM_ID, [
+    this.props.context.reduxStore.dispatch(this.actions.setValues(FORM_ID, [
       { fieldName: ['goals', 'professional'], value: 'Entrepreneur' },
       { fieldName: ['goals', 'material', 'lodging'], value: 'Simple home' },
       { fieldName: ['goals', 'material', 'electronics'], value: '' },
@@ -78,8 +78,10 @@ class RepeatableForm extends Page {
     var reactRenderer = new ReactRenderer();
     reactRenderer.head = '<title>Repeatable Form Test</title>';
     reactRenderer.body = React.createElement(Component, {
-      reduxStore: store,
-      config: this.config
+      context: {
+        reduxStore: store,
+        config: this.config
+      }
     });
     var renderResult = new RenderResult(reactRenderer);
     callback(renderResult);

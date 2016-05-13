@@ -6,7 +6,7 @@ export default class RepeatableAdd extends React.Component {
   _actions;
 
   componentWillMount() {
-    this._actions = this.props.reduxStore.register(FormSegment);
+    this._actions = this.props.context.reduxStore.register(FormSegment);
   }
 
   render() {
@@ -16,7 +16,7 @@ export default class RepeatableAdd extends React.Component {
   }
 
   addListItem() {
-    this.props.reduxStore.dispatch(this._actions.addListItem(
+    this.props.context.reduxStore.dispatch(this._actions.addListItem(
       this.props.form.getFormId(), this.props.name, this.props.minLength,
       this.props.maxLength
     ));

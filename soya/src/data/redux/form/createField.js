@@ -225,7 +225,7 @@ export default function createField(InputComponent) {
       var errorMessages = this.validateSync(value);
       if (errorMessages.length > 0) {
         var actions = this.props.getActionCreator(FormSegment.id());
-        this.props.reduxStore.dispatch(actions.mergeFields(
+        this.props.getReduxStore().dispatch(actions.mergeFields(
           this.props.form._formId, [{
             fieldName: this.props.name,
             object: {
@@ -383,7 +383,7 @@ export default function createField(InputComponent) {
             for (i = 0; i < result.length; i++) {
               if (typeof result[i] == 'string') errorMessages.push(result[i]);
             }
-            this.props.reduxStore.dispatch(actions.addErrorMessages(
+            this.props.getReduxStore().dispatch(actions.addErrorMessages(
               this.props.form._formId, [{
                 fieldName: this.props.name,
                 messages: errorMessages
@@ -423,7 +423,7 @@ export default function createField(InputComponent) {
      */
     lock() {
       var actions = this.props.getActionCreator(FormSegment.id());
-      this.props.reduxStore.dispatch(actions.setIsValidating(
+      this.props.getReduxStore().dispatch(actions.setIsValidating(
         this.props.form._formId, { [this.props.name] : true }
       ));
     }
@@ -433,7 +433,7 @@ export default function createField(InputComponent) {
      */
     unlock() {
       var actions = this.props.getActionCreator(FormSegment.id());
-      this.props.reduxStore.dispatch(actions.setIsValidating(
+      this.props.getReduxStore().dispatch(actions.setIsValidating(
         this.props.form._formId, { [this.props.name]: false }
       ));
     }
