@@ -75,10 +75,6 @@ export default class FormSegment extends LocalSegment {
     return 'form';
   }
 
-  static createInitialData() {
-    return {};
-  }
-
   static extractValues(fields) {
     const result = {};
     for (const currentKey in fields) {
@@ -421,7 +417,7 @@ export default class FormSegment extends LocalSegment {
 
   _getReducer() {
     return (state, action) => {
-      if (state == null) return FormSegment.createInitialData();
+      if (state == null) return {};
       switch (action.type) {
         case this._setFormEnabledStateActionType:
           return this._setFormEnabledState(state, action);
