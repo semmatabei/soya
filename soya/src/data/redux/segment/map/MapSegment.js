@@ -60,7 +60,10 @@ export default class MapSegment extends Segment {
     this._cleanActionType = ActionNameUtil.generate(id, 'CLEAN');
 
     this._actionCreator = {
-      load: (query) => {
+      clean: () => {
+        return this._createSyncCleanAction();
+      },
+      load: query => {
         var queryId = this._generateQueryId(query);
         return this._createLoadAction(query, queryId);
       }
