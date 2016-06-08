@@ -92,6 +92,7 @@ export default function createRepeatable(FieldSetComponent) {
           props[i] = this.props[i];
         }
         fieldSetList = [];
+        props.totalItem = length;
         props.addListItem = this._addListItemFunc;
         props.removeListItem = this._removeListItemFunc;
         props.reorderListItemInc = this._reorderListItemIncFunc;

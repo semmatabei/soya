@@ -65,8 +65,8 @@ export default class LocalSegment extends Segment {
   /**
    * @returns {Object | Array | string | number | void}
    */
-  static createInitialData() {
-    return null;
+  createInitialData() {
+    return {};
   }
 
   /**
@@ -97,8 +97,7 @@ export default class LocalSegment extends Segment {
   _createSyncInitAction(queryId) {
     return {
       type: this._initActionType,
-      queryId: queryId,
-      payload: this.constructor.createInitialData()
+      queryId: queryId
     };
   }
 
@@ -183,6 +182,16 @@ export default class LocalSegment extends Segment {
   }
 
   /**
+   * Creates default query result for the given queryId.
+   *
+   * @param {string} queryId
+   * @returns {?}
+   */
+  _createInitialQueriedData(queryId) {
+    return null;
+  }
+
+  /**
    * Returns a reducer function. Called only once by Store, on registration
    * of a new segment.
    *
@@ -201,11 +210,13 @@ export default class LocalSegment extends Segment {
     var initActionType = this._initActionType;
     var cleanActionType = this._cleanActionType;
     var updateActionType = this._updateActionType;
-    var initialData = this.constructor.createInitialData();
-    return function(state, action) {
+    var initialData = this.createInitialData();
+    return (state, action) => {
       if (state == null) return initialData;
       switch (action.type) {
         case initActionType:
+          return update(state, {[action.queryId]: { $set: this._createInitialQueriedData(action.queryId) }});
+          break;
         case cleanActionType:
           // Since there are no concept of loading in local segment, init and
           // clean does the same thing, which is populating the segment with
