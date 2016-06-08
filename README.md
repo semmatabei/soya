@@ -2,21 +2,21 @@
 
 ## Hopefully hassle free web front-end framework
 
-**NOT READY FOR PRODUCTION**
+Soya uses React, Webpack and Redux to help speed up web front-end engineering efforts. Soya aims to:
 
-Soya uses React and Webpack to help speed up web front-end engineering efforts. Soya aims to:
+- Make it easier for front-end engineers to create and share UI components, as easy Java engineers import classes!
+- Reuse components on any layer of abstraction, just the view, the domain logic, or the entire component - along with its context.
+- Removes the need to deal with HTML, CSS, JS and static file dependencies manually.
+- Easier to code by running the same view code on server and client side.
 
-- Removes the need to deal with HTML, CSS, JS and static file dependencies. Just require your React component dependencies and you're good to go. This removes unnecessary complexity that's always been bogging down front-end engineers.
-- Increase code reusability by making it easier to create, browse, find, and use UI components (still unfinished, more on this later).
-- Reduce errors by running the same view code on server and client side.
+Eventually the final objective is to make the cost of web UI prototyping as small as possible, making iterative development of front-end much more viable.
 
-Eventually the final objective is to make the cost of web UI prototyping as small as possible, making iterative development of front-end viable.
+Soya is still in active development. If you want to look around, play around in our integration tests.
 
-Soya is still in development, we're currently testing it against real-world use cases. If you want to look around, the starter demo should be working.
+    (~/soya) $ cd test/integration
+    (~/soya/test/integration) $ npm install
+    (~/soya/test/integration) $ npm run start
 
-    (~/soya) $ cd soya-starter
-    (~/soya/soya-starter) $ npm install
-    (~/soya/soya-starter) $ ./node_modules/.bin/webpack
-    (~/soya/soya-starter) $ node build/server
+Server should be running at localhost:8000.
 
 Send suggestions, criticisms, and insults to ricky@traveloka.com.
