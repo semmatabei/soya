@@ -63,6 +63,7 @@ export default class FormSegment extends LocalSegment {
 
   // Repeatable field related action.
   _addListItemActionType;
+  _addListItemWithValueActionType;
   _removeListItemActionType;
   _reorderListItemActionType;
   _reorderListItemIncActionType;
@@ -106,6 +107,7 @@ export default class FormSegment extends LocalSegment {
     this._clearFormActionType = ActionNameUtil.generate(id, 'CLEAR_FORM');
 
     this._addListItemActionType = ActionNameUtil.generate(id, 'ADD_ITEM');
+    this._addListItemWithValueActionType = ActionNameUtil.generate(id,'ADD_ITEM_WITH_VALUE');
     this._removeListItemActionType = ActionNameUtil.generate(id, 'REMOVE_ITEM');
     this._reorderListItemActionType = ActionNameUtil.generate(id, 'REORDER_ITEM');
     this._reorderListItemIncActionType = ActionNameUtil.generate(id, 'REORDER_ITEM_INC');
@@ -192,6 +194,15 @@ export default class FormSegment extends LocalSegment {
           fieldName: fieldName,
           minLength: minLength,
           maxLength: maxLength
+        };
+      },
+      // Repeatable field related action.
+      addListItemWithValue: (formId, fieldName, values) => {
+        return {
+          type: this._addListItemWithValueActionType,
+          formId: formId,
+          fieldName: fieldName,
+          values : values
         };
       },
       removeListItem: (formId, fieldName, index) => {
@@ -449,6 +460,9 @@ export default class FormSegment extends LocalSegment {
         case this._addListItemActionType:
           return this._addListItem(state, action);
           break;
+        case this._addListItemWithValueActionType:
+          return this._addListItemWithValue(state, action);
+          break;
         case this._removeListItemActionType:
           return this._removeListItem(state, action);
           break;
@@ -580,6 +594,26 @@ export default class FormSegment extends LocalSegment {
       $set: null
     });
     return update(state, updateObject);
+  }
+
+  _addListItemWithValue(state, action){
+    state = this._ensureFormExistence(state, action);
+    var result = this._extractField(state, action, []);
+    var fieldLength = result.field != null ? result.field.length : 0, fieldName = action.fieldName, value, i;
+    var parentFieldName;
+    if (fieldName instanceof Array) {
+      parentFieldName = fieldName.concat(fieldLength);
+    } else {
+      parentFieldName = [fieldName, fieldLength];
+    }
+    state = result.state;
+    for (i = 0; i < action.values.length; i++) {
+      value = action.values[i];
+      state = this._setValue(state, this._actionCreator.setValue(
+        action.formId, parentFieldName.concat(value.fieldName), value.value
+      ));
+    }
+    return state;
   }
 
   _addListItem(state, action) {
