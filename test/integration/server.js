@@ -7,18 +7,27 @@
  */
 
 import path from 'path';
-import fs from 'fs';
 
 import server from 'soya/lib/server';
 import config from './config.js';
 
-// Can't place these lines in config since config is run
 // Haven't found a better way to do this yet. So for now, consider page and
 // component directory as non configurable for now.
 // TODO: Separate compilation and actual framework config so that these lines can be configurable from config.js.
 var frameworkConfig = config.frameworkConfig;
 frameworkConfig.absolutePageRequirePath = path.join(frameworkConfig.absoluteProjectDir, 'src/pages');
 frameworkConfig.absoluteComponentRequirePath = path.join(frameworkConfig.absoluteProjectDir, 'src/components');
+
+// Can't place these lines in config since config is run both by our server.js
+// and webpack configuration file. When we first compile for server-side, we
+// don't yet have webpack's require.context. Webpack's dynamic require also
+// requires that we use string literal instead of variables since it does its
+// magic by parsing the arguments.
+// The reason we need to use context is because pages are dynamically referenced
+// using a YAML configuration. Since there are no direct require() call, we'd
+// have to load all pages and all components dynamically using webpack's dynamic
+// require.
+// More info: https://webpack.github.io/docs/context.html
 frameworkConfig.pageRequireContext = require.context('./src/pages', true, /\.js$/);
 frameworkConfig.componentRequireContext = require.context('./src/components', true, /\.js$/);
 
