@@ -1,5 +1,4 @@
 import ReverseRoutingData from './ReverseRoutingData.js';
-import PathNode from './PathNode.js';
 
 /**
  * Used for reverse routing.
