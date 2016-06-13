@@ -1,9 +1,13 @@
 # Version 0.0.x
 
+## 0.0.30
+
+-
+
 ## 0.0.29
 
-- Moved integration test IDs into another package so that mutations can refer
-  to these IDs without explicitly declaring dependency to Segment.
+- Moved integration test segment IDs into another package so that mutations can
+  refer to these IDs without explicitly declaring dependency to Segment.
 - Mutation system implemented and tested.
 - Implemented webpack's extract-text-plugin.
   - CSS now delivered as files instead of appended dynamically by javascript
