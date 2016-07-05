@@ -304,7 +304,7 @@ export default class WebpackCompiler extends Compiler {
         "css-loader"
       );
       configuration.plugins.push(
-        new ExtractTextPlugin('css/[name]-[contenthash].css'));
+        new ExtractTextPlugin('css/[name]-[chunkhash].css'));
     }
     configuration.module.loaders.push(normalCssLoader);
     configuration.module.loaders.push(globalCssLoader);
