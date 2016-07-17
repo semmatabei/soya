@@ -58,6 +58,7 @@ export default class FormSegment extends LocalSegment {
   _addErrorMessagesActionType;
   _setIsValidatingActionType;
   _setFormEnabledStateActionType;
+  _clearErrorMessagesActionType;
   _clearFormActionType;
   _actionCreator;
 
@@ -107,6 +108,7 @@ export default class FormSegment extends LocalSegment {
     this._addErrorMessagesActionType = ActionNameUtil.generate(id, 'ADD_ERRORS');
     this._setFormEnabledStateActionType = ActionNameUtil.generate(id, 'SET_ENABLED_STATE');
     this._clearFormActionType = ActionNameUtil.generate(id, 'CLEAR_FORM');
+    this._clearErrorMessagesActionType = ActionNameUtil.generate(id, 'CLEAR_ERROR_MESSAGES');
 
     this._addListItemActionType = ActionNameUtil.generate(id, 'ADD_ITEM');
     this._addListItemWithValueActionType = ActionNameUtil.generate(id,'ADD_ITEM_WITH_VALUE');
@@ -180,6 +182,13 @@ export default class FormSegment extends LocalSegment {
           formId: formId,
           messages: messages
         };
+      },
+      clearErrorMessages: (formId, fieldNames) => {
+        return {
+          type: this._clearErrorMessagesActionType,
+          formId: formId,
+          fieldNames: fieldNames
+        }
       },
       clear: (formId) => {
         return {
@@ -458,7 +467,9 @@ export default class FormSegment extends LocalSegment {
         case this._clearFormActionType:
           return this._clearForm(state, action);
           break;
-
+        case this._clearErrorMessagesActionType:
+          return this._clearErrorMessages(state, action);
+          break;
         case this._addListItemActionType:
           return this._addListItem(state, action);
           break;
@@ -586,6 +597,27 @@ export default class FormSegment extends LocalSegment {
         }
       }
     });
+  }
+
+  _clearErrorMessages(state, action) {
+    state = this._ensureFormExistence(state, action);
+    var i, fieldName, field, result, updateObject,
+        tempAction = {formId: action.formId};
+    for (i = 0; i < action.fieldNames.length; i++) {
+      fieldName = action.fieldNames[i];
+      tempAction.fieldName = fieldName;
+      result = this._extractField(state, tempAction);
+      state = result.state;
+      field = result.field;
+      if (field != null && field.errorMessages.length > 0) {
+        updateObject = this._createFieldUpdateObject(
+          {formId: action.formId, fieldName: fieldName},
+          { errorMessages: { $set: [] } }
+        );
+        state = update(state, updateObject);
+      }
+    }
+    return state;
   }
 
   _clearField(state, action) {
