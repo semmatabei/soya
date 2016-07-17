@@ -2,7 +2,8 @@
 
 ## 0.0.30
 
--
+- Fixed common.css file disappearing bug.
+- Fixed form-wide validation error messages not clearing.
 
 ## 0.0.29
 

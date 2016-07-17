@@ -1,6 +1,6 @@
 import FormSegment from './FormSegment.js';
 import PromiseUtil from '../PromiseUtil.js';
-import { isStringDuckType } from '../helper.js';
+import { isStringDuckType, isEqualShallowArray, isArrayDuckType } from '../helper.js';
 
 /**
  * Represents a form. Instance of this class may be passed to each Field
@@ -26,6 +26,11 @@ export default class Form {
   _fields;
 
   /**
+   * @type {Array<string | Array<string>>}
+   */
+  _fieldNames;
+
+  /**
    * @type {Object<Function>}
    */
   _actionCreator;
@@ -39,6 +44,7 @@ export default class Form {
     this._formId = formId;
     this._reduxStore = reduxStore;
     this._fields = {};
+    this._fieldNames = [];
   }
 
   /**
@@ -53,6 +59,7 @@ export default class Form {
    * @param {Function} validateAll
    */
   regField(fieldName, validateAll) {
+    this._fieldNames.push(fieldName);
     this._fields[fieldName.toString()] = { validateAll: validateAll };
   }
 
@@ -60,6 +67,23 @@ export default class Form {
    * @param {Array<string>|string} fieldName
    */
   unregField(fieldName) {
+    // Since fieldName could be an Array, we'd have to loop manually to remove.
+    var i, found = false, fieldNameInLoop;
+    for (i = 0; i < this._fieldNames.length; i++) {
+      fieldNameInLoop = this._fieldNames[i];
+      if (isStringDuckType(fieldNameInLoop) &&
+          isStringDuckType(fieldName) && fieldNameInLoop == fieldName) {
+        found = true;
+        break;
+      } else if (isArrayDuckType(fieldNameInLoop) && isArrayDuckType(fieldName)
+                 && isEqualShallowArray(fieldNameInLoop, fieldName)) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      this._fieldNames.splice(i, 1);
+    }
     delete this._fields[fieldName.toString()];
   }
 
@@ -135,28 +159,40 @@ export default class Form {
 
   submit(submitFunc, validationFunc) {
     this.disable();
-    var validateAllPromise = this.validateAll();
-    validateAllPromise.then((result) => {
-      if (!result.isValid || validationFunc == null) {
-        submitFunc(result);
-        this.enable();
-        return;
-      }
-      // Result is valid and validation function is not null. Do form-wide validation.
-      var formWideValidationPromise = Promise.resolve(validationFunc(result.values));
-      formWideValidationPromise.then((formWideValidationResult) => {
-        if (typeof formWideValidationResult == 'object' && !formWideValidationResult.isValid) {
-          // Render error messages.
-          this._reduxStore.dispatch(this._actionCreator.addErrorMessages(
-            this._formId, formWideValidationResult.errorMessages
-          ));
-          result.isValid = false;
+
+    // We need to clear all error messages, since form-wide validation doesn't
+    // return with arrays to clear all error messages.
+    var clearErrorMessages = this._actionCreator.clearErrorMessages(
+      this._formId, this._fieldNames);
+    var promise = this._reduxStore.dispatch(clearErrorMessages);
+
+    promise.then(() => {
+      var validateAllPromise = this.validateAll();
+      validateAllPromise.then((result) => {
+        if (!result.isValid || validationFunc == null) {
+          submitFunc(result);
+          this.enable();
+          return;
         }
-        submitFunc(result);
-        this.enable();
+        // Result is valid and validation function is not null. Do form-wide validation.
+        var formWideValidationPromise = Promise.resolve(validationFunc(result.values));
+        formWideValidationPromise.then((formWideValidationResult) => {
+          if (typeof formWideValidationResult == 'object' && !formWideValidationResult.isValid) {
+            // Render error messages.
+            this._reduxStore.dispatch(this._actionCreator.addErrorMessages(
+              this._formId, formWideValidationResult.errorMessages
+            ));
+            result.isValid = false;
+          }
+          submitFunc(result);
+          this.enable();
+        }).catch((error) => {
+          result.isValid = false;
+          submitFunc(result);
+          this.enable();
+          PromiseUtil.throwError(error);
+        });
       }).catch((error) => {
-        result.isValid = false;
-        submitFunc(result);
         this.enable();
         PromiseUtil.throwError(error);
       });
