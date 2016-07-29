@@ -77,9 +77,11 @@ export default class FormSegment extends LocalSegment {
   }
 
   static extractValues(fields) {
-    const result = {};
-    for (const currentKey in fields) {
+    const isArray = fields instanceof Array;
+    const result = isArray ? [] : {};
+    for (let currentKey in fields) {
       if (!fields.hasOwnProperty(currentKey)) continue;
+      currentKey = isArray ? Number(currentKey) : currentKey;
       FormSegment.fetchValue(fields[currentKey], currentKey, result);
     }
     return result;
