@@ -267,7 +267,8 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(this._frameworkConfig)
-        ]
+        ],
+        noParse: /node_modules\/quill\/dist/
       },
       devtool: "source-map",
       resolve: { alias: {} },
@@ -289,7 +290,7 @@ export default class WebpackCompiler extends Compiler {
     };
     var globalCssLoader = {
       test: /\.global\.css$/,
-      loader: 'style-loader!' + cssLoaderStr
+      loader: 'style-loader!css-loader'
     };
     if (!this._frameworkConfig.hotReload) {
       // Enable loading CSS as files.
