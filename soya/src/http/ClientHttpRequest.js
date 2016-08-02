@@ -72,4 +72,15 @@ export default class ClientHttpRequest {
   getUrl() {
     return this._element.href;
   }
+
+  /**
+   * @return {string}
+   */
+  getHash() {
+    let hashString = this._element.hash;
+    if (hashString.length > 0 && hashString[0] === '#') {
+      return hashString.slice(1, hashString.length);
+    }
+    return hashString;
+  }
 }
