@@ -1,7 +1,7 @@
 import React from 'react';
 
 import BaseModal from '../BaseModal/BaseModal.js';
-import style from './style.css';
+import style from './style.mod.css';
 
 /**
  * @CLIENT_SERVER

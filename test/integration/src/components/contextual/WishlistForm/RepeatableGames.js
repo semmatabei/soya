@@ -4,11 +4,11 @@ import createRepeatable from 'soya/lib/data/redux/form/createRepeatable';
 import TextField from '../../common/TextField/TextField';
 import RepeatableReviews from './RepeatableReviews.js';
 import RepeatableAdd from '../../common/RepeatableAdd/RepeatableAdd';
-import style from './style.css';
+import './style.css';
 
 export class GamesFieldSet extends React.Component {
   render() {
-    return <div className={style.repeatable}>
+    return <div className={'repeatable'}>
       <div>
         <a href="javascript:void(0)" onClick={this.props.removeListItem.bind(null, this.props.index)}>Remove</a>
         <a href="javascript:void(0)" onClick={this.props.reorderListItemInc.bind(null, this.props.index, 1)}>Down</a>

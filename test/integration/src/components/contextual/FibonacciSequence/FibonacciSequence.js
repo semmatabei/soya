@@ -4,7 +4,7 @@ import FibonacciSegment from '../../../segments/FibonacciSegment.js';
 import connect from 'soya/lib/data/redux/connect';
 import { SERVER } from 'soya/lib/data/RenderType';
 
-import style from './style.css';
+import style from './style.mod.css';
 
 class FibonacciSequence {
   static connectId() {

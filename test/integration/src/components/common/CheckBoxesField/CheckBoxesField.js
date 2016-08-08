@@ -2,7 +2,7 @@ import React from 'react';
 import update from 'react-addons-update';
 import createField from 'soya/lib/data/redux/form/createField';
 
-import style from './style.css';
+import style from './style.mod.css';
 
 export class CheckBoxesInput extends React.Component {
   render() {

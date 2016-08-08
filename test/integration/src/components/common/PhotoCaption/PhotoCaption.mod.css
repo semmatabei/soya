@@ -1,11 +1,11 @@
-:local(.image) {
+.image {
   float: left;
   padding: 15px;
   border: 1px solid #ccc;
   background-color: #f4f4f4;
 }
 
-:local(.image) img {
+.image img {
   display: block;
   border: 1px solid #ccc;
   padding: 10px;
@@ -13,12 +13,12 @@
   background-color: #fff;
 }
 
-:local(.container) {
+.container {
   overflow: auto;
   margin: 15px 0;
 }
 
-:local(.imageCaption) {
+.imageCaption {
   font-size: 14px;
   color: #333;
 }

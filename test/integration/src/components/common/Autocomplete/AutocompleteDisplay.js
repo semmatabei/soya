@@ -1,7 +1,7 @@
 import React from 'react';
 import at from 'soya/lib/scope';
 
-import style from './style.css';
+import style from './style.mod.css';
 
 export default class AutocompleteDisplay extends React.Component {
   static get propTypes() {

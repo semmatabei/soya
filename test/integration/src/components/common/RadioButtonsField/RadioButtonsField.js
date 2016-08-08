@@ -1,7 +1,7 @@
 import React from 'react';
 import createField from 'soya/lib/data/redux/form/createField';
 
-import style from './style.css';
+import style from './style.mod.css';
 
 export class RadioButtonsInput extends React.Component {
   render() {

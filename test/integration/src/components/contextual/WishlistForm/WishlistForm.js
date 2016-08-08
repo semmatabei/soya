@@ -1,6 +1,6 @@
 import React from 'react';
 
-import style from './style.css';
+import './style.css';
 
 import TextField from '../../common/TextField/TextField';
 import RepeatableGames from './RepeatableGames';
@@ -9,7 +9,7 @@ import { required, minSelected, requiredCheckbox, optional } from '../../../vali
 
 export default class WishlistForm extends React.Component {
   render() {
-    return <div className={style.form}>
+    return <div className={'form'}>
       <h3>{this.props.formName}</h3>
       <h4>Goals</h4>
       <TextField form={this.props.form} name={['goals', 'professional']} label="Professional"
