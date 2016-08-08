@@ -3,7 +3,6 @@ export const DEFAULT_FRAMEWORK_CONFIG = {
   minifyJs: false,
   hotReload: false,
   debug: false,
-  cssModules: true,
   commonFileThreshold: 3,
   clientReplace: {},
   clientResolve: [],
