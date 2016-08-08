@@ -2,7 +2,7 @@ import React from 'react';
 import createField from 'soya/lib/data/redux/form/createField';
 
 import loadingGif from '../../../shared/loading.gif';
-import style from './style.css';
+import style from './style.mod.css';
 
 export class TextInput extends React.Component {
   static connectId() {

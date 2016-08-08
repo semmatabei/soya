@@ -4,6 +4,9 @@
 
 - Fixed common.css file disappearing bug.
 - Fixed form-wide validation error messages not clearing.
+- From now on, only CSS files with *.mod.css file name will be converted into
+  CSS module hashes. This is to prevent unwanted conversion of non-soya
+  libraries we load from node_modules.
 
 ## 0.0.29
 

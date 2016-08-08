@@ -1,6 +1,6 @@
 import React from 'react';
 
-import style from './style.css';
+import style from './style.mod.css';
 import { required, minSelected, requiredCheckbox, optional } from '../../../validator/general.js';
 import { name, phone, maxLength, minLength } from '../../../validator/string.js';
 import TextField from '../../common/TextField/TextField';

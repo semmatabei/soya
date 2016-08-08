@@ -1,6 +1,6 @@
 import React from 'react';
 
-import style from './style.css';
+import style from './style.mod.css';
 
 export default class BaseModal extends React.Component {
   render() {

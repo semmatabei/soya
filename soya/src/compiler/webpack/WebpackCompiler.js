@@ -133,7 +133,6 @@ export default class WebpackCompiler extends Compiler {
       'process.env.NODE_ENV': frameworkConfig.NODE_ENV || '"development"'
     });
 
-    var cssLoaderStr = frameworkConfig.cssModules ? 'css-loader/locals?modules' : 'css-loader';
     return {
       entry: absEntryPointFile,
       target: 'node',
@@ -151,7 +150,8 @@ export default class WebpackCompiler extends Compiler {
         loaders: [
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(frameworkConfig),
-          { test: /\.css$/, loader: cssLoaderStr }
+          { test: /\.css$/, loader: 'css-loader', exclude: /\.mod\.css/ },
+          { test: /\.mod\.css$/, loader: 'css-loader/locals?modules' }
         ]
       },
       plugins: [
@@ -256,7 +256,6 @@ export default class WebpackCompiler extends Compiler {
    */
   run(entryPoints, updateCompileResultCallback) {
     var i, j, entryPoint, entryPointList = [];
-    var cssLoaderStr = this._frameworkConfig.cssModules ? 'css-loader?sourceMap&modules' : 'css-loader?sourceMap';
     var configuration = {
       entry: {},
       output: {
@@ -284,22 +283,22 @@ export default class WebpackCompiler extends Compiler {
     // - https://webpack.github.io/docs/list-of-plugins.html
     // - https://github.com/webpack/css-loader
     // - https://github.com/webpack/style-loader
+    var modulesCssLoader = {
+      test: /\.mod\.css$/,
+      loader: 'style-loader!css-loader?sourceMap&modules'
+    };
     var normalCssLoader = {
       test: /\.css$/,
-      loader: 'style-loader!' + cssLoaderStr,
-      exclude: /\.global\.css$/
-    };
-    var globalCssLoader = {
-      test: /\.global\.css$/,
-      loader: 'style-loader!css-loader'
+      loader: 'style-loader!css-loader',
+      exclude: /\.mod\.css$/
     };
     if (!this._frameworkConfig.hotReload) {
       // Enable loading CSS as files.
-      normalCssLoader.loader = ExtractTextPlugin.extract(
+      modulesCssLoader.loader = ExtractTextPlugin.extract(
         "style-loader",
-        cssLoaderStr
+        "css-loader?sourceMap&modules"
       );
-      globalCssLoader.loader = ExtractTextPlugin.extract(
+      normalCssLoader.loader = ExtractTextPlugin.extract(
         "style-loader",
         "css-loader"
       );
@@ -307,7 +306,7 @@ export default class WebpackCompiler extends Compiler {
         new ExtractTextPlugin('css/[name]-[chunkhash].css'));
     }
     configuration.module.loaders.push(normalCssLoader);
-    configuration.module.loaders.push(globalCssLoader);
+    configuration.module.loaders.push(modulesCssLoader);
 
     for (i in this._clientReplace) {
       if (!this._clientReplace.hasOwnProperty(i)) continue;

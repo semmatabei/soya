@@ -5,7 +5,7 @@ import connect from 'soya/lib/data/redux/connect';
 import { isEqualShallow, isReactChildrenEqual } from 'soya/lib/data/redux/helper';
 
 import ModalSegment from '../../../segments/ModalSegment.js';
-import style from './style.css';
+import style from './style.mod.css';
 
 /**
  * @CLIENT_SERVER
