@@ -74,7 +74,7 @@ export default class ServerHttpRequest {
    * @returns {string}
    */
   getPath() {
-    return this._parsedUrl.path;
+    return this._parsedUrl.pathname;
   }
 
   /**
