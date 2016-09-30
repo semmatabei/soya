@@ -1,8 +1,8 @@
 import React from 'react';
 
-// We can use webpack's localized CSS to ensure there is no naming clash
+// We can use webpack's localized CSS/SCSS to ensure there is no naming clash
 // between our components.
-var style = require('./PhotoCaption.mod.css');
+var style = require('./PhotoCaption.mod.scss');
 
 export default class PhotoCaption extends React.Component {
   render() {
