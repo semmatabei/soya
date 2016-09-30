@@ -150,7 +150,9 @@ export default class WebpackCompiler extends Compiler {
           WebpackCompiler.getBabelLoaderConfig(),
           WebpackCompiler.getFileLoaderConfig(frameworkConfig),
           { test: /\.css$/, loader: 'css-loader', exclude: /\.mod\.css/ },
-          { test: /\.mod\.css$/, loader: 'css-loader/locals?modules' }
+          { test: /\.mod\.css$/, loader: 'css-loader/locals?modules' },
+          { test: /\.scss$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader!sass-loader'), exclude: /\.mod\.scss/ },
+          { test: /\.mod\.scss$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap&modules!sass-loader') },
         ]
       },
       plugins: [
@@ -158,7 +160,8 @@ export default class WebpackCompiler extends Compiler {
         new webpack.BannerPlugin('require("source-map-support").install();',
           { raw: true, entryOnly: false }),
         new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.NoErrorsPlugin()
+        new webpack.NoErrorsPlugin(),
+        new ExtractTextPlugin('css/[name]-[contenthash].css')
       ],
       externals: nodeModules
     };
@@ -291,6 +294,15 @@ export default class WebpackCompiler extends Compiler {
       loader: 'style-loader!css-loader',
       exclude: /\.mod\.css$/
     };
+    var modulesScssLoader = {
+      test: /\.mod\.scss$/,
+      loader: 'style-loader!css-loader?sourceMap&modules!sass-loader'
+    };
+    var normalSassLoader = {
+      test: /\.scss$/,
+      loader: 'style-loader!css-loader!sass-loader',
+      exclude: /\.mod\.scss$/
+    };
     if (!this._frameworkConfig.hotReload) {
       // Enable loading CSS as files.
       modulesCssLoader.loader = ExtractTextPlugin.extract(
@@ -301,11 +313,21 @@ export default class WebpackCompiler extends Compiler {
         "style-loader",
         "css-loader"
       );
+      modulesScssLoader.loader = ExtractTextPlugin.extract(
+        "style-loader",
+        "css-loader?sourceMap&modules!sass-loader"
+      );
+      normalSassLoader.loader = ExtractTextPlugin.extract(
+        "style-loader",
+        "css-loader!sass-loader"
+      );
       configuration.plugins.push(
         new ExtractTextPlugin('css/[name]-[chunkhash].css'));
     }
-    configuration.module.loaders.push(normalCssLoader);
     configuration.module.loaders.push(modulesCssLoader);
+    configuration.module.loaders.push(normalCssLoader);
+    configuration.module.loaders.push(modulesScssLoader);
+    configuration.module.loaders.push(normalSassLoader);
 
     for (i in this._clientReplace) {
       if (!this._clientReplace.hasOwnProperty(i)) continue;
