@@ -20,3 +20,7 @@ Soya is still in active development. If you want to look around, play around in 
 Server should be running at localhost:8000.
 
 Please write your suggestions, criticisms, feature requests in the wiki page.
+
+## Contributors
+
+See [Contributors](https://github.com/traveloka/soya/blob/master/soya/CONTRIBUTORS.md).
