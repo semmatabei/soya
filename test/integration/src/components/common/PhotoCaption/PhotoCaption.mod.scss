@@ -1,8 +1,10 @@
+@import "../../../shared/variables";
+
 .image {
   float: left;
   padding: 15px;
   border: 1px solid #ccc;
-  background-color: #f4f4f4;
+  background-color: $gray-lighter;
 }
 
 .image img {
