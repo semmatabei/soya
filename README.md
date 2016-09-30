@@ -19,4 +19,4 @@ Soya is still in active development. If you want to look around, play around in 
 
 Server should be running at localhost:8000.
 
-Send suggestions, criticisms, and insults to ricky@traveloka.com.
+Please write your suggestions, criticisms, feature requests in the wiki page.
