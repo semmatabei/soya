@@ -1,5 +1,9 @@
 # Version 0.0.x
 
+## 0.0.31
+
+- Enable SCSS support.
+
 ## 0.0.30
 
 - Fixed common.css file disappearing bug.
