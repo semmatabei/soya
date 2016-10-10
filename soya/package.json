@@ -1,6 +1,6 @@
 {
   "name": "soya",
-  "version": "0.0.29",
+  "version": "0.0.33",
   "description": "Hopefully hassle-free web front-end framework",
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
+    "build": "./node_modules/.bin/babel src/ --out-dir lib --source-maps",
     "watch": "./node_modules/.bin/babel src/ --out-dir lib --source-maps --watch",
     "watch-starter": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter/node_modules/soya/lib\" --source-maps --watch",
     "watch-starter-redux": "./node_modules/.bin/babel src/ --out-dir \"../soya-starter-redux/node_modules/soya/lib\" --source-maps --watch",
