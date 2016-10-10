@@ -327,6 +327,27 @@ export default class Application {
       }
     }
 
+
+    if (this._frameworkConfig.webSocket.enabled === true) {
+      // with socket.io
+      var serverSocket = new SocketIO(this._frameworkConfig.webSocket.port);
+      var i, route, pageClass, routes = this._wsRouter.getAllRoutes();
+
+      for (i = 0; i < routes.length; i++) {
+        route = routes[i];
+        pageClass = this._wsPageClasses[route.pageName];
+
+        if (!pageClass) {
+          throw new Error('Invalid socket route data, page '+ route.pageName + ' doesn\'t exist');
+        }
+        var page = new pageClass();
+        var nsp = serverSocket.of(route.path);
+        nsp.on('connection', socket => {
+          page.render(socket);
+        });
+      }
+    }
+
     this._logger.info('Server listening at port: ' + this._frameworkConfig.port + '.');
   }
 
