@@ -39,6 +39,7 @@
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
     "react-addons-update": "^0.14.6",
+    "socket.io": "^1.4.8",
     "source-map-support": "^0.3.2",
     "style-loader": "^0.12.4",
     "webpack": "^1.12.2"
