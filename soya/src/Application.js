@@ -305,8 +305,11 @@ export default class Application {
 
     if (this._frameworkConfig.webSocket.enabled === true) {
       // with socket.io
-      var serverSocket = new SocketIO(this._frameworkConfig.webSocket.port);
+      var socketServer = new SocketIO(this._frameworkConfig.webSocket.port);
       var i, route, pageClass, routes = this._wsRouter.getAllRoutes();
+      var socketDomain = domain.create().on('error', error => {
+        this._logger.error('[WebSocket] Error happened.', error);
+      });
 
       for (i = 0; i < routes.length; i++) {
         route = routes[i];
@@ -316,10 +319,11 @@ export default class Application {
           throw new Error('Invalid socket route data, page '+ route.pageName + ' doesn\'t exist');
         }
         var page = new pageClass();
-        var nsp = serverSocket.of(route.path);
-        nsp.on('connection', socket => {
+        var nspSocketIO = socketServer.of(route.path);
+        nspSocketIO.on('connection', socket => {
           page.render(socket);
         });
+        socketDomain.add(nspSocketIO);
       }
     }
 
